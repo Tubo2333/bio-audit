@@ -1,0 +1,66 @@
+rule_id: "D1.3-DEG-001"
+domain: "data_handling.normalization"
+status: "active"
+version: 2
+title: "Bulk RNA-seq 归一化方法选择"
+description: >
+  选择下游 DEG 方法兼容的归一化方式。
+
+condition:
+  decision_type: "normalization"
+  required_context:
+    data_category: "raw_counts"
+    sequencing: "bulk_RNA_seq"
+
+scoring:
+  level_4:
+    methods: []
+    description: "v0.2 — LLM rationale assessment"
+  level_3:
+    methods:
+      - "TMM"
+      - "RLE"
+      - "DESeq2_median_of_ratios"
+      - "upper_quartile"
+    description: "方法内置归一化 (edgeR TMM / DESeq2 median-of-ratios)"
+    rationale: "与下游方法原生集成，假设验证自动处理"
+  level_2:
+    methods:
+      - "TPM"
+      - "CPM_no_log"
+    note: "TPM 在 limma-trend + log-TPM 场景下可接受，但不匹配 DESeq2/edgeR 的输入要求"
+    conditions_when_acceptable: "下游方法明确接受 TPM (如 limma-trend 对 log-TPM 可用)"
+  level_1:
+    methods:
+      - "FPKM"
+      - "RPKM"
+    note: "存在已知的组成偏差 (composition bias) — Dillies et al. 2013 证实 FPKM/RPKM 在样本间比较时有偏"
+  level_0:
+    methods:
+      - "raw_counts_no_normalization"
+    note: "完全不做归一化 → 测序深度差异会主导结果"
+
+evidence:
+  - source_type: "consensus_guideline"
+    doi: "10.1186/s13059-016-0881-8"
+    pmid: "26813401"
+    title: "Conesa et al. (2016) Genome Biology — RNA-seq best practices survey"
+    confidence: "L-Consensus"
+    excerpt: "TMM and RLE normalization effectively correct for library size and composition bias."
+    supports_levels: ["level_3"]
+
+  - source_type: "benchmark_paper"
+    doi: "10.1093/bib/bbs046"
+    pmid: "22988256"
+    title: "Dillies et al. (2013) Briefings in Bioinformatics — Normalization method comparison"
+    confidence: "L-Consensus"
+    excerpt: "FPKM/RPKM do not correct for RNA composition bias and should be avoided for between-sample comparisons."
+    supports_levels: ["level_1"]
+
+  - source_type: "method_paper"
+    doi: "10.1186/gb-2010-11-3-r25"
+    pmid: "20196867"
+    title: "Robinson & Oshlack (2010) — TMM normalization"
+    confidence: "L-Consensus"
+    excerpt: "TMM normalization robustly corrects for RNA composition bias."
+    supports_levels: ["level_3"]

@@ -1,0 +1,67 @@
+rule_id: "D1.2-DEG-001"
+domain: "data_handling.filtering"
+status: "active"
+version: 2
+title: "低表达基因过滤策略选择"
+description: >
+  D1 FIX: Level 4 改为 filterByExpr()/independent filtering。
+  过滤太严 → 丢失真阳性信号。过滤太松 → 多重检验负担过大。
+
+condition:
+  decision_type: "filtering"
+  required_context:
+    sequencing: "bulk_RNA_seq"
+  context_constraints:
+    - "n_replicates >= 2"
+
+scoring:
+  level_4:
+    methods: []
+    description: "v0.2 启用 — 基于 rational 的 LLM 评估"
+  level_3:
+    methods:
+      - "filterByExpr"
+      - "independent_filtering"
+      - "DESeq2_independentFiltering"
+      - "CPM_filter_with_replicate_awareness"
+    description: "filterByExpr() (edgeR) 或 independentFiltering (DESeq2) — 方法自适应阈值"
+    rationale: "D1 FIX: 领域金标准是 filterByExpr / independent filtering，不是固定 CPM>1"
+  level_2:
+    methods:
+      - "CPM_filter_min_samples"
+      - "counts_per_million_min"
+      - "mean_expression_filter"
+      - "median_expression_filter"
+    note: "固定阈值方法 — 在极端文库大小下不够精确"
+  level_1:
+    methods:
+      - "no_filtering"
+    note: "不过滤 → 低表达基因噪声大 + 多重检验负担增加"
+  level_0:
+    methods:
+      - "filter_by_variance_only"
+      - "percentile_cutoff_on_normalized_data"
+    note: "仅在归一化数据上做过滤可能保留噪声基因或移除有生物学意义的低表达基因"
+
+evidence:
+  - source_type: "consensus_guideline"
+    title: "Conesa et al. (2016) Genome Biology — RNA-seq best practices survey"
+    doi: "10.1186/s13059-016-0881-8"
+    pmid: "26813401"
+    confidence: "L-Consensus"
+    excerpt: "Filtering low-count genes improves detection power... filterByExpr() provides data-driven thresholds."
+    supports_levels: ["level_3"]
+
+  - source_type: "consensus_guideline"
+    title: "edgeR User's Guide §2.5 Filtering"
+    confidence: "L-Consensus"
+    excerpt: "filterByExpr() determines a threshold based on experimental design and library sizes."
+    supports_levels: ["level_3"]
+
+  - source_type: "benchmark_paper"
+    doi: "10.1073/pnas.0914005107"
+    pmid: "20460310"
+    title: "Bourgon et al. (2010) PNAS — Independent filtering increases detection power"
+    confidence: "L-Consensus"
+    excerpt: "Independent filtering increases detection power while maintaining FDR control."
+    supports_levels: ["level_3"]

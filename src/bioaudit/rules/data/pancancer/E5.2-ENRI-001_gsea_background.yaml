@@ -1,0 +1,48 @@
+rule_id: E5.2-ENRI-001
+domain: ENRICHMENT
+status: active
+version: 1
+title: "GSEA背景基因集选择 / GSEA background gene set selection"
+description: "GSEA富集分析的背景基因集决定了统计检验的参考框架。使用错误背景(如全基因组而非实际检测基因集)会导致富集分数的系统偏差和误导性p值。必须使用实际检测/表达的基因作为背景。"
+condition:
+  decision_type: gsea_background
+  required_context:
+    analysis_type: pathway_enrichment
+    method: GSEA
+
+scoring:
+  level_3:
+    methods:
+      - expressed_genes_background
+      - detected_genes_universe
+      - filtered_expression_matrix_genes
+      - MSigDB_default_with_filtered_universe
+    description: "使用实际检测/表达基因作为背景 — 正确"
+    rationale: "低表达基因(在RNA-seq中被过滤或在微阵列中不可检测)未参与排序,不应包含在背景中 (Subramanian et al. 2005; MSigDB 文档)"
+  level_2:
+    methods:
+      - MSigDB_default_background
+      - all_known_genes
+    description: "使用MSigDB默认背景 — 可能包含未检测基因"
+    note: "当平台覆盖基因数接近全基因组时(如全转录组RNA-seq),默认背景可以接受"
+  level_0:
+    methods:
+      - wrong_species_background
+      - GO_all_genes_no_filter
+      - custom_wrong_background
+    description: "错误的背景基因集 — 结果完全不可靠"
+    rationale: "使用错误物种的背景集或GO全基因集(包含许多未检测基因)会显著改变富集分数的零分布"
+
+evidence:
+  - source_type: method_paper
+    pmid: "16199512"
+    title: "Gene set enrichment analysis: a knowledge-based approach for interpreting genome-wide expression profiles — Subramanian et al. 2005, PNAS"
+    confidence: L-Confirmed
+    excerpt: "The background gene set for GSEA should be the set of genes actually detected/expressed in the experiment."
+    supports_levels: ["level_3"]
+  - source_type: consensus_guideline
+    url: "https://www.gsea-msigdb.org/gsea/doc/GSEAUserGuideFrame.html"
+    title: "GSEA User Guide — gene set background and universe"
+    confidence: L-Confirmed
+    excerpt: "The gene universe should be the set of genes that were assayed in your experiment."
+    supports_levels: ["level_3", "level_0"]

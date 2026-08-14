@@ -1,0 +1,56 @@
+rule_id: "M1.2-DEG-001"
+domain: "statistical_rigor.multiple_testing"
+status: "active"
+version: 2
+title: "多重检验校正方法选择"
+description: >
+  RNA-seq DEG 涉及对 ~20000 个基因同时检验。不做多重检验校正 → 假阳性海量。
+
+condition:
+  decision_type: "multiple_testing_correction"
+  required_context:
+    analysis_type: "differential_expression"
+
+scoring:
+  level_4:
+    methods: []
+    description: "v0.2 — LLM rationale assessment"
+  level_3:
+    methods:
+      - "BH"
+      - "Benjamini-Hochberg"
+      - "FDR"
+    description: "Benjamini-Hochberg FDR 校正 — DEG 探索性分析的标准做法"
+  level_2:
+    methods:
+      - "BY"
+      - "Benjamini-Yekutieli"
+      - "q_value_storey"
+      - "Storey_q_value"
+    note: "BY 比 BH 更保守；q-value 考虑了 pi0 估计"
+  level_1:
+    methods:
+      - "Bonferroni"
+    note: "FWER 控制 — 对全基因组探索性分析过保守，但在验证性场景（少量预定义基因）下是正确选择"
+    conditions_when_acceptable: "当只检验 <=20 个预定义候选基因时，Bonferroni 是合理选择"
+  level_0:
+    methods:
+      - "no_correction"
+      - "raw_p_value"
+      - "uncorrected"
+    note: "不做多重检验校正 → 在 20000 个检验中，α=0.05 下期望 ~1000 个假阳性"
+    conditions_when_acceptable: "仅做描述性分析、不做统计推断时可接受"
+
+evidence:
+  - source_type: "math_theorem"
+    title: "Multiple testing problem — Bonferroni inequality"
+    confidence: "L-Confirmed"
+    excerpt: "With 20,000 independent tests at α=0.05, ~1,000 false positives expected under the global null."
+
+  - source_type: "method_paper"
+    doi: "10.1111/j.2517-6161.1995.tb02031.x"
+    url: "https://www.jstor.org/stable/2346101"
+    title: "Benjamini & Hochberg (1995) — Controlling the FDR"
+    confidence: "L-Consensus"
+    excerpt: "BH procedure controls the expected proportion of false rejections among all rejections."
+    supports_levels: ["level_3"]

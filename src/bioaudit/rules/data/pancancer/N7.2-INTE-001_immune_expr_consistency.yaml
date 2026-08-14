@@ -1,0 +1,44 @@
+rule_id: N7.2-INTE-001
+domain: INTEGRATION
+status: active
+version: 1
+title: "免疫-表达方向一致性 / Immune-expression direction consistency"
+description: "跨模块结论一致性检验。免疫浸润程度与基因表达的相关性方向必须与基因的已知免疫功能一致。如果免疫激活基因在免疫冷肿瘤中高表达(或反之),需要生物学解释。未经讨论的方向矛盾表明可能存在数据质量问题或混杂因素。"
+condition:
+  decision_type: immune_expression_consistency
+  required_context:
+    integration_type: cross_module
+
+scoring:
+  level_3:
+    methods:
+      - direction_consistent_with_known_function
+      - direction_inconsistent_with_validated_explanation
+    description: "方向与已知功能一致,或有实验验证的解释 — 可信"
+    rationale: "免疫相关基因(如CSTB参与抗原呈递)的表达与免疫浸润正相关是符合预期的。负相关需要额外生物学机制解释。"
+  level_2:
+    methods:
+      - direction_inconsistent_with_hypothesis_only
+    description: "方向矛盾,仅有假设性解释 — 部分可信"
+  level_1:
+    methods:
+      - direction_inconsistent_not_discussed
+    description: "方向矛盾,未讨论 — 结论链断裂"
+  level_0:
+    methods:
+      - direction_inconsistent_ignored_in_conclusion
+    description: "方向矛盾但在最终结论中忽略 — 结论选择偏差"
+
+evidence:
+  - source_type: method_paper
+    pmid: "30104775"
+    title: "Robust enumeration of cell subsets from tissue expression profiles — Newman et al. 2015, Nature Methods (CIBERSORT)"
+    confidence: L-Confirmed
+    excerpt: "Gene expression deconvolution methods reveal immune infiltration patterns that should be interpreted in context of gene function."
+    supports_levels: ["level_3"]
+  - source_type: consensus_guideline
+    pmid: "20676068"
+    title: "REporting recommendations for tumour MARKer prognostic studies (REMARK) — McShane et al. 2005, JNCI"
+    confidence: L-Confirmed
+    excerpt: "All findings should be discussed in the context of the existing literature."
+    supports_levels: ["level_3", "level_1"]

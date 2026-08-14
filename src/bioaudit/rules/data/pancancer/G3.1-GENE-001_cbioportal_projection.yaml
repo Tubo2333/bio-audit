@@ -1,0 +1,44 @@
+rule_id: G3.1-GENE-001
+domain: GENETIC
+status: active
+version: 1
+title: "cBioPortal API投影模式 / cBioPortal API projection mode"
+description: "cBioPortal API的SUMMARY模式将hugoGeneSymbol返回为'?',所有基因名称信息丢失。突变和拷贝数数据必须使用DETAILED投影模式获取完整的基因符号。"
+condition:
+  decision_type: cbioportal_projection
+  required_context:
+    data_source: cBioPortal
+
+scoring:
+  level_3:
+    methods:
+      - DETAILED
+      - projection_DETAILED
+      - detailed_projection
+    description: "DETAILED投影 — 返回完整基因符号"
+    rationale: "DETAILED模式返回完整的hugoGeneSymbol,entrezGeneId等字段 (cBioPortal API文档)"
+  level_1:
+    methods:
+      - SUMMARY_with_client_side_remap
+    description: "SUMMARY模式但做了基因名重映射 — 可能出错"
+    note: "手动将entrezGeneId映射回基因符号可能引入错误(一对多映射)"
+  level_0:
+    methods:
+      - SUMMARY
+      - projection_SUMMARY
+      - default_summary
+    description: "SUMMARY投影 — 基因符号为'?'"
+    rationale: "SUMMARY模式下hugoGeneSymbol对所有基因返回'?',导致下游分析无法识别基因"
+
+evidence:
+  - source_type: consensus_guideline
+    url: "https://docs.cbioportal.org/web-api-and-clients/"
+    title: "cBioPortal Web API Documentation — projection parameter"
+    confidence: L-Confirmed
+    excerpt: "Projection=DETAILED returns full gene metadata including hugoGeneSymbol. SUMMARY mode abbreviates fields and may return '?' for gene symbols."
+    supports_levels: ["level_3", "level_0"]
+  - source_type: reference
+    title: "rule-api-001: cBioPortal — always use projection=DETAILED"
+    confidence: L-Confirmed
+    excerpt: "SUMMARY mode returns hugoGeneSymbol as '?'. Use projection=DETAILED on all cBioPortal endpoints."
+    supports_levels: ["level_3", "level_0"]

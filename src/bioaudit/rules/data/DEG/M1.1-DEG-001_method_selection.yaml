@@ -1,0 +1,89 @@
+rule_id: "M1.1-DEG-001"
+domain: "method_selection.deg"
+status: "active"
+version: 2
+title: "Bulk RNA-seq 差异分析方法选择"
+description: >
+  D2 FIX: 核心证据升级为 Conesa 2016 + Schurch 2016。Soneson 2013 降级为历史参考。
+  D3 FIX: MVP Level 3 与 Level 4 合并。Level 4 保留给 v0.2 LLM rationale 评估。
+
+condition:
+  decision_type: "deg_method"
+  required_context:
+    data_category: "raw_counts"
+    sequencing: "bulk_RNA_seq"
+    design: "simple_two_group"
+  context_constraints:
+    - "n_replicates >= 2"
+  forbidden_context:
+    data_category: ["normalized_counts", "tpm", "fpkm", "rpkm"]
+
+scoring:
+  level_4:
+    methods: []
+    description: "v0.2 — LLM rationale assessment for demonstration-level justification"
+  level_3:
+    methods:
+      - "DESeq2"
+      - "edgeR"
+      - "limma-voom"
+      - "limma_voom"
+    description: "DESeq2 / edgeR / limma-voom — 负二项分布或经验贝叶斯框架"
+    note: "D3 FIX: Level 3 覆盖所有正确方法。n=3 时所有方法敏感度低 (~50%)，但方法选择正确。"
+  level_2:
+    methods:
+      - "limma-trend"
+      - "voom-with-quality-weights"
+    note: "边缘适用场景 — 在特定条件下可接受"
+    conditions_when_acceptable: "当使用 TPM/log-TPM 输入时应选用 limma-trend"
+  level_1:
+    methods:
+      - "Wilcoxon_rank_sum"
+    note: "对低表达基因效力不足。pseudobulk + Wilcoxon 在单细胞场景是标准做法，但本规则仅覆盖 bulk RNA-seq。"
+    conditions_when_acceptable: "n >= 5 且数据严重非正态时可能合理"
+  level_0:
+    methods:
+      - "ttest_equal_variance"
+      - "ttest_unequal_variance"
+      - "DESeq2_on_normalized_data"
+    note: "t-test 违反正态性假设。DESeq2 要求 raw counts 输入。"
+  override_n2:
+    condition: "n_replicates <= 2"
+    all_methods: "level_0"
+    note: "n<=2 时无法可靠估计生物学变异。降级为仅报告 fold change，不做统计推断。"
+
+evidence:
+  - source_type: "consensus_guideline"
+    doi: "10.1186/s13059-016-0881-8"
+    pmid: "26813401"
+    title: "Conesa et al. (2016) Genome Biology — RNA-seq best practices survey"
+    confidence: "L-Consensus"
+    excerpt: "DESeq2 and edgeR are the most widely used and best-performing methods... limma-voom performs comparably and handles complex designs well."
+    supports_levels: ["level_3"]
+
+  - source_type: "benchmark_paper"
+    doi: "10.1261/rna.053959.115"
+    pmid: "27022035"
+    title: "Schurch et al. (2016) RNA — n=48 yeast benchmark"
+    confidence: "L-Consensus"
+    excerpt: "At n=3, sensitivity is ~50% for all methods. n>=6 recommended for adequate power. DESeq2 most conservative; edgeR-robust best balance."
+    supports_levels: ["level_3", "override_n2"]
+
+  - source_type: "benchmark_paper"
+    doi: "10.1186/1471-2105-14-91"
+    pmid: "24115176"
+    title: "Soneson & Delorenzi (2013) BMC Bioinformatics — HISTORICAL REFERENCE"
+    confidence: "L-Evidenced"
+    excerpt: "D2 FIX: Evaluated DESeq v1 (not DESeq2). Broad finding that negative binomial models control FDR still holds, but specific rankings are outdated."
+    supports_levels: ["level_3"]
+
+  - source_type: "method_paper"
+    doi: "10.1186/s13059-014-0550-8"
+    pmid: "25516281"
+    title: "Love et al. (2014) DESeq2, Genome Biology"
+    confidence: "L-Confirmed"
+    excerpt: "The DESeq2 model requires raw counts of sequencing fragments... it is not appropriate to supply normalized counts."
+    supports_levels: ["level_0"]
+
+conflicts_with: ["M1.1-DEG-003"]
+conflict_resolution: "M1.1-DEG-001 适用于 bulk RNA-seq。单细胞数据使用 M1.1-DEG-003。"

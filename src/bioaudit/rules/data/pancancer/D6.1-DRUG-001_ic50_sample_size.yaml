@@ -1,0 +1,49 @@
+rule_id: D6.1-DRUG-001
+domain: DRUG
+status: active
+version: 1
+title: "IC50相关性分析样本量阈值 / IC50 correlation sample size threshold"
+description: "GDSC2药物敏感性分析中,基因表达-IC50相关性的统计效力取决于细胞系数量。n<10时Spearman相关极易受离群值影响,p值不可靠。必须报告有效细胞系数并讨论统计效力限制。"
+condition:
+  decision_type: ic50_sample_size
+  required_context:
+    analysis_type: drug_sensitivity
+    data_source: GDSC2
+
+scoring:
+  level_3:
+    methods:
+      - n_gte_30_with_power_analysis
+      - n_gte_20_across_multiple_lineages
+      - sample_size_adequate_with_disclosure
+    description: "n ≥ 20-30 且披露统计效力 — 充分"
+    rationale: "GDSC2包含~1,000个细胞系,对于大多数药物-基因对n在100-900范围内。n≥20可以产生相对稳定的相关估计。"
+  level_2:
+    methods:
+      - n_10_to_20_with_limitation_noted
+    description: "n 10-20 且明确讨论限制 — 可接受但有风险"
+    note: "当特定癌种细胞系数有限时,n 10-20可以接受,但必须明确讨论统计效力不足和假阳性风险"
+  level_1:
+    methods:
+      - n_5_to_10_without_limitation
+    description: "n 5-10 且未讨论限制 — 不可靠"
+  level_0:
+    methods:
+      - n_less_than_5
+      - n_less_than_10_conclusive_claims
+    description: "n < 5-10 仍下确定性结论 — 结论不可靠"
+    rationale: "n<10时单个离群细胞系可能逆转相关方向,Spearman p值不可靠"
+
+evidence:
+  - source_type: method_paper
+    pmid: "22950953"
+    title: "The Cancer Cell Line Encyclopedia enables predictive modelling of anticancer drug sensitivity — Barretina et al. 2012, Nature"
+    confidence: L-Confirmed
+    excerpt: "Drug-gene correlation analysis requires adequate sample size (typically n>20 cell lines) for reliable Spearman correlation estimates."
+    supports_levels: ["level_3", "level_0"]
+  - source_type: method_paper
+    pmid: "31699995"
+    title: "A landscape of pharmacogenomic interactions in cancer — Iorio et al. 2016, Cell"
+    confidence: L-Consensus
+    excerpt: "GDSC drug sensitivity analysis must account for cell line sample size when interpreting correlation strength."
+    supports_levels: ["level_2", "level_0"]

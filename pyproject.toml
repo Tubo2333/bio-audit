@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bio-audit"
+version = "0.1.0"
+description = "Bio-Audit: 生信 AI Agent 方法学决策的确定性审计层（Scientific Decision CI）— 规则驱动的科学决策 lint / benchmark / reward 引擎"
+readme = "README.md"
+requires-python = ">=3.10"   # H8: 最低 Python（引擎使用 PEP 604 联合类型）；CI 双版本矩阵在 B6 落地
+license = { text = "Apache-2.0" }   # 拍板 #3（H13）
+authors = [{ name = "Bio-Audit Contributors" }]
+keywords = ["bioinformatics", "audit", "scientific-decision", "rules-engine", "mcp"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+# H8/H9: 依赖声明（核心 = pydantic + pyyaml；UI/脚本依赖为 optional extra）
+dependencies = [
+    "pydantic>=2.0,<3",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+ui = ["streamlit>=1.31"]        # Streamlit 薄壳（ui/）
+scripts = ["numpy>=1.24", "scipy>=1.10"]  # 验证数据重算脚本（B6 数据管线）
+dev = ["pytest>=7.0", "ruff>=0.4"]
+
+[project.scripts]
+bio-audit = "bioaudit.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# 包内数据资产（规则/轨迹/验证/mappings）随包分发 —— 路径锚定见 bioaudit/paths.py
+[tool.setuptools.package-data]
+"bioaudit.rules" = ["data/**/*.yaml", "ruleset.json"]
+"bioaudit" = ["data/**/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]

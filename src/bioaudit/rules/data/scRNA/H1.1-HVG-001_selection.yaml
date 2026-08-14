@@ -1,0 +1,56 @@
+rule_id: H1.1-HVG-001
+domain: HVG
+status: active
+version: 1
+title: "高变基因选择方法 / HVG selection method"
+description: "高变基因(HVG)选择是降维和聚类的前置步骤。VST (variance stabilizing transformation) 方法是 Seurat 默认, 基于方差-均值关系选择基因。dispersion 方法在某些场景下可能选择不同的基因集。HVG数量通常建议2000-3000。"
+condition:
+  decision_type: hv_gene_selection
+  required_context:
+    sequencing: 10X_scRNA_seq
+  forbidden_context: {}
+  context_constraints:
+    - "n_genes >= 1000"
+
+scoring:
+  level_4:
+    methods: []
+  level_3:
+    methods:
+      - vst
+      - seurat_vst
+    description: "VST — 方差稳定化变换, 最广泛应用于scRNA-seq"
+    rationale: "Seurat默认方法, 经广泛验证, 稳健性好"
+  level_2:
+    methods:
+      - dispersion
+      - mean_var_plot
+    description: "Dispersion/mean.var.plot — 经典方法, 选择基因可能偏向高表达基因"
+    conditions_when_acceptable: "当使用旧版Seurat或需要与历史结果对比时"
+  level_1:
+    methods:
+      - top_n_variable
+      - sd_based
+    description: "简单方差/标准差排序 — 不考虑均值-方差关系"
+    note: "SD-based选择偏向高表达基因, 可能遗漏在低表达范围有生物学意义的基因"
+  level_0:
+    methods:
+      - no_hvg_selection
+      - all_genes
+    description: "无HVG选择 — 使用全部基因降维会引入噪声, 稀释生物学信号"
+  override_n2: {}
+
+evidence:
+  - source_type: method_paper
+    pmid: "26099764"
+    title: "Spatial reconstruction of single-cell gene expression data — Satija et al. 2015, Nature Biotechnology"
+    confidence: L-Confirmed
+    excerpt: "Seurat uses variance-stabilizing transformation (VST) for HVG selection."
+    supports_levels: ["level_3"]
+  - source_type: benchmark_paper
+    pmid: "31870423"
+    title: "Normalization and variance stabilization of single-cell RNA-seq data — Hafemeister & Satija 2019, Genome Biology"
+    confidence: L-Evidenced
+    excerpt: "Proper HVG selection based on variance-mean relationship is critical for downstream analysis."
+    supports_levels: ["level_3", "level_2"]
+conflicts_with: []

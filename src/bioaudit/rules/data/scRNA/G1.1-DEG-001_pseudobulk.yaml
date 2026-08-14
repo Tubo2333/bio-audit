@@ -1,0 +1,62 @@
+rule_id: G1.1-DEG-001_pseudobulk
+domain: DEG
+status: active
+version: 1
+title: "单细胞差异表达: pseudobulk vs 单细胞级别 / scRNA DEG: pseudobulk vs cell-level"
+description: "单细胞级别DEG (Wilcoxon/MAST) 将每个细胞视为独立重复, 这违反了统计推断的独立性假设 — 同一患者的多个细胞是伪重复(pseudoreplication)。Pseudobulk方法将每个患者的细胞聚合为一个'pseudo-sample', 以患者为生物学重复。Squair et al. (2021) 证明细胞级别DEG的假阳性率可高达100%。"
+condition:
+  decision_type: deg_method
+  required_context:
+    sequencing: 10X_scRNA_seq
+  forbidden_context: {}
+  context_constraints:
+    - "n_patients >= 3"
+
+scoring:
+  level_4:
+    methods: []
+  level_3:
+    methods:
+      - pseudobulk_DESeq2
+      - pseudobulk_edgeR
+      - pseudobulk_limma
+    description: "Pseudobulk + 负二项/线性模型 — 以患者为生物学重复"
+    rationale: "正确处理伪重复问题, FDR控制在名义水平"
+  level_2:
+    methods:
+      - MAST_with_replicate_correction
+      - NEBULA
+      - scVI_LDEE
+    description: "混合模型/深度学习方法 — 在模型层面控制重复"
+    conditions_when_acceptable: "当用户明确需要对稀有细胞类型(每患者<10细胞)做DEG时"
+  level_1:
+    methods:
+      - MAST
+      - wilcoxon_rank_sum
+      - wilcoxon_sc
+      - Seurat_FindMarkers
+    description: "细胞级别 DEG — 伪重复问题未解决, FPR膨胀"
+    note: "Seurat FindMarkers 默认将细胞视为独立重复, n=细胞数会导致虚假的小p值"
+  level_0:
+    methods:
+      - ttest_equal_variance
+      - ttest_on_cells
+    description: "t-test 用于单细胞级别 — 分布假设不满足 + 伪重复双重问题"
+    rationale: "单细胞数据非正态、存在大量零值, t-test假设完全不成立"
+  override_n2:
+    condition: "n_patients <= 2"
+
+evidence:
+  - source_type: benchmark_paper
+    pmid: "34433851"
+    title: "Confronting false discoveries in single-cell differential expression — Squair et al. 2021, Nature Communications"
+    confidence: L-Confirmed
+    excerpt: "Pseudobulk methods control FDR at nominal levels; cell-level methods can produce FPR up to 100%."
+    supports_levels: ["level_3", "level_1", "level_0"]
+  - source_type: method_paper
+    pmid: "31870423"
+    title: "Normalization and variance stabilization — Hafemeister & Satija 2019, Genome Biology"
+    confidence: L-Evidenced
+    excerpt: "Biological replicates (patients) not cells should be the unit of analysis in DEG."
+    supports_levels: ["level_3"]
+conflicts_with: []

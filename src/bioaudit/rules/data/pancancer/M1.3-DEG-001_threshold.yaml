@@ -1,0 +1,51 @@
+rule_id: "M1.3-DEG-001"
+domain: "statistical_rigor.threshold"
+status: "active"
+version: 2
+title: "显著性阈值选择"
+description: >
+  DEG 通常需要同时满足统计显著性 (adjusted p-value) 和生物学显著性 (fold change) 两个阈值。
+  注意: |logFC| 最优阈值取决于生物学上下文 (转录因子 vs 代谢酶 vs 组织特异性基因)。
+
+condition:
+  decision_type: "significance_threshold"
+  required_context:
+    analysis_type: "differential_expression"
+
+scoring:
+  level_4:
+    methods: []
+    description: "v0.2 — LLM rationale assessment considering biological context"
+  level_3:
+    methods:
+      - "padj <= 0.05, |logFC| >= 1.0"
+      - "FDR < 0.05, |logFC| >= 1.0"
+      - "padj <= 0.05, |logFC| >= 0.5"
+    description: "双阈值 (统计 + 生物学) — 标准做法。logFC 阈值可根据领域惯例在 0.5-2.0 之间调整。"
+  level_2:
+    methods:
+      - "padj <= 0.1, |logFC| >= 0.5"
+    note: "宽松的统计阈值 → 需明确标注为探索性分析"
+  level_1:
+    methods:
+      - "p_raw <= 0.05"
+    note: "仅用 raw p 值 + 无效应量阈值 → 大量假阳性报告"
+  level_0:
+    methods:
+      - "no_threshold"
+      - "unfiltered"
+    note: "完全无约束 → 不可接受的假阳性率"
+
+evidence:
+  - source_type: "benchmark_paper"
+    doi: "10.1261/rna.053959.115"
+    pmid: "27022035"
+    title: "Schurch et al. (2016) RNA — n=48 yeast benchmark"
+    confidence: "L-Consensus"
+    excerpt: "At n=3, sensitivity is low across methods. |logFC| threshold helps reduce false positives, but n>=6 is the primary requirement for reliability."
+
+  - source_type: "consensus_guideline"
+    title: "ENCODE RNA-seq standards"
+    confidence: "L-Consensus"
+    excerpt: "Differential expression should be reported with both adjusted p-value and fold change."
+    supports_levels: ["level_3"]

@@ -1,0 +1,56 @@
+rule_id: D2.2-DIMR-002_pca_dimension
+domain: DIMRED
+status: active
+version: 1
+title: "PCA 维度数量选择 / PCA dimension selection"
+description: "PCA维度直接影响聚类粒度。维度太少→聚类过粗(不同细胞类型合并); 维度太多→噪声被纳入(过度分裂)。ElbowPlot + JackStraw 双重验证是最佳实践。肿瘤单细胞数据通常需要20-50个PC。"
+condition:
+  decision_type: pca_dimension
+  required_context:
+    sequencing: 10X_scRNA_seq
+  forbidden_context: {}
+  context_constraints:
+    - "n_genes >= 1000"
+
+scoring:
+  level_4:
+    methods: []
+  level_3:
+    methods:
+      - elbow_plus_jackstraw
+      - elbow_with_sensitivity
+    description: "ElbowPlot + JackStraw 双重客观选维"
+    rationale: "双重方法交叉验证, 确保选维不过度也不不足"
+  level_2:
+    methods:
+      - elbow_only
+      - heuristic_30_50
+    description: "仅用ElbowPlot 或经验值(30-50) — 大多数情况合理"
+    conditions_when_acceptable: "当ElbowPlot拐点明确且数据集是标准10X肿瘤数据时"
+  level_1:
+    methods:
+      - default_10
+      - default_15
+    description: "仅用默认值10-15个PC — 对大异质性数据可能不足"
+    note: "肿瘤单细胞数据异质性高, 10个PC通常不够"
+  level_0:
+    methods:
+      - arbitrary_less_than_5
+      - no_pca
+    description: "过少PC (<5) 或跳过PCA — 信息严重损失, 聚类无意义"
+  override_n2: {}
+
+evidence:
+  - source_type: method_paper
+    pmid: "26099764"
+    title: "Spatial reconstruction of single-cell gene expression data — Satija et al. 2015, Nature Biotechnology"
+    confidence: L-Evidenced
+    excerpt: "JackStraw procedure provides statistical significance for PC selection."
+    supports_levels: ["level_3"]
+  - source_type: consensus_guideline
+    pmid: "31841116"
+    title: "Current best practices in single-cell RNA-seq analysis — Luecken & Theis 2019, Mol Syst Biol"
+    confidence: L-Confirmed
+    excerpt: "Elbow plot is a common heuristic for PC selection; combined with JackStraw for rigor."
+    supports_levels: ["level_3", "level_2"]
+conflicts_with: []

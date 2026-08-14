@@ -1,0 +1,46 @@
+rule_id: E5.1-ENRI-001
+domain: ENRICHMENT
+status: active
+version: 1
+title: "ORA多重检验校正 / ORA multiple testing correction"
+description: "过表达分析(ORA)同时测试数百条通路/GO term,必须多重检验校正。不校正时,以p<0.05为阈值预期5%的假阳性率,数百条测试=数十条假阳性通路。FBH FDR或Bonferroni校正为必需步骤。"
+condition:
+  decision_type: enrichment_correction
+  required_context:
+    analysis_type: pathway_enrichment
+
+scoring:
+  level_3:
+    methods:
+      - BH_FDR
+      - Benjamini_Hochberg
+      - FDR_correction
+      - Bonferroni
+    description: "BH FDR或Bonferroni校正 — 必需"
+    rationale: "ORA/GO分析同时测试数百条通路,FDR校正控制假阳性率 (Huang et al. 2009)"
+  level_2:
+    methods:
+      - BY_FDR
+      - q_value
+    description: "其他FDR变体 — 可接受"
+  level_0:
+    methods:
+      - no_correction
+      - raw_p_value
+      - uncorrected_p
+    description: "不做多重检验校正 — 富集结果不可信"
+    rationale: "测试500条通路,p<0.05不做校正=预期25条假阳性通路"
+
+evidence:
+  - source_type: method_paper
+    pmid: "19131956"
+    title: "Bioinformatics enrichment tools: paths toward the comprehensive functional analysis of large gene lists — Huang et al. 2009, Nucleic Acids Research"
+    confidence: L-Confirmed
+    excerpt: "Multiple testing correction (BH FDR) is essential for pathway enrichment analysis."
+    supports_levels: ["level_3", "level_0"]
+  - source_type: method_paper
+    pmid: "16199512"
+    title: "Gene set enrichment analysis: a knowledge-based approach for interpreting genome-wide expression profiles — Subramanian et al. 2005, PNAS"
+    confidence: L-Confirmed
+    excerpt: "FDR correction is applied to account for multiple hypothesis testing across gene sets."
+    supports_levels: ["level_3"]

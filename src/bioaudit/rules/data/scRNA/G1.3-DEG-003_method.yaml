@@ -1,0 +1,60 @@
+rule_id: G1.3-DEG-003_method
+domain: DEG
+status: active
+version: 1
+title: "单细胞差异表达方法选择 / scRNA DEG method selection"
+description: "除了pseudobulk vs cell-level的选择外, DEG方法本身的统计学特性也很重要。DESeq2 (pseudobulk) 基于负二项分布对count数据建模最佳。MAST 使用hurdle模型处理zero-inflation。NEBULA 使用负二项混合模型。方法的统计假设需要与数据特征匹配。"
+condition:
+  decision_type: deg_method
+  required_context:
+    sequencing: 10X_scRNA_seq
+  forbidden_context: {}
+  context_constraints: []
+
+scoring:
+  level_4:
+    methods: []
+  level_3:
+    methods:
+      - DESeq2_pseudobulk
+      - pseudobulk_DESeq2
+      - edgeR_pseudobulk
+      - pseudobulk_edgeR
+      - limma_voom_pseudobulk
+      - pseudobulk_limma
+    description: "Pseudobulk + 负二项/线性模型 — 统计特性最佳"
+    rationale: "负二项分布自然适合UMI count数据的过度离散特征"
+  level_2:
+    methods:
+      - MAST
+      - NEBULA
+      - scVI_LDEE
+    description: "混合模型/深度学习 — 考虑细胞间变异但需要合理使用"
+    conditions_when_acceptable: "当pseudobulk不可行(稀有细胞类型)时, MAST的hurdle模型是合理选择"
+  level_1:
+    methods:
+      - Seurat_wilcoxon_default
+      - ttest_on_normalized
+    description: "Wilcoxon/t-test — 经典但未针对单细胞优化"
+    note: "Seurat FindMarkers默认使用Wilcoxon, 适用于探索性分析但需注意伪重复"
+  level_0:
+    methods:
+      - ttest_on_raw_counts
+      - anova_on_cells
+    description: "t-test/ANOVA直接用于原始counts — 不满足任何假设"
+  override_n2: {}
+
+evidence:
+  - source_type: benchmark_paper
+    pmid: "34433851"
+    title: "Confronting false discoveries in single-cell differential expression — Squair et al. 2021, Nature Communications"
+    confidence: L-Confirmed
+    excerpt: "DESeq2 and edgeR on pseudobulk data provide best FDR control for scRNA-seq DEG."
+    supports_levels: ["level_3"]
+  - source_type: method_paper
+    pmid: "28818974"
+    title: "MAST: a flexible statistical framework for assessing transcriptional changes — Finak et al. 2015, Genome Biology"
+    confidence: L-Evidenced
+    excerpt: "MAST's hurdle model accounts for the bimodal expression pattern in scRNA-seq."
+    supports_levels: ["level_2"]
+conflicts_with: []

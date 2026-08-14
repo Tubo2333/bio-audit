@@ -1,0 +1,60 @@
+rule_id: D1.1-DOUB-001
+domain: DOUBLET
+status: active
+version: 1
+title: "双联体检测方法 / Doublet detection method"
+description: "10X Genomics 单细胞数据中双联体比例通常为 0.5-8%（随细胞浓度增加）。不检测双联体会导致虚假的'共表达'和'新细胞类型'。scDblFinder 基于模拟双联体的随机森林是最新推荐方法。"
+condition:
+  decision_type: doublet_detection
+  required_context:
+    sequencing: 10X_scRNA_seq
+  forbidden_context: {}
+  context_constraints:
+    - "n_cells >= 1000"
+
+scoring:
+  level_4:
+    methods: []
+  level_3:
+    methods:
+      - scDblFinder
+      - scrublet_with_scDblFinder
+      - Solo_with_scDblFinder
+    description: "scDblFinder — 基于模拟双联体的随机森林分类器"
+    rationale: "Xi & Li (2021) 基准测试显示 scDblFinder 在多种场景下表现最优"
+  level_2:
+    methods:
+      - DoubletFinder
+      - Scrublet
+    description: "DoubletFinder/Scrublet — 有效但比scDblFinder FPR略高"
+    conditions_when_acceptable: "当scDblFinder不可用时, DoubletFinder是合理替代"
+  level_1:
+    methods:
+      - Solo
+      - cxds
+    description: "Solo/cxds — 特定场景有效但通用性不足"
+    note: "这些方法针对特定数据特征优化, 泛化性有限"
+    conditions_when_acceptable: "当数据集特征与方法假设匹配时(如Solo适用于Smart-seq2)"
+  level_0:
+    methods:
+      - no_doublet_detection
+      - skip_doublet
+      - manual_visual
+    description: "无检测/纯目测 — 双联体未被识别, 下游聚类/注释/DEG被污染"
+    rationale: "未去除的双联体在UMAP中形成独立cluster, 被误注释为'新细胞类型'"
+  override_n2: {}
+
+evidence:
+  - source_type: benchmark_paper
+    pmid: "33541407"
+    title: "Benchmarking computational doublet-detection methods for single-cell RNA sequencing data — Xi & Li 2021, Genome Biology"
+    confidence: L-Confirmed
+    excerpt: "scDblFinder consistently performs well across diverse scRNA-seq datasets."
+    supports_levels: ["level_3", "level_2"]
+  - source_type: method_paper
+    pmid: "31209304"
+    title: "DoubletFinder: Doublet detection in single-cell RNA sequencing data using artificial nearest neighbors — McGinnis et al. 2019, Cell Systems"
+    confidence: L-Evidenced
+    excerpt: "DoubletFinder identifies doublets using artificial nearest neighbor analysis."
+    supports_levels: ["level_2"]
+conflicts_with: []

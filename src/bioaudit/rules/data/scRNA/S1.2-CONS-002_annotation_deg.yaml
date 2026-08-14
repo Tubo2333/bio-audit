@@ -1,0 +1,52 @@
+rule_id: S1.2-CONS-002_annotation_deg
+domain: CONSISTENCY
+status: active
+version: 1
+title: "注释-DEG跨模块一致性 / Annotation-DEG consistency"
+description: "差异表达分析应覆盖所有主要注释细胞类型。如果只对T细胞做DEG而跳过其他7种细胞类型, 则无法得出'XX细胞类型在肿瘤中特异性富集'的结论。注释范围与DEG范围必须一致, 不一致需要解释(如某些细胞类型细胞数太少, 统计效力不足)。"
+condition:
+  decision_type: annotation_deg_consistency
+  required_context:
+    integration_type: cross_module
+  forbidden_context: {}
+  context_constraints: []
+
+scoring:
+  level_4:
+    methods: []
+  level_3:
+    methods:
+      - all_major_types_covered
+      - deg_covers_all_annotated
+    description: "所有主要注释细胞类型都有DEG分析, 未分析的细胞类型有合理解释"
+  level_2:
+    methods:
+      - most_types_covered
+    description: "大部分细胞类型覆盖, 少量跳过并有说明"
+    conditions_when_acceptable: "当稀有细胞类型(n<50 cells)不足以支持统计检验时"
+  level_1:
+    methods:
+      - selective_deg_only
+    description: "仅对选定的细胞类型做DEG — 可能产生选择偏差"
+    note: "选择性做DEG可能导致'cherry-picking': 只报告显著的结果而忽略不显著的"
+  level_0:
+    methods:
+      - deg_contradicts_annotation
+    description: "DEG结果与注释矛盾但未解决 — 如注释为'正常上皮'但DEG显示高度增殖"
+    rationale: "如果'正常上皮'表达大量增殖marker(MKI67+), 注释可能是错误的(应为肿瘤上皮)"
+  override_n2: {}
+
+evidence:
+  - source_type: consensus_guideline
+    pmid: "31841116"
+    title: "Current best practices in single-cell RNA-seq analysis — Luecken & Theis 2019, Mol Syst Biol"
+    confidence: L-Confirmed
+    excerpt: "Differential expression should be performed across all major cell types present."
+    supports_levels: ["level_3"]
+  - source_type: benchmark_paper
+    pmid: "34433851"
+    title: "Confronting false discoveries in single-cell differential expression — Squair et al. 2021, Nature Communications"
+    confidence: L-Confirmed
+    excerpt: "DEG analysis coverage should match the annotation scope for valid cross-module conclusions."
+    supports_levels: ["level_3", "level_2"]
+conflicts_with: []

@@ -1,0 +1,59 @@
+rule_id: N1.1-NORM-001
+domain: NORM
+status: active
+version: 1
+title: "单细胞 RNA-seq 归一化方法 / scRNA-seq normalization method"
+description: "单细胞归一化必须在方差稳定化和生物学变异保留之间平衡。SCTransform (Hafemeister & Satija 2019) 使用正则化负二项回归, 优于 LogNormalize 因为它消除了技术变异与基因丰度的相关性。scran 的池化反卷积是内存高效的替代方案。"
+condition:
+  decision_type: scRNA_normalization
+  required_context:
+    sequencing: 10X_scRNA_seq
+    data_category: umi_counts
+  forbidden_context: {}
+  context_constraints: []
+
+scoring:
+  level_4:
+    methods: []
+  level_3:
+    methods:
+      - SCTransform
+      - sctransform
+    description: "SCTransform — 正则化负二项回归, 方差稳定化最佳"
+    rationale: "消除技术变异(测序深度)与基因丰度的相关性, 保留生物学异质性"
+  level_2:
+    methods:
+      - scran
+      - scran_norm
+    description: "scran 池化反卷积 — 对大型数据集内存效率更高"
+    conditions_when_acceptable: "当数据集非常大(>100K cells)时, scran比SCTransform更快"
+  level_1:
+    methods:
+      - LogNormalize
+      - lognormalize
+    description: "LogNormalize — 经典方法但有已知缺陷"
+    note: "LogNormalize(CPM+log1p)不消除技术变异-基因丰度相关性, 可能导致假阳性DEG"
+    conditions_when_acceptable: "仅当分析目标为探索性可视化且后续用非参数方法"
+  level_0:
+    methods:
+      - no_normalization
+      - raw_counts
+      - TPM_norm
+    description: "无归一化或bulk RNA-seq归一化方法 — 单细胞数据特性不匹配"
+    rationale: "单细胞UMI counts与bulk counts的分布特性不同, bulk方法不适用"
+  override_n2: {}
+
+evidence:
+  - source_type: method_paper
+    pmid: "31870423"
+    title: "Normalization and variance stabilization of single-cell RNA-seq data using regularized negative binomial regression — Hafemeister & Satija 2019, Genome Biology"
+    confidence: L-Confirmed
+    excerpt: "SCTransform outperforms log-normalization for variance stabilization in scRNA-seq data."
+    supports_levels: ["level_3"]
+  - source_type: method_paper
+    pmid: "27477888"
+    title: "Pooling across cells to normalize single-cell RNA sequencing data with many zero counts — Lun et al. 2016, Genome Biology"
+    confidence: L-Confirmed
+    excerpt: "scran pooling-based size factor estimation provides robust normalization for scRNA-seq."
+    supports_levels: ["level_2"]
+conflicts_with: []

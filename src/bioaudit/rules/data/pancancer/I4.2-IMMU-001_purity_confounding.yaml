@@ -1,0 +1,48 @@
+rule_id: I4.2-IMMU-001
+domain: IMMUNE
+status: active
+version: 1
+title: "肿瘤纯度混杂校正 / Tumor purity confounding adjustment"
+description: "免疫浸润与基因表达的相关性分析中,肿瘤纯度是重要的混杂因子。高纯度肿瘤样本中免疫细胞比例低,可能导致基因表达与免疫评分的虚假负相关。必须考虑肿瘤纯度校正或至少在讨论中提及此限制。"
+condition:
+  decision_type: purity_confounding
+  required_context:
+    analysis_type: immune_expression_correlation
+
+scoring:
+  level_3:
+    methods:
+      - purity_adjusted_partial_correlation
+      - ESTIMATE_purity_correction
+      - consensusTME_purity_adjustment
+      - partial_Spearman_with_purity
+    description: "使用偏相关或工具校正肿瘤纯度 — 严谨"
+    rationale: "偏相关(partial correlation)在控制肿瘤纯度后评估免疫-表达关联,减少虚假关联 (Aran et al. 2015)"
+  level_2:
+    methods:
+      - purity_discussed_as_limitation
+      - stratification_by_purity
+    description: "按纯度分层分析或明确讨论此限制 — 可接受"
+  level_1:
+    methods:
+      - purity_mentioned_without_action
+    description: "提及纯度混杂但未采取任何措施 — 不足"
+  level_0:
+    methods:
+      - purity_ignored
+      - no_purity_consideration
+    description: "完全忽略肿瘤纯度影响 — 结论可能存在虚假关联"
+
+evidence:
+  - source_type: method_paper
+    pmid: "26573719"
+    title: "Systematic pan-cancer analysis of tumour purity — Aran et al. 2015, Nature Communications"
+    confidence: L-Confirmed
+    excerpt: "Tumour purity significantly confounds gene expression and immune infiltration correlations."
+    supports_levels: ["level_3", "level_0"]
+  - source_type: method_paper
+    pmid: "24113737"
+    title: "Inferring tumour purity and stromal and immune cell admixture from expression data — Yoshihara et al. 2013, Nature Communications"
+    confidence: L-Confirmed
+    excerpt: "ESTIMATE algorithm quantifies tumour purity which should be accounted for in expression-immune association analysis."
+    supports_levels: ["level_3"]

@@ -1,0 +1,258 @@
+"""RuleEvaluator — 自 fullflow-demo 迁移（含 A3/B6/D3/D4/D5 修正），import 改为 bioaudit 包。
+
+保留修正：
+- A3: Take LOWEST (strictest) score, not highest
+- B6: Fuzzy choice normalization for real agent output
+- D3: MVP merges Level 3+4; only check methods in Level 3
+- D4: Implement override_n2
+- D5: Check conditions_when_acceptable（2026-08-13 修复：无条件提升已移除）
+"""
+
+import re
+from bioaudit.models.rule import Rule
+from bioaudit.models.decision import ParsedStep
+from bioaudit.models.score import DecisionScore
+
+
+# Level → numeric score mapping (MVP: nonlinear)
+LEVEL_TO_SCORE = {4: 1.0, 3: 0.85, 2: 0.6, 1: 0.3, 0: 0.0, -1: 0.5}
+
+LEVEL_LABELS = {
+    4: "示范级 — 方法和参数都最优 (v0.2 LLM增强后启用)",
+    3: "正确级 — 方法选择正确",
+    2: "可接受 — 有微小瑕疵",
+    1: "有风险 — 方法选择值得商榷",
+    0: "危险 — 方法选择将导致错误结论",
+    -1: "无法评估 — 没有适用的规则",
+}
+
+
+class RuleEvaluator:
+    """Evaluates a single decision against matched rules.
+
+    Philosophy: conservative/paranoid. When multiple rules match,
+    take the LOWEST (strictest) score across all rules.
+    """
+
+    def evaluate(self, parsed: ParsedStep, rules: list[Rule]) -> DecisionScore:
+        if not rules:
+            return self._no_rule_matched(parsed)
+
+        # A3 FIX: start at best possible, take LOWEST (strictest)
+        best_level = 4
+        all_rule_ids = []
+
+        for rule in rules:
+            # D4: check overrides first (e.g., n=2)
+            override_level = self._check_overrides(rule, parsed)
+            if override_level is not None:
+                level = override_level
+            else:
+                level = self._check_level(rule, parsed)
+
+            all_rule_ids.append(rule.rule_id)
+            # A3 FIX: < not > (take lowest/strictest)
+            if level < best_level:
+                best_level = level
+
+        # D5: check if conditions_when_acceptable could lift the score
+        best_level = self._check_conditional_acceptability(rules, parsed, best_level)
+
+        return self._build_score(parsed, all_rule_ids, rules, best_level)
+
+    def _check_level(self, rule: Rule, parsed: ParsedStep) -> int:
+        """Check which scoring level the agent's choice falls into.
+
+        B6 FIX: normalize choices for fuzzy matching.
+        D3 FIX: Level 3 and Level 4 are merged for MVP.
+            Only check methods in Level 3. Level 4 reserved for
+            LLM-based rationale assessment (v0.2).
+        """
+        choice = self._normalize_choice(parsed.original.choice)
+
+        # Check Level 3 first (merged 3+4 for MVP)
+        methods_3 = [self._normalize_choice(m) for m in rule.scoring.level_3.methods]
+        if choice in methods_3:
+            return 3
+
+        # Check Level 2
+        methods_2 = [self._normalize_choice(m) for m in rule.scoring.level_2.methods]
+        if choice in methods_2:
+            return 2
+
+        # Check Level 1
+        methods_1 = [self._normalize_choice(m) for m in rule.scoring.level_1.methods]
+        if choice in methods_1:
+            return 1
+
+        # Check Level 0
+        methods_0 = [self._normalize_choice(m) for m in rule.scoring.level_0.methods]
+        if choice in methods_0:
+            return 0
+
+        # If not matched anywhere, check Level 4 as well (for future use)
+        methods_4 = [self._normalize_choice(m) for m in rule.scoring.level_4.methods]
+        if choice in methods_4:
+            return 4
+
+        # Completely unrecognized → Level 0 (dangerous — unknown method)
+        return 0
+
+    def _check_overrides(self, rule: Rule, parsed: ParsedStep) -> int | None:
+        """D4: Check special override conditions (e.g., n=2).
+
+        Returns override level or None if no override applies.
+        """
+        override = rule.scoring.override_n2
+        if override and "condition" in override:
+            cond = override["condition"]
+            ctx = parsed.normalized_context
+            if ctx.get("n_replicates") and ctx["n_replicates"] <= 2:
+                return 0  # All methods → Level 0 for n<=2
+        return None
+
+    def _check_conditional_acceptability(
+        self, rules: list[Rule], parsed: ParsedStep, current_level: int
+    ) -> int:
+        """D5 FIX（2026-08-13, refactor-plan-v1.1 A1/A2/A4）: 移除无条件提升。
+
+        原实现（审计 H1）只检查 lvl.conditions_when_acceptable 文本是否存在、
+        choice 是否命中该 level 的 methods，满足即 min(current_level+1, 3)
+        无条件提升一级——条件文本从未被解析校验，导致：
+          - TPM/LogNormalize/hard_threshold 等"有风险"方法被虚增为"可接受/正确"
+          - skip/fail-open 缺键场景下等级反而抬高（最严规则被跳过）
+        结构化条件校验将在阶段 1 本体落地时实现（ontology context_schema +
+        missing 三档语义）。当前返回原等级，保证分数不虚增。
+        """
+        return current_level
+
+    def _normalize_choice(self, choice: str) -> str:
+        """B6 FIX: Normalize agent choices for fuzzy matching.
+
+        Handles: 'DESeq2 (Wald test)' → 'deseq2'
+                'Benjamini-Hochberg' → 'bh'
+                'no_correction' → 'no_correction'
+        """
+        c = choice.lower().strip()
+        # Remove parenthetical qualifiers
+        c = re.split(r'[\(（]', c)[0].strip()
+        # Replace spaces/underscores/hyphens with single separator
+        c = re.sub(r'[\s_\-]+', '_', c)
+        # Common abbreviations
+        aliases = {
+            "bh": "bh",
+            "benjamini_hochberg": "bh",
+            "fdr": "bh",
+            "by": "by",
+            "benjamini_yekutieli": "by",
+            "bonferroni": "bonferroni",
+            "no_correction": "no_correction",
+            "uncorrected": "no_correction",
+            "tmm": "tmm",
+            "rle": "rle",
+            "deseq2_median_of_ratios": "deseq2_median_of_ratios",
+            "tpm": "tpm",
+            "fpkm": "fpkm",
+            "rpkm": "rpkm",
+            "cpm": "cpm",
+            "deseq2": "deseq2",
+            "edger": "edger",
+            "limma_voom": "limma_voom",
+            "limma_trend": "limma_trend",
+            "wilcoxon": "wilcoxon_rank_sum",
+            "wilcoxon_rank_sum": "wilcoxon_rank_sum",
+            "ttest": "ttest_equal_variance",
+            "t_test": "ttest_equal_variance",
+            "student_t": "ttest_equal_variance",
+        }
+        return aliases.get(c, c)
+
+    def _build_score(
+        self, parsed: ParsedStep, rule_ids: list[str],
+        rules: list[Rule], level: int
+    ) -> DecisionScore:
+        """Build DecisionScore with evidence ordered by confidence."""
+        numeric = LEVEL_TO_SCORE.get(level, 0.5)
+
+        # Sort evidence by confidence rank, then take top 5
+        conf_rank = {"L-Confirmed": 5, "L-Consensus": 4, "L-Evidenced": 3,
+                     "L-Emerging": 2, "L-Anecdotal": 1}
+        all_evidence = []
+        for rule in rules:
+            for ev in rule.evidence:
+                all_evidence.append((conf_rank.get(ev.confidence, 0), ev))
+
+        all_evidence.sort(key=lambda x: x[0], reverse=True)
+        evidence_citations = []
+        for _, ev in all_evidence[:5]:
+            if ev.pmid:
+                # 首选 PubMed — 国内可访问 (doi.org 被 GFW 阻断)
+                evidence_citations.append(
+                    f"[{ev.confidence}] {ev.title} — "
+                    f"**[PMID: {ev.pmid}](https://pubmed.ncbi.nlm.nih.gov/{ev.pmid}/)**"
+                )
+            elif ev.url:
+                # 其次任意直链 (如 JSTOR)
+                evidence_citations.append(
+                    f"[{ev.confidence}] {ev.title} — "
+                    f"**[查看原文]({ev.url})**"
+                )
+            elif ev.doi:
+                # fallback: DOI 链接
+                evidence_citations.append(
+                    f"[{ev.confidence}] {ev.title} — "
+                    f"**[DOI: {ev.doi}](https://doi.org/{ev.doi})**"
+                )
+            else:
+                evidence_citations.append(f"[{ev.confidence}] {ev.title}")
+
+        # Alternatives from higher levels
+        alternatives = []
+        if level <= 1:
+            for lvl_key in ["level_3", "level_2"]:
+                lvl = getattr(rules[0].scoring, lvl_key, None) if rules else None
+                if lvl:
+                    alternatives.extend(lvl.methods[:3])
+
+        return DecisionScore(
+            step_id=parsed.step_id,
+            decision_type=parsed.decision_type,
+            agent_choice=parsed.original.choice,
+            agent_rationale=parsed.original.rationale,
+            matched_rules=rule_ids,
+            level=level,
+            numeric_score=numeric,
+            explanation=LEVEL_LABELS.get(level, "未知"),
+            evidence_citations=evidence_citations,
+            alternatives=alternatives,
+            reward_signal=numeric,  # C3: documented as experimental/uncalibrated
+        )
+
+    def _no_rule_matched(self, parsed: ParsedStep) -> DecisionScore:
+        """Sentinel: decision type has no active rules."""
+        return DecisionScore(
+            step_id=parsed.step_id,
+            decision_type=parsed.decision_type,
+            agent_choice=parsed.original.choice,
+            agent_rationale=parsed.original.rationale,
+            matched_rules=[],
+            level=-1,
+            numeric_score=0.5,
+            explanation="无法评估 — 没有适用的规则。此分数为占位值，不可作为质量判断依据。",
+            evidence_citations=[],
+            alternatives=[],
+            reward_signal=0.5,
+        )
+
+    def evaluate_all_rules(
+        self, parsed: ParsedStep, rules: list[Rule]
+    ) -> dict[str, int]:
+        """Public method: evaluate against ALL rules individually.
+        Returns {rule_id: level} for conflict detection.
+        Unlike evaluate(), this does NOT take the strictest — it returns
+        each rule's independent evaluation.
+        """
+        result = {}
+        for rule in rules:
+            result[rule.rule_id] = self._check_level(rule, parsed)
+        return result

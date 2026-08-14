@@ -1,0 +1,54 @@
+rule_id: A1.2-ANNO-002_marker_validation
+domain: ANNOTATION
+status: active
+version: 1
+title: "注释结果的marker基因验证 / Marker gene validation of annotation"
+description: "任何自动注释方法的结果都应通过经典marker基因的表达模式进行验证。例如: T细胞(CD3D/CD8A), B细胞(CD19/MS4A1/CD79A), 巨噬细胞(CD68/CD14), 上皮细胞(EPCAM/KRT19)。如果自动注释为'T细胞'但cluster不表达CD3D, 则注释错误。"
+condition:
+  decision_type: annotation_validation
+  required_context:
+    sequencing: 10X_scRNA_seq
+  forbidden_context: {}
+  context_constraints: []
+
+scoring:
+  level_4:
+    methods: []
+  level_3:
+    methods:
+      - marker_dotplot_validated
+      - marker_vlnplot_validated
+      - cross_method_with_marker
+    description: "DotPlot/VlnPlot 展示已知marker表达 + 多方法交叉验证"
+  level_2:
+    methods:
+      - marker_list_checked
+    description: "检查了marker基因列表, 但未可视化"
+    conditions_when_acceptable: "当注释结果与已知marker一致且无歧义时"
+  level_1:
+    methods:
+      - marker_not_checked
+      - assumed_correct
+    description: "未做marker验证, 直接信任自动注释结果"
+    note: "自动注释的top hit可能不是正确的细胞类型, 尤其在复杂组织中"
+  level_0:
+    methods:
+      - conflicting_marker_ignored
+    description: "已知marker矛盾但被忽略 — 注释可能是错误的"
+    rationale: "如果注释为'肝细胞'但表达EPCAM(上皮marker), 注释需要审查"
+  override_n2: {}
+
+evidence:
+  - source_type: consensus_guideline
+    pmid: "31841116"
+    title: "Current best practices in single-cell RNA-seq analysis — Luecken & Theis 2019, Mol Syst Biol"
+    confidence: L-Confirmed
+    excerpt: "Automatic annotation results should be validated using canonical marker genes."
+    supports_levels: ["level_3", "level_2"]
+  - source_type: method_paper
+    pmid: "31209304"
+    title: "SingleR — Aran et al. 2019, Nature Immunology"
+    confidence: L-Evidenced
+    excerpt: "Reference-based annotation produces top correlation scores but requires validation."
+    supports_levels: ["level_3"]
+conflicts_with: []
