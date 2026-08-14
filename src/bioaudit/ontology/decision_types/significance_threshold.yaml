@@ -1,0 +1,23 @@
+# 决策类型：significance_threshold（显著性阈值）— inference / bulk-DEG, pan-cancer
+decision_type: significance_threshold
+display:
+  cn: 显著性阈值
+  en: Significance threshold
+stage: inference
+paradigms: [bulk-DEG, pan-cancer]
+dimension: statistical_rigor
+optional: false
+aliases: []
+depends_on: [deg_method, multiple_testing_correction]
+context_schema:
+  - key: analysis_type
+    type: enum
+    values: [differential_expression, survival_analysis, immune_expression_correlation, pathway_enrichment, drug_sensitivity]
+    required: true
+    # A2：被罚分规则（M1.3）引用 → 禁止 fail-open
+    missing: fail-closed
+  - key: n_replicates
+    type: int
+    min: 0
+    required: false
+    missing: fail-closed

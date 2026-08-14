@@ -15,10 +15,18 @@ PKG_DIR = Path(__file__).resolve().parent
 
 # ── 数据资源锚点 ──
 RULES_DIR = PKG_DIR / "rules" / "data"          # 43 条规则 YAML（DEG/pancancer/scRNA）
-TRAJECTORIES_DIR = PKG_DIR / "data" / "trajectories"  # 20 条轨迹 JSON
-MAPPINGS_DIR = PKG_DIR / "data" / "mappings"    # aliases / context_keys / dep_graph / type_to_dim
+# B4: 轨迹 canonical 目录 = v2（version/provenance 元数据，评分只消费 decisions）；
+# 旧 v1 文件（裸决策数组）保留在 TRAJECTORIES_LEGACY_DIR 作为备份，迁移器不修改。
+TRAJECTORIES_DIR = PKG_DIR / "data" / "trajectories" / "v2"   # ★ 20 条 v2 轨迹（B4 迁移产物）
+TRAJECTORIES_LEGACY_DIR = PKG_DIR / "data" / "trajectories"   # v1 原文件（备份，只读）
+MAPPINGS_DIR = PKG_DIR / "data" / "mappings"    # 遗留映射（B2 后由本体取代：aliases→ontology/、dep_graph→depends_on、type_to_dim→dimension）
 VALIDATION_DIR = PKG_DIR / "data" / "validation"  # 验证数据（full_audit_results 等）
 REPORT_DATA_DIR = PKG_DIR / "data" / "report"   # 报告数据（ai_error_patterns.md）
+
+# ── 本体锚点（B2：决策类型本体，单一事实源）──
+# 覆盖：paradigms.yaml / stages.yaml / aliases.yaml / topics.yaml /
+#       input_synonyms.yaml / backlog.yaml / decision_types/*.yaml（34 定义）
+ONTOLOGY_DIR = PKG_DIR / "ontology"
 
 # 范式 → 规则子目录（golden 复算按范式分别建 registry）
 ACT_RULE_SUBDIRS = {

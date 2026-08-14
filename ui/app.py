@@ -133,9 +133,11 @@ if st.session_state.act:
             if st.button("▶ 运行审计 / Run Audit", key=f"run_{st.session_state.act}", type="primary", use_container_width=True):
                 traj_file = TRAJECTORIES_DIR / traj_opts[choice]["file_name"]
                 traj_data = json.loads(traj_file.read_text(encoding="utf-8"))
+                # B4: v2 轨迹为对象（version/provenance/decisions），v1 为裸数组 —— 统一取 decisions
+                traj_decisions = traj_data if isinstance(traj_data, list) else traj_data["decisions"]
                 st.session_state.demo_mode = choice
                 st.session_state.is_correct_traj = traj_opts[choice].get("is_correct", False)
-                st.session_state.trajectory = {"task": st.session_state.act_task, "modules": st.session_state.act_modules, "decisions": traj_data}
+                st.session_state.trajectory = {"task": st.session_state.act_task, "modules": st.session_state.act_modules, "decisions": traj_decisions}
                 st.session_state.human_overrides = {}
                 st.session_state.audit_result = None
                 st.switch_page("pages/02_audit.py")

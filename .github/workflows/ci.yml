@@ -1,0 +1,79 @@
+# Bio-Audit CI（B6 回归体系，2026-08-14）
+#
+# 门禁（v1.1 D1/C4/H8；B6 验收项 1/2/4）：
+# 1. 双版本矩阵（Python 3.10 / 3.12，H8）跑 pytest + golden + 校验器
+# 2. golden_replay 接入 CI：diff ≠ 0 → 失败即红（C4），漂移摘要上传 artifact（人工确认门槛）
+# 3. 规则治理三闸 ruleset-validate（清单 semver/哈希 + D2 冲突 + golden，D1）
+# 4. 数据管线锚定：scrna_r0.json 确定性重生成逐字节一致（B6-5）
+#
+# 规则变更流程（D1）：改规则 → 本 workflow 全绿才可合并（失败即"自动回退"= 不合并）。
+
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    name: pytest+golden (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install locked deps + package
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.lock -r requirements-dev.lock
+          pip install -e .
+
+      - name: 本体校验器（P1 三职责：覆盖/语义边界/冲突）
+        run: bio-audit validate-ontology --json
+
+      - name: 规则治理三闸（清单 + D2 冲突 + golden，D1）
+        run: bio-audit ruleset-validate --json
+
+      - name: pytest 全套
+        run: python -m pytest -q
+
+      - name: Golden replay（20 轨迹 137 决策，失败即红；C4）
+        run: |
+          bio-audit golden --json > golden-summary.json || { echo "::error::GOLDEN DIFF — 分数漂移必须逐条人工确认（v1.1 C4）"; cat golden-summary.json; exit 1; }
+          python -c "import json; s=json.load(open('golden-summary.json')); print('n_diffs =', s['n_diffs'], '| n_decisions =', s['n_decisions_replayed'])"
+
+      - name: 漂移报告 artifact（有变化必须人工确认）
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-summary-${{ matrix.python-version }}
+          path: golden-summary.json
+
+      - name: 数据管线锚定（scrna_r0 确定性重生成，B6-5）
+        run: |
+          python scripts/generate_scrna_r0.py --output /tmp/scrna_r0_regen.json
+          python - <<'EOF'
+          import hashlib
+          from pathlib import Path
+          from bioaudit.paths import VALIDATION_DIR
+          a = hashlib.sha256(Path('/tmp/scrna_r0_regen.json').read_bytes()).hexdigest()
+          b = hashlib.sha256((VALIDATION_DIR / 'scrna_r0.json').read_bytes()).hexdigest()
+          print('regen   :', a)
+          print('packaged:', b)
+          assert a == b, 'scrna_r0.json 与确定性重生成不一致 — 数据管线漂移'
+          print('OK: scrna_r0.json 锚定一致')
+          EOF
+
+      - name: ruff lint（H13）
+        run: |
+          ruff check src tests scripts || true

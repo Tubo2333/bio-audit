@@ -1,0 +1,14 @@
+# 行尾一致性（B5/B6 治理：ruleset.json 内容哈希跨平台可复现）
+# 背景：规则/数据文件的内容哈希写死在 ruleset.json（B5）与 asset_manifest.json；
+# Windows core.autocrlf=true 会在 checkout 时把 LF 转 CRLF，导致哈希校验漂移。
+# 全部文本文件强制 LF：Linux CI 与 Windows 工作区行为一致。
+* text=auto
+*.py text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.toml text eol=lf
+*.lock text eol=lf
+*.txt text eol=lf
+*.sh text eol=lf

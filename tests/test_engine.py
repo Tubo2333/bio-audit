@@ -82,7 +82,7 @@ def test_audit_decision_single():
         "rationale": "TPM for cross-sample comparison",
         "context": {"n_replicates": 6, "paired": False,
                     "data_category": "raw_counts", "sequencing": "bulk_RNA_seq"},
-    }, act="deg")
+    }, paradigm="deg")  # B3: paradigm 必填
     assert d["level"] == 2  # TPM 为 L2（D5 修复后不再虚增到 L3）
     assert d["matched_rules"] == ["D1.3-DEG-001"]
 
@@ -93,6 +93,6 @@ def test_unknown_decision_type_is_unevaluable():
         "decision_type": "totally_unknown_type",
         "choice": "whatever",
         "context": {},
-    }, act="deg")
+    }, paradigm="deg")  # B3: paradigm 必填
     assert d["level"] == -1
     assert d["matched_rules"] == []

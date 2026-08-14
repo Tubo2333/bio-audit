@@ -3,7 +3,7 @@ domain: DEG
 status: active
 version: 1
 title: "单细胞差异表达方法选择 / scRNA DEG method selection"
-description: "除了pseudobulk vs cell-level的选择外, DEG方法本身的统计学特性也很重要。DESeq2 (pseudobulk) 基于负二项分布对count数据建模最佳。MAST 使用hurdle模型处理zero-inflation。NEBULA 使用负二项混合模型。方法的统计假设需要与数据特征匹配。"
+description: "除了pseudobulk vs cell-level的选择外, DEG方法本身的统计学特性也很重要。DESeq2 (pseudobulk) 基于负二项分布对count数据建模最佳。MAST_with_replicate_correction 使用hurdle模型处理zero-inflation并控制重复。NEBULA 使用负二项混合模型。方法的统计假设需要与数据特征匹配。B5 裁决（2026-08-14）：裸 MAST（细胞级、无 replicate correction）与 G1.1 对齐评为 L1——伪重复问题未解决；仅 MAST_with_replicate_correction 评 L2。"
 condition:
   decision_type: deg_method
   required_context:
@@ -26,17 +26,18 @@ scoring:
     rationale: "负二项分布自然适合UMI count数据的过度离散特征"
   level_2:
     methods:
-      - MAST
+      - MAST_with_replicate_correction
       - NEBULA
       - scVI_LDEE
-    description: "混合模型/深度学习 — 考虑细胞间变异但需要合理使用"
-    conditions_when_acceptable: "当pseudobulk不可行(稀有细胞类型)时, MAST的hurdle模型是合理选择"
+    description: "混合模型/深度学习(含重复校正) — 考虑细胞间变异但需要合理使用"
+    conditions_when_acceptable: "当pseudobulk不可行(稀有细胞类型)时, 带 replicate correction 的混合模型是合理选择"
   level_1:
     methods:
+      - MAST
       - Seurat_wilcoxon_default
       - ttest_on_normalized
-    description: "Wilcoxon/t-test — 经典但未针对单细胞优化"
-    note: "Seurat FindMarkers默认使用Wilcoxon, 适用于探索性分析但需注意伪重复"
+    description: "MAST(细胞级,无重复校正)/Wilcoxon/t-test — 经典但未针对单细胞优化"
+    note: "裸 MAST 与 Seurat FindMarkers 默认 Wilcoxon 均以细胞为独立重复(伪重复未解决, 与 G1.1 L1 对齐, B5 裁决); 适用于探索性分析但需注意伪重复"
   level_0:
     methods:
       - ttest_on_raw_counts

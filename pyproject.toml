@@ -38,10 +38,11 @@ bio-audit = "bioaudit.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
-# 包内数据资产（规则/轨迹/验证/mappings）随包分发 —— 路径锚定见 bioaudit/paths.py
+# 包内数据资产（规则/轨迹/验证/mappings/本体）随包分发 —— 路径锚定见 bioaudit/paths.py
 [tool.setuptools.package-data]
 "bioaudit.rules" = ["data/**/*.yaml", "ruleset.json"]
 "bioaudit" = ["data/**/*"]
+"bioaudit.ontology" = ["*.yaml", "decision_types/*.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

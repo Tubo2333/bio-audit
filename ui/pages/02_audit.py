@@ -5,11 +5,13 @@
 - 只调 api（v1 蓝图：UI 薄壳）；匹配明细走 api.match_details
 - 移除 unsafe_allow_html script 注入（审计 D12）
 """
+import json
 import re
 
 import streamlit as st
 
 from bioaudit.api import match_details, run_audit
+from bioaudit.errors import BioAuditError
 
 st.set_page_config(page_title="Bio-Audit — 审计过程", page_icon="🔍", layout="wide")
 
@@ -49,9 +51,16 @@ st.divider()
 # ═══════════════════════════════════════════════════════════
 if "audit_result" not in st.session_state or st.session_state.audit_result is None:
     with st.spinner("⏳ 运行审计引擎（7 步管道：解析 → 匹配 → 评分 → 冲突 → 聚合 → 传播 → 报告）..."):
-        result = run_audit(traj["decisions"], act=act)
+        try:
+            result = run_audit(traj["decisions"], act=act)
+        except BioAuditError as exc:  # B3：契约错误（错误码显式展示，不裸抛）
+            st.error(f"审计输入被拒绝 [{exc.code}]: {exc.message}")
+            if exc.details:
+                st.code(json.dumps(exc.details, ensure_ascii=False, indent=1))
+            st.stop()
     if result.get("error"):
-        st.error(f"审计失败: {result['error']}")
+        code = result.get("error_code") or "internal-error"
+        st.error(f"审计失败 [{code}]: {result['error']}")
         st.stop()
     st.session_state.audit_result = result
     st.rerun()

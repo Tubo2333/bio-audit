@@ -1,0 +1,34 @@
+# 决策类型：api_data_integrity（数据完整性）— data-acquisition / scRNA
+decision_type: api_data_integrity
+display:
+  cn: 数据获取与完整性
+  en: Data acquisition integrity
+stage: data-acquisition
+paradigms: [scRNA]
+dimension: data_handling
+optional: false
+aliases: []
+depends_on: []
+context_schema:
+  - key: data_source
+    type: enum
+    values: [GEO, cBioPortal, GDSC2, SRA, ArrayExpress]
+    required: true
+    # A2：被罚分规则（A1.1-API）引用 → 禁止 fail-open
+    missing: fail-closed
+  - key: data_format
+    type: enum
+    values: [h5ad, h5, loom, mtx, rds, csv]
+    required: true
+    # A2：被罚分规则（A1.1-API）引用 → 禁止 fail-open
+    missing: fail-closed
+  - key: n_cells
+    type: int
+    min: 0
+    required: false
+    missing: fail-closed
+  - key: n_genes
+    type: int
+    min: 0
+    required: false
+    missing: fail-closed

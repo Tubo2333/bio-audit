@@ -35,7 +35,10 @@ class EventStore:
     """Append-only JSONL event store. One file per audit session."""
 
     def __init__(self, log_dir: Optional[str | Path] = None):
-        self.log_dir = Path(log_dir) if log_dir else DEFAULT_LOG_DIR
+        # B3: log_dir 未显式传入时读环境变量（测试可重定向；默认 ~/.bioaudit）
+        self.log_dir = Path(log_dir) if log_dir else Path(
+            os.environ.get("BIOAUDIT_LOG_DIR", str(DEFAULT_LOG_DIR))
+        )
         self.log_dir.mkdir(parents=True, exist_ok=True)
         self._session_id: str | None = None
         self._file_path: Path | None = None

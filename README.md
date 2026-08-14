@@ -16,13 +16,32 @@
 # 安装（Python >= 3.10）
 pip install -e ".[dev,ui]"
 
-# 命令行审计一条轨迹
-bio-audit run src/bioaudit/data/trajectories/deg_correct.json
+# 命令行审计一条轨迹（v2 轨迹 = version/provenance 元数据 + decisions；评分只消费 decisions）
+bio-audit run src/bioaudit/data/trajectories/v2/deg_correct.json
 
 # golden 回归：20 轨迹 137 决策 vs 冻结基线，必须 0 差异
 python scripts/golden_replay.py --baseline tests/golden/golden_expected_output_after.json
 
-# 单元 + 回归测试
+# P1 本体校验器三职责（覆盖报告 / 语义边界 / 冲突完整性）
+bio-audit validate-ontology        # 或 python scripts/validate_ontology.py [--json]
+
+# B4 轨迹迁移器（只读：v1 旧轨迹 → v2 新目录，原文件保留为备份）
+bio-audit migrate-trajectories --dry-run   # 预览 20 条迁移清单；去掉 --dry-run 实际迁移
+bio-audit trajectory-validate src/bioaudit/data/trajectories/v2   # v2 schema 校验（缺必填字段报错）
+
+# B3 API 契约：单决策审计（--act 必填，deg_method 同名异构消歧）
+bio-audit audit-decision decision.json --act scrna
+
+# B5 规则治理三闸（规则变更必跑）：清单校验（semver/哈希/唯一 id）+
+# D2 冲突检查 + golden 重放，一条命令（D1 变更流程，见 CONTRIBUTING.md）
+bio-audit ruleset-validate --json
+
+# B6 回归 CI（本地复现 GitHub Actions 门禁）
+python scripts/golden_replay.py                 # golden 0 差异（失败 exit 1）
+python scripts/generate_scrna_r0.py --output /tmp/scrna_r0.json   # R0 确定性锚定
+
+# 单元 + 回归测试（依赖按 lockfile 锁定，B6-3）
+pip install -r requirements.lock -r requirements-dev.lock
 pytest
 
 # Streamlit 薄壳 UI（只调 bioaudit.api）
@@ -39,12 +58,13 @@ bio-audit-v2/
 │   ├── engine/               # 匹配/评分/聚合/冲突/传播（fullflow-demo D5 修复后迁移）
 │   ├── models/               # Decision / Rule / Score / Profile 数据模型
 │   ├── storage/              # RuleRegistry（C2 去重告警）+ EventStore
-│   ├── api/                  # 单一入口：run_audit / audit_decision（B3 完善契约）
+│   ├── api/                  # 三入口（run_audit / audit_decision / match_details，B3 契约完成：
+│   │                         #   pydantic 校验 + 错误码 + paradigm 必填；见 docs/api-contract.md）
 │   ├── ontology/             # 本体（阶段 B2 落地：34 类型 + P1 校验器）
-│   ├── capture/              # 采集（阶段 2：M1 hook / M3 解析器 / 交叉验证）
+│   ├── capture/              # 采集（阶段 2）+ B4 轨迹迁移器（trajectory_migrator，只读）
 │   ├── rules/                # 43 条规则 YAML（统一后）+ ruleset 快照清单
-│   ├── report/               # 报告 schema（C1 三元组快照：ruleset+ontology+engine）
-│   └── data/                 # 包内小资产：20 轨迹 / validation / mappings / report
+│   ├── report/               # 报告 schema（C1 三元组快照）+ schema 常量（B4）
+│   └── data/                 # 包内小资产：20 轨迹（v2 canonical / v1 备份）/ validation / mappings / report
 ├── mcp/                      # MCP server（阶段 2 骨架）
 ├── ui/                       # Streamlit 薄壳（只调 api）
 ├── tests/                    # 单元 + golden 回归（tests/golden/ 冻结基线副本）
