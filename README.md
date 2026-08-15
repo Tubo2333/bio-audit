@@ -47,6 +47,16 @@ AI Agent 做生信分析已经相当熟练：代码能跑、输出像样、总�
 
 两个口径对象不同、机制不同，**严格区分、禁止混写**（口径纪律见 [site-design §6.2](https://tubo2333.github.io/bio-audit/docs/site-design.html#62-数字口径纪律教训-2-单一事实源)）。报告：[G-2 补充报告](https://tubo2333.github.io/bio-audit/docs/migration/agent-eval-report-g2.html) · [G 主报告（旧版留档）](https://tubo2333.github.io/bio-audit/docs/migration/agent-eval-report.html)。
 
+**高分阳性对照（窗口 I，2026-08）**：为了让"链路能抓错"的证据闭环，我们还用**确定性脚本**（按公开最佳实践编写的"黄金 Agent"，**非 LLM**）在同一个数据集上真实执行、走同一条采集链路——教科书式执行得到 **80.0 · pass**，与 CellVoyager 真实运行 **30.0 · needs_correction** 形成对比度：
+
+| 黄金 Agent 变体（同数据同流程，仅一处方法学差异） | 分数 · verdict | 注入的方法学错误 |
+|---|---|---|
+| **A 黄金版**（MAD QC → SCTransform → VST HVG → PCA-elbow → Harmony → Leiden → CellTypist → pseudobulk DESeq2 → BH） | **80.0 · pass** | 无 |
+| **B 逻辑断裂版**（cell-level DEG 替代 pseudobulk，伪重复） | **63.0 · blocked** | DEG 把细胞当独立样本（终答照常输出差异基因列表） |
+| **C 微妙错误版**（固定硬阈值替代 MAD 自适应 QC） | **66.7 · needs_correction** | QC 固定阈值（该数据恰好一个细胞都没滤掉，结果表面与 A 几乎相同） |
+
+三版终答"表面完成度"相同，仅方法学逻辑不同 → 审计分与 verdict 呈梯度（pass → blocked → needs_correction）——**审计评的是科学逻辑链，不是只看终答**。报告：[窗口 I 阳性对照报告](https://tubo2333.github.io/bio-audit/docs/migration/I1-positive-control-report.html)。（注：A 版 80.0 未达 85.0 目标，偏差归因于注释方法 L3 通道的采集签名缺口，报告 §6 如实记录。）
+
 引擎自身的可信度也有独立验证（R0-R3）：模拟数据真值锚定下，审计分数与实际 F1 的排序一致性 Spearman ρ=0.9747（D5 修复后重算，结论不变）；权威文献案例 4/4 全部正确判级。
 
 ## 快速开始
@@ -63,7 +73,7 @@ bio-audit ruleset-validate          # 规则集校验（清单/冲突/golden 回
 
 ## 项目状态与路线图
 
-**当前（v0.2.x，2026-08）**：核心体系已闭环——稳定引擎 + 34 类型决策本体 + 规则治理门禁、真实采集链路（M1/M3 交叉验证）、60 条评测任务集、reward 信号层；真实 Agent 评测链路打通并完成首轮修复（G-2）。工程质量：pytest 234/234 · CI 双矩阵（Python 3.10/3.12）全绿 · golden 回归 0 差异 · 报告带三元组快照（engine/ruleset/ontology 版本），任何分数可复现。
+**当前（v0.2.x，2026-08）**：核心体系已闭环——稳定引擎 + 34 类型决策本体 + 规则治理门禁、真实采集链路（M1/M3 交叉验证）、60 条评测任务集、reward 信号层；真实 Agent 评测链路打通并完成首轮修复（G-2），端到端阳性对照（黄金 Agent A/B/C）补齐"链路能认对"证据（窗口 I）。工程质量：pytest 235/235 · CI 双矩阵（Python 3.10/3.12）全绿 · golden 回归 0 差异 · 报告带三元组快照（engine/ruleset/ontology 版本），任何分数可复现。
 
 **接下来**：L3/L4 结论级与一致性级审计（通用实现）、PRM（过程奖励模型）、任务集扩展（批 3，跨模型标注对照）、更多真实 Agent 评测（多数据集/多 Agent）。
 

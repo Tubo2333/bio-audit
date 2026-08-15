@@ -186,6 +186,37 @@ def test_resolution_value_not_used_as_method_name():
     assert not cand.choice.isdigit()  # choice 不是裸数值
 
 
+def test_non_literal_kwarg_choice_ranges_uncertain_not_crash():
+    """窗口 I 实测缺陷（2026-08-16）：choice_ranges 收到非字面量 kwarg
+    （如 n_comps=n_comps 变量间接）时此前直接 TypeError 崩溃——
+    违反禁猜（F6）设计（无法确定性取值 → uncertain，绝不崩溃）。"""
+    code = (
+        "n_comps = 20\n"
+        "sc.pp.pca(adata, n_comps=n_comps, random_state=42)\n"
+        "sc.tl.leiden(adata, resolution=res, flavor='igraph')\n"
+    )
+    result = M3Parser(act="scrna").parse_code(code)
+    # 不崩溃；pca_dimension 无法确定性判定 → uncertain（不猜、不产出候选）
+    assert not [c for c in result.candidates if c.decision_type == "pca_dimension"]
+    assert any(
+        u.decision_type == "pca_dimension"
+        for u in result.uncertain
+    )
+    # 字面量路径行为不变（0.8 → default_0_8）
+    r2 = M3Parser(act="scrna").parse_code("sc.tl.leiden(adata, resolution=0.8)")
+    cand = next(
+        c for c in r2.candidates if c.decision_type == "clustering_resolution"
+    )
+    assert cand.choice == "default_0_8"
+    # 变量分辨率 → clustering_resolution uncertain（不崩溃）
+    r3 = M3Parser(act="scrna").parse_code("res = 1.0\nsc.tl.leiden(adata, resolution=res)")
+    assert not [c for c in r3.candidates if c.decision_type == "clustering_resolution"]
+    assert any(
+        u.decision_type == "clustering_resolution"
+        for u in r3.uncertain
+    )
+
+
 def test_choice_table_maps_threshold_vocabulary():
     """significance_threshold：padj+logFC 组合 → 规则词表 choice（M1.3）。"""
     code = "deg = df[(df.padj < 0.05) & (df.logFC.abs() > 1.0)]"

@@ -344,7 +344,11 @@ class M3Parser:
             arg_name = sig.choice_arg or self._only_numeric_arg(sig)
             if arg_name is None:
                 return None, False
-            value = kwargs.get(arg_name)
+            # 窗口 I 实测修复（2026-08-16）：非字面量 kwarg（如 n_comps=n_comps
+            # 变量间接）无法确定性取值 → 禁猜（F6）→ uncertain，绝不崩溃。
+            # 此前 _coerce 失败的值（None）在 _build_candidate 被跳过，但
+            # choice_ranges 直接比较原始 kwarg 值 → str vs int TypeError 崩溃。
+            value = _coerce(kwargs.get(arg_name), "float")
             if value is None:
                 return None, False
             for row in sig.choice_ranges:
