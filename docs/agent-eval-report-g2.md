@@ -3,9 +3,10 @@
 > **日期**：2026-08-16（窗口 G-2）
 > **性质**：对窗口 G 真实评测的修复与重评（零成本——只跑本地审计引擎 + 已有运行产物，
 > **不重跑 Agent、不手工编轨迹**）
-> **宪法**：`docs/agent-eval-protocol.md`（v1.0，本报告为 G-2 补充）
+> **宪法**：`docs/agent-eval-protocol.md`（v1.0 + §4.1 declared 修订，本报告为 G-2 补充）
 > **对应验收**：execution-plan-v1 §六.十二 G2-a/b/c/d（13 项，本窗口已冻结）
 > **主报告（旧版留档）**：`docs/agent-eval-report.md`（窗口 G，2026-08-16，不修改结论）
+> **CI 状态**：GitHub Actions 双矩阵（3.10/3.12）**全绿**（push 0150a53，run 31891058554）
 
 ---
 
@@ -132,6 +133,7 @@ ontology-design §二.1）；declared 齐全也无法评分。**非 context 缺�
 | benchmark-validate 四闸 | taskset / contamination / coverage / golden 全 PASS |
 | reward-validate 五闸 | PASS |
 | ruff | 新增/修改代码零错误 |
+| **60 任务集全局影响**（benchmark-run，v1.1.0） | **与窗口 G 基线逐项一致**：mean 0.5528（CI [0.4818, 0.6218] 同）、recall 0.820 / F1 0.781 / precision 0.745、edge 检出 0.667、gap Δ=0.046（区间内无告警）——放宽对任务集**零影响**（纯加性最强证据） |
 
 **执行计划快照**：`docs/specs/2026-08-13-execution-plan-v1.md` §六.十二 13 项逐项打勾（G-2 完成标记）。
 
