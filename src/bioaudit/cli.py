@@ -187,6 +187,10 @@ def main(argv: list[str] | None = None) -> int:
         "--baseline",
         default=str(Path(__file__).resolve().parent.parent.parent / "tests" / "golden" / "golden_expected_output_after.json"),
     )
+    p_golden.add_argument(
+        "--json", action="store_true",
+        help="输出原始 JSON 报告（默认输出即 JSON，此开关与其它子命令对齐，供 CI 使用）",
+    )
     p_golden.set_defaults(func=cmd_golden)
 
     p_ad = sub.add_parser("audit-decision", help="单决策审计")
