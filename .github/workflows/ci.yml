@@ -25,9 +25,10 @@ jobs:
         python-version: ["3.10", "3.12"]
 
     steps:
-      - uses: actions/checkout@v4
+      # 2026-08-15：v4/v5 基于 Node 20，GitHub 弃用警告 → 升级 v7（Node 24 runtime）
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
@@ -54,7 +55,7 @@ jobs:
 
       - name: 漂移报告 artifact（有变化必须人工确认）
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: golden-summary-${{ matrix.python-version }}
           path: golden-summary.json
