@@ -37,10 +37,24 @@ from bioaudit.errors import BioAuditError, ErrorCode, validation_error
 from bioaudit.models.decision import ParsedStep
 from bioaudit.models.score import DecisionScore
 from bioaudit.paths import rules_dir_for
-from bioaudit.storage.event_store import AuditEvent, EventStore
+from bioaudit.storage.event_store import AuditEvent, EventStore, EventWriteError
 from bioaudit.storage.rule_registry import RuleRegistry
 
 logger = logging.getLogger(__name__)
+
+
+def _append_event(event_store: EventStore, state: dict, event: AuditEvent) -> None:
+    """C5（F11）：事件写入显式告警——写失败不再静默丢写。
+
+    失败 → EventWriteError → 记入 state["event_store_warnings"]（进审计输出），
+    管道主流程继续（告警可见，审计者也可审计）。
+    """
+    try:
+        event_store.append(event)
+    except EventWriteError as exc:
+        warning = f"事件写入失败（F11 显式告警）: {exc}"
+        state.setdefault("event_store_warnings", []).append(warning)
+        logger.error(warning)
 
 
 def _registry_for(act: str | None = None) -> RuleRegistry:
@@ -138,6 +152,7 @@ def run_audit(
         "act": act,
         "error": None,
         "error_code": None,
+        "event_store_warnings": [],  # C5（F11）：事件写入失败显式告警（进报告）
     }
 
     # ── Step 1: Parse（输入已由 TrajectoryPayload 校验，此处仅归一化）──
@@ -147,7 +162,7 @@ def run_audit(
             parsed, _ = matcher.match(decision)
             parsed_steps.append(parsed.model_dump())
         state["parsed_steps"] = parsed_steps
-        event_store.append(AuditEvent(
+        _append_event(event_store, state, AuditEvent(
             event_type="parse_complete", node="parse",
             payload={"n_decisions": len(parsed_steps)},
         ))
@@ -166,7 +181,7 @@ def run_audit(
             parsed = ParsedStep(**step_dict)
             rules = matcher.match_parsed(parsed)
             matched[parsed.step_id] = [r.rule_id for r in rules]
-            event_store.append(AuditEvent(
+            _append_event(event_store, state, AuditEvent(
                 event_type="rule_matched", node="match",
                 payload={"step_id": parsed.step_id, "n_rules": len(rules),
                          "rule_ids": [r.rule_id for r in rules]},
@@ -204,7 +219,7 @@ def run_audit(
                 score.level = override
                 score.numeric_score = LEVEL_TO_SCORE.get(override, 0.5)
                 score.explanation += f" [human override: Lvl -> {override}]"
-                event_store.append(AuditEvent(
+                _append_event(event_store, state, AuditEvent(
                     event_type="human_overrode", node="evaluate",
                     payload={"step_id": parsed.step_id, "new_level": override},
                 ))
@@ -212,7 +227,7 @@ def run_audit(
                 score = evaluator.evaluate(parsed, rules)
 
             step_scores.append(score.model_dump())
-            event_store.append(AuditEvent(
+            _append_event(event_store, state, AuditEvent(
                 event_type="decision_scored", node="evaluate",
                 payload={"step_id": parsed.step_id, "level": score.level,
                          "agent_choice": parsed.original.choice},
@@ -244,7 +259,7 @@ def run_audit(
                 )
                 all_conflicts.extend(conflicts)
                 for c in conflicts:
-                    event_store.append(AuditEvent(
+                    _append_event(event_store, state, AuditEvent(
                         event_type="conflict_detected",
                         node="detect_conflicts", payload=c,
                     ))
@@ -261,7 +276,7 @@ def run_audit(
         state["trajectory_score"] = agg.trajectory_score
         state["eval_verdict"] = agg.verdict
         state["critical_issues"] = agg.critical_issues
-        event_store.append(AuditEvent(
+        _append_event(event_store, state, AuditEvent(
             event_type="aggregation_complete", node="aggregate",
             payload={"trajectory_score": agg.trajectory_score,
                      "verdict": agg.verdict},
@@ -277,7 +292,7 @@ def run_audit(
         scores = [DecisionScore(**s) for s in state["step_scores"]]
         chains = error_tracer.trace(scores)
         state["error_chains"] = [c.model_dump() for c in chains]
-        event_store.append(AuditEvent(
+        _append_event(event_store, state, AuditEvent(
             event_type="propagation_traced", node="trace",
             payload={"n_error_chains": len(chains)},
         ))
@@ -311,9 +326,11 @@ def run_audit(
                 c for c in state.get("conflicts", [])
                 if c.get("resolution") == "NEEDS_HUMAN_REVIEW"
             ],
+            # C5（F11）：事件写入失败显式告警进报告（不再静默丢写）
+            "event_store_warnings": state.get("event_store_warnings", []),
         }
         state["report"] = report
-        event_store.append(AuditEvent(
+        _append_event(event_store, state, AuditEvent(
             event_type="report_generated", node="report", payload=report,
         ))
     except Exception as exc:
@@ -328,6 +345,7 @@ def audit_decision(
     decision: dict,
     paradigm: str,
     mappings_dir=None,
+    session_id: str | None = None,
 ) -> dict:
     """单决策审计（B1/B2/B3 契约入口之一；reward 入口在阶段 4）。
 
@@ -339,6 +357,9 @@ def audit_decision(
         **必填**。deg / pan / scrna——deg_method 同名异构消歧（v1.1 B2）：
         同一 choice 在不同范式下按各自规则集评分；未知范式 →
         paradigm-not-found。
+    session_id : str | None
+        C5（可观测）：提供时把本次审计写入该 session 的事件流
+        （审计者也可审计；不提供则不落盘）。
 
     Returns
     -------
@@ -373,12 +394,34 @@ def audit_decision(
             exc,
         ) from exc
 
+    # C5：session 级审计过程日志（审计者也可审计）
+    event_store = None
+    state_trace: dict = {"event_store_warnings": []}
+    if session_id is not None:
+        event_store = EventStore()
+        event_store.start_session(session_id)
+
     try:
         registry = _registry_for(paradigm)
         matcher = RuleMatcher(registry, mappings_dir)
         evaluator = RuleEvaluator()
         parsed, rules = matcher.match(request.decision)
         score = evaluator.evaluate(parsed, rules)
+        if event_store is not None:
+            _append_event(event_store, state_trace, AuditEvent(
+                event_type="decision_scored", node="evaluate",
+                payload={
+                    "step_id": parsed.step_id, "level": score.level,
+                    "agent_choice": parsed.original.choice,
+                    "paradigm": paradigm,
+                    "matched_rules": score.matched_rules,
+                },
+            ))
+        if state_trace.get("event_store_warnings"):
+            score.explanation += (
+                " [event_store_warning: "
+                + "; ".join(state_trace["event_store_warnings"]) + "]"
+            )
         return score.model_dump()
     except BioAuditError:
         raise

@@ -45,7 +45,13 @@ jobs:
       - name: 规则治理三闸（清单 + D2 冲突 + golden，D1）
         run: bio-audit ruleset-validate --json
 
-      - name: pytest 全套
+      - name: 采集层自检（C2/C6：签名表校验 + 样例 notebook 解析冒烟）
+        run: bio-audit capture-validate --notebook tests/fixtures/sample_scrna_notebook.ipynb
+
+      - name: MCP server 自检（C4：独立启动 + 端到端 audit_decision）
+        run: python -m mcp.server --selfcheck
+
+      - name: pytest 全套（含采集/交叉验证/M1 hook/MCP/可观测，C6-18）
         run: python -m pytest -q
 
       - name: Golden replay（20 轨迹 137 决策，失败即红；C4）
