@@ -1,6 +1,33 @@
 # 一套 AI 跑分析，另一套 AI 查作业——我们在生信 Agent 身上试了试
 
-> 20 条分析轨迹、137 个决策点、43 条文献锚定规则（38 条唯一）。CellVoyager 的真实单细胞分析被抓住了 5 个危险级（L0）决策——而它自己毫不知情。
+> 20 条分析轨迹、137 个决策点、43 条文献锚定规则（38 条唯一）。我们让 CellVoyager 真实跑了一次
+> 单细胞分析并翻开它的决策草稿：demo 轨迹曾被抓住 5 个危险级（L0）决策；2026-08 G-2 真实运行
+> 重评后为 **30.0 分（L0=0）**——两个口径严格区分，见下方"当前状态"。
+
+---
+
+## 当前状态（2026-08-16，v0.2.x）
+
+五阶段重构（止血 → 地基 → 采集 lint → benchmark → reward）全部完成，真实 Agent 评测链路打通。
+**引用 CellVoyager 分数时请认准口径**（教训 #2 单一事实源，禁止混写）：
+
+| 口径 | 分数 | 决策分布 |
+|---|---|---|
+| demo 轨迹（2026-08-13 D5 修复后引擎重跑） | 29 分 · Blocked | **5 × L0** |
+| **G-2 真实运行重评**（GSE115978 · declared 注入 + 规则平台键放宽） | **30.0 needs_correction** | **L0=0 / L1×7 / L3×1 / L-1×12** |
+
+- 真实评测报告：[G-2 补充报告](https://tubo2333.github.io/bio-audit/docs/migration/agent-eval-report-g2.html)
+  （总成本 ¥2.55、正式运行 10-12 分钟；[G 主报告留档](https://tubo2333.github.io/bio-audit/docs/migration/agent-eval-report.html)）
+- 工程现状：pytest **234/234** · CI 双矩阵全绿 · golden 20 轨迹 137 决策 **0 差异** ·
+  60 条任务集（IRR κ=0.8336）· ruleset 1.2.0 / engine 0.2.1
+- 数字口径纪律全文：[site-design §6.2](https://tubo2333.github.io/bio-audit/docs/site-design.html)
+
+## 快速导航
+
+- [快速开始](https://tubo2333.github.io/bio-audit/docs/quickstart.html)（[English](https://tubo2333.github.io/bio-audit/docs/quickstart.en.html)）
+- [API 契约](https://tubo2333.github.io/bio-audit/docs/api-contract.html) · [MCP 契约](https://tubo2333.github.io/bio-audit/docs/mcp-contract.html)
+- [规则贡献](https://github.com/Tubo2333/bio-audit/blob/main/CONTRIBUTING.md) · [Release](https://github.com/Tubo2333/bio-audit/releases)
+- [文档中心](https://tubo2333.github.io/bio-audit/docs/) · [设计文档](https://tubo2333.github.io/bio-audit/docs/specs/) · [窗口报告](https://tubo2333.github.io/bio-audit/docs/migration/)
 
 ---
 
@@ -16,7 +43,7 @@
 
 ---
 
-## 让 CellVoyager 跑一次分析，然后翻开它的草稿纸
+## 让 CellVoyager 跑一次分析，然后翻开它的草稿纸（demo 轨迹复盘）
 
 ![Bio-Audit 全流程 Demo 首页](assets/01_landing.png)
 
@@ -30,7 +57,7 @@ Bio-Audit 是我们自己做的另一套东西。它的工作就是坐在 Agent 
 
 我们让它逐步骤检查了 CellVoyager 刚才那 12 步。
 
-结果：**29 分（D5 修复后口径），Blocked**。五个危险级（L0）决策：
+**结果（demo 轨迹，2026-08-13 D5 修复后引擎重跑）：29 分，Blocked。** 五个危险级（L0）决策：
 
 | 步骤 | 决策 | Level | 为什么是问题 |
 |------|------|-------|------------|
@@ -46,11 +73,16 @@ Bio-Audit 是我们自己做的另一套东西。它的工作就是坐在 Agent 
 
 做一下对比：同样的 12 步，如果我们用手工构造一份理想分析轨迹——SCTransform 归一化、Harmony 批次校正、pseudobulk 做 DEG、scDblFinder 做双联体检测、SingleR 加 CellTypist 交叉验证做注释——Bio-Audit 给它打 85 分。通过了。
 
-![CellVoyager 审计结果: 29 分 BLOCKED](assets/02_result.png)
+![CellVoyager 审计结果: 29 分 BLOCKED（demo 轨迹）](assets/02_result.png)
 
-CellVoyager 和理想轨迹差了 56 分。差距不是来自一个错得离谱的模型——这个模型很聪明。差距来自它跳过了几个关键步骤。
+CellVoyager 和理想轨迹差了 56 分（demo 口径）。差距不是来自一个错得离谱的模型——这个模型很聪明。差距来自它跳过了几个关键步骤。
 
-> 关于分数口径的诚实说明：29 分是 2026-08-13 D5 修复（移除"条件可接受"无条件加分 bug）后的引擎实测。修复前旧口径为 48.3 分——其中一部分来自 bug 的虚增，一部分来自旧规则词表（如 `PCA_arbitrary` 未被规则收录导致 L0 判定）。修复与重算过程全程留痕，见 docs/specs/ 下的审计基线。
+> **关于分数口径的诚实说明**：上表 29 分 5 L0 是 **demo 轨迹**（20 条 legacy 轨迹之一）在
+> 2026-08-13 D5 修复（移除"条件可接受"无条件加分 bug）后的引擎重跑结果；修复前旧口径为 48.3 分，
+> 其中一部分来自 bug 的虚增，一部分来自旧规则词表（如 `PCA_arbitrary` 未被规则收录导致 L0 判定）。
+> **2026-08-16 G-2 真实运行重评**（CellVoyager 在 GSE115978 上真实运行，declared 注入 + 规则平台键
+> 放宽后，零成本重评）得 **30.0 分（L0=0 / L1×7 / L3×1 / L-1×12）**——两者对象不同、口径不同，
+> 禁止混写。全程留痕见 [G-2 报告](https://tubo2333.github.io/bio-audit/docs/migration/agent-eval-report-g2.html)。
 
 ---
 
@@ -83,13 +115,15 @@ BiomniBench 的输出是"你的 Agent 得了 64 分"——但不会告诉你第�
 | CoE Audit | AI 论文 | 逐声明 | 原文引用 | ❌ | ✅ |
 | nf-test | Pipeline | 代码级 | Snapshot | ✅ | ❌ |
 | MedSkillAudit | 临床 Agent | 双层否决 | 指南 | ✅ | ❌ |
-| **Bio-Audit** | **分析决策** | **决策级逐步骤（L1-L2；L3/L4 设计中）** | **PMID** | **✅** | **✅ R0-R3** |
+| **Bio-Audit** | **分析决策** | **决策级逐步骤（L1-L2 落地；L3/L4 设计中）** | **PMID** | **✅** | **✅ R0-R3** |
 
 我们想要的东西是：**Agent 跑完分析之后，能逐步骤告诉你哪一步有问题、为什么是错的、依据哪篇文献、建议怎么修。**
 
 Bio-Audit 就是按这个想法做的。
 
-> 关于 L3/L4 的诚实说明：设计中的四层审计（L1 决策级 / L2 流程级 / L3 结论级 / L4 一致性级）目前引擎落地了 L1-L2 决策级与流程级审计；L3/L4 在早期子项目中有原型（CSTB 场景硬编码版），已列入重构排期重写为通用实现（见 docs/specs/2026-08-13-refactor-plan-v1.1.md）。
+> 关于 L3/L4 的诚实说明：设计中的四层审计（L1 决策级 / L2 流程级 / L3 结论级 / L4 一致性级）目前引擎落地了
+> L1-L2 决策级与流程级审计；L3/L4 在早期子项目中有原型（CSTB 场景硬编码版），已列入重构排期重写为通用实现
+> （设计依据在仓库外审计内存 docs/specs/refactor-plan-v1.1.md，不进本站）。
 
 ---
 
@@ -148,15 +182,15 @@ Act 1（DEG，5 个决策类型）和 Act 3（scRNA，20 个决策类型）的�
 
 **第三个：分数会压缩，但排序不会。**
 
-一个 12 步的单细胞分析中，5 步是 L0，其余步有对有错。按直觉，5/12 出错应该接近 0 分——但实际得分在 30 到 50 分区间（修复后口径），因为正确的步骤拉高了整体分数。这看起来像"审计太松"，但实际上是一个合理的设计决策：你不想因为 Agent 在某一步的疏忽就把整个分析判死刑——特别是在那一步的后果可能没那么严重的情况下。真正重要的是两件事：**L0/L1 的计数**（几个危险决策）和**排序**（这套分析和那套分析哪个更可靠）。Spearman 的 0.9747 告诉我们排序是稳的。
+以 demo 轨迹样本为例：一个 12 步的单细胞分析中，5 步是 L0，其余步有对有错。按直觉，5/12 出错应该接近 0 分——但实际得分在 30 到 50 分区间（修复后口径），因为正确的步骤拉高了整体分数。这看起来像"审计太松"，但实际上是一个合理的设计决策：你不想因为 Agent 在某一步的疏忽就把整个分析判死刑——特别是在那一步的后果可能没那么严重的情况下。真正重要的是两件事：**L0/L1 的计数**（几个危险决策）和**排序**（这套分析和那套分析哪个更可靠）。Spearman 的 0.9747 告诉我们排序是稳的。
 
 ---
 
 ## 诚实地说
 
-Level -1 还没实现。系统目前区分不了"不认识的新方法"和"危险的方法"。如果 2026 年某篇论文提出了一种全新的 DEG 方法，它会因为不在规则库里被当成 Level 0。正确做法是返回"无法评估"——这个功能已在重构排期中（与本体 missing 三档语义同批落地）。
+Level -1（无法评估）在 v2 重构中已经落地：系统能区分"不认识的新方法"（返回 -1，不再误判为 L0）和"危险的方法"（L0）——missing 三档语义 + unclassified 标记。G-2 真实运行重评中的 12 条 L-1 正是"无法评估"占位（immune_correlation_method 为 scRNA 范式规则覆盖缺口，非采集缺口，见 [G-2 报告](https://tubo2333.github.io/bio-audit/docs/migration/agent-eval-report-g2.html)）。
 
-人类校准也没做。设计文档里留了 R4 的位置，但 2 到 3 个评分者的 Krippendorff's α 在 20 条轨迹上的置信区间太宽（从 0.42 到 0.89），为了一个不太可信的数字去麻烦三个同学不值得。先留白。
+人类校准还没做。设计文档里留了 R4 的位置，但 2 到 3 个评分者的 Krippendorff's α 在 20 条轨迹上的置信区间太宽（从 0.42 到 0.89），为了一个不太可信的数字去麻烦三个同学不值得。先留白。
 
 单细胞的锚定验证因为 Bioconductor 被 GFW 阻断，没法用 splatter 包，改用 numpy 模拟数据替代。不完美，但记录在案。
 
@@ -168,7 +202,7 @@ Level -1 还没实现。系统目前区分不了"不认识的新方法"和"危�
 
 ## 怎么跑
 
-v2 单仓库（推荐）：
+推荐 v2 单仓库（见[快速开始](https://tubo2333.github.io/bio-audit/docs/quickstart.html)）：
 
 ```bash
 pip install -e ".[dev,ui]"     # Python >= 3.10
@@ -177,7 +211,7 @@ bio-audit golden               # golden 回归（20 轨迹 137 决策，0 差异
 bio-audit ruleset-validate     # 规则治理三闸（清单/冲突/golden）
 ```
 
-旧版全流程演示（Docker，含 R0-R3 验证数据，镜像为 2026-08 前旧版引擎）：
+旧版全流程演示（Docker，含 R0-R3 验证数据，镜像为 2026-08 前旧版引擎，分数为旧口径）：
 
 ```bash
 docker run -p 8504:8504 ghcr.io/tubo2333/bio-audit-fullflow:latest

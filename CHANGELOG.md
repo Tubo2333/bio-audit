@@ -1,5 +1,36 @@
 # Changelog
 
+## 文档站化（窗口 H — 2026-08-16，无版本号）
+
+- **站点规范**：`docs/site-design.md`（导航结构 / 目录组织 / 双语策略 / Release 衔接 / 链接与数字口径纪律）
+- **Pages 导航升级**：自定义 `_layouts/default.html`（cayman 主题无导航 → 9 项导航覆盖全站）；
+  `_config.yml`（lang / github_repo / exclude 代码目录，冻结资产不进 Pages）
+- **docs/ 目录组织**：评测报告归入 `docs/migration/`（agent-eval-report / agent-eval-report-g2）；
+  宪法协议归入 `docs/protocols/`（agent-eval-protocol / benchmark-protocol）；新增 `docs/environment/`
+  （github-pages.md）；`docs/specs/` 与 `docs/migration/` 配 index 索引页；契约/宪法一级文档
+  （api-contract / mcp-contract / reward-mapping / reward-protocol）因代码 docstring 与测试锚定保留根级
+  （site-design.md §4 决策记录）
+- **核心文档双语**（H11 裁决）：README（`README.md` 中文主版 + `README.en.md` 英文版）+ 快速开始
+  （`docs/quickstart.md` + `docs/quickstart.en.md`）；其余文档中文为主不翻译（site-design.md §5.1 决策记录）
+- **与 Release 衔接**：CHANGELOG 条目引用文档链接；站点导航含 Release 项；v0.2.0 Release body 更新文档链接
+- **G-2 遗留 minor 整改**：`src/bioaudit/__init__.py:8` ruff E501（107>100）→ 注释独立成行
+- **回归**：golden 20 轨迹 137 决策 0 差异；pytest 234/234；ruff 零新增；CI 双矩阵全绿；
+  Pages 构建成功 + HTTP 200 + 导航可达 + 链接无 404
+
+## 0.2.1 — 2026-08-16（窗口 G-2：评测缺口修复）
+
+- **declared 四级可信源落地**（采集层）：call_arg > data_metadata > declared（评测者/数据事实声明）> unverified；
+  Agent 上报键永远不进 declared（宪法 §4.1）；12 项测试（test_declared_eval.py）
+- **规则平台键审查与放宽**（规则层）：22 条 scRNA 规则 required_context 平台依赖逐条审查
+  （过强放宽 17 条 / D1.1 双联体保留 10X 专属）；GSE115978 平台事实查证定案 = **Smart-seq2**
+  （GEO Overall design 原文）→ declared 注入 smartseq2；required_context 列表 any-of 语义（engine 0.2.1）；
+  ruleset **1.1.1 → 1.2.0**
+- **重评（零成本，复用已有 WAL/notebook）**：真实运行有效分数 **30.0 needs_correction（L0=0/L1=7/L3=1/L-1=12）**，
+  与 demo 轨迹 **29 分 5 L0** 口径严格区分（禁止混写，教训 #2）；golden **0 差异基线未更新**（纯加性放宽，C4 未触发）
+- **回归**：pytest **234/234**（+12）；CI 双矩阵全绿
+- 报告：`docs/migration/agent-eval-report-g2.md`（主报告留档：`docs/migration/agent-eval-report.md`）；
+  审查报告：`docs/migration/G2b-platform-key-review.md`；宪法：`docs/protocols/agent-eval-protocol.md`（§4.1 修订）
+
 ## 0.1.6 — 2026-08-16（窗口 F：批 2 任务集 30 → 60 + 校准更新）
 
 - **任务集 v1.1.0（60 条）**：批 2 生成 30 条（scrna 10 / pan 10 / deg 10，
@@ -27,7 +58,7 @@
 - **回归**：golden **20 轨迹 137 决策 0 差异**；benchmark-validate 四闸 +
   reward-validate 五闸 PASS（CI 双矩阵零改动）；pytest **220/220**（206 + 新增 14）
 - 报告：`docs/migration/F1-phase3-benchmark-batch2-report.md`；
-  协议：`docs/benchmark-protocol.md`（批 2 扩展）
+  协议：`docs/protocols/benchmark-protocol.md`（批 2 扩展）
 
 ## 0.2.0 — 2026-08-16（v0.2.0 Release：五阶段重构完成，demo → 可迭代产品）
 
@@ -85,7 +116,7 @@
 - **CI**：双矩阵新增 benchmark-validate 步骤（D6.16）
 - golden 回归：**20 轨迹 137 决策 0 差异**；测试全量绿（详见完成报告）
 - 报告：`docs/migration/D3-phase3-benchmark-report.md`；
-  协议：`docs/benchmark-protocol.md`
+  协议：`docs/protocols/benchmark-protocol.md`
 
 ## 0.1.3 — 2026-08-14（B5 规则治理 + B6 回归 CI，阶段 1 窗口 ⑦）
 

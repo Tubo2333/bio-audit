@@ -2,7 +2,7 @@
 
 > **日期**：2026-08-16
 > **执行依据**：docs/specs/2026-08-13-execution-plan-v1.md §六.九（F1-F4 验收清单，12 项冻结）
-> + docs/benchmark-protocol.md（宪法）+ `src/bioaudit/benchmark/pre_registration.json`
+> + docs/protocols/benchmark-protocol.md（宪法）+ `src/bioaudit/benchmark/pre_registration.json`
 > （record **benchmark-pr-2026-08-16-02**，批 1 记录 `benchmark-pr-2026-08-16-01` 留档）
 > **验收结果**：**F1-F4 全部 12 项 ✅**（逐项见 §三）；golden **20 轨迹 137 决策 0 差异**；
 > pytest **220/220**（206 + 新增 14）
@@ -43,7 +43,7 @@ rubric v1.1）→ F3（覆盖 + 难度复核）→ F4（reward-protocol 更新 +
 | 标注 | `src/bioaudit/data/annotation/merged_annotations_batch2.json` + `irr_report_batch2.json` | 批 2 合并结果 + IRR 实测（批 1 旧值留档） |
 | rubric | `benchmark/annotation_rubric.md` | **annotation.v1.1**（D 遗留 6 条澄清点，§四） |
 | 预注册 | `benchmark/pre_registration.json` + `pre_registration_v1_archived.json` | **新记录 v2**（gap 区间重评估）+ 批 1 留档 |
-| 协议 | `docs/benchmark-protocol.md` | 批 2 扩展（60 条 / v1.1.0 / rubric v1.1 / 记录 v2） |
+| 协议 | `docs/protocols/benchmark-protocol.md` | 批 2 扩展（60 条 / v1.1.0 / rubric v1.1 / 记录 v2） |
 | reward 协议 | `docs/reward-protocol.md` | §7.1 批 1 留档 + §7.2 60 任务新实测表 |
 | 测试 | `tests/test_benchmark_batch2.py`（13 项）+ `test_benchmark.py`/`test_reward.py` 更新 | 批 2 守卫（E6/预注册/校准门槛/gold 版本/覆盖/难度/split） |
 

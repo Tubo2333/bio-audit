@@ -1,5 +1,14 @@
 title: "Bio-Audit"
-description: "AI Agent Scientific Decision Auditor for Bioinformatics"
+description: "生信 AI Agent 方法学决策的确定性审计层（Scientific Decision CI）— 运行时验证 lint · 评测数据 benchmark · 训练信号 reward"
 theme: jekyll-theme-cayman
 show_downloads: false
 google_analytics:
+lang: zh-CN
+github_repo: "https://github.com/Tubo2333/bio-audit"
+# 站点只发布文档与首页；代码目录不进 Pages（冻结资产不进站点，H 窗口决策，见 docs/site-design.md §4）
+exclude:
+  - src
+  - tests
+  - scripts
+  - mcp
+  - ui

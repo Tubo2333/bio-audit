@@ -3,9 +3,9 @@
 > **日期**：2026-08-16（窗口 G-2）
 > **性质**：对窗口 G 真实评测的修复与重评（零成本——只跑本地审计引擎 + 已有运行产物，
 > **不重跑 Agent、不手工编轨迹**）
-> **宪法**：`docs/agent-eval-protocol.md`（v1.0 + §4.1 declared 修订，本报告为 G-2 补充）
+> **宪法**：`docs/protocols/agent-eval-protocol.md`（v1.0 + §4.1 declared 修订，本报告为 G-2 补充）
 > **对应验收**：execution-plan-v1 §六.十二 G2-a/b/c/d（13 项，本窗口已冻结）
-> **主报告（旧版留档）**：`docs/agent-eval-report.md`（窗口 G，2026-08-16，不修改结论）
+> **主报告（旧版留档）**：`docs/migration/agent-eval-report.md`（窗口 G，2026-08-16，不修改结论）
 > **CI 状态**：GitHub Actions 双矩阵（3.10/3.12）**全绿**（push 0150a53，run 31891058554）
 
 ---
@@ -143,7 +143,7 @@ ontology-design §二.1）；declared 齐全也无法评分。**非 context 缺�
 
 | 产物 | 路径 |
 |---|---|
-| G-2 补充报告（本文件） | `bio-audit-v2/docs/agent-eval-report-g2.md` |
+| G-2 补充报告（本文件） | `bio-audit-v2/docs/migration/agent-eval-report-g2.md` |
 | 平台键审查报告 | `bio-audit-v2/docs/migration/G2b-platform-key-review.md` |
 | declared 测试 | `bio-audit-v2/tests/test_declared_eval.py`（12 项） |
 | 规则修订（17 文件） | `bio-audit-v2/src/bioaudit/rules/data/scRNA/*.yaml`（ruleset 1.2.0） |

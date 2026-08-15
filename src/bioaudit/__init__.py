@@ -5,7 +5,8 @@
 引擎基线：fullflow-demo（D5 修复后 + DEG 双副本统一 + mappings 补齐）。
 """
 
-__version__ = "0.2.1"  # 0.2.1（2026-08-16 G-2）：required_context 列表 any-of 语义；0.2.0 = v0.2.0 Release
+# 0.2.1（2026-08-16 G-2）：required_context 列表 any-of 语义；0.2.0 = v0.2.0 Release
+__version__ = "0.2.1"
 
 # 快照三元组（v1.1 C1）：规则集版本见 bioaudit/rules/ruleset.json；
 # ontology 版本 B2 落地（bioaudit/ontology/paradigms.yaml 的 ontology_version 与之保持一致）。

@@ -2,11 +2,11 @@
 
 > **日期**：2026-08-16
 > **性质**：真实 LLM Agent 评测（DeepSeek anthropic 端点，真实 API 花费）
-> **宪法**：`docs/agent-eval-protocol.md`（v1.0，含冒烟修订记录）
-> **对应验收**：execution-plan-v1 §六.十 G1-G4；benchmark-protocol.md
+> **宪法**：`docs/protocols/agent-eval-protocol.md`（v1.0，含冒烟修订记录）
+> **对应验收**：execution-plan-v1 §六.十 G1-G4；docs/protocols/benchmark-protocol.md
 >
 > **▶ 窗口 G-2 补充**（2026-08-16，评测缺口修复 + 重评，本报告旧版留档）：
-> `docs/agent-eval-report-g2.md`——declared 注入 + 规则平台键放宽（ruleset 1.2.0）
+> `docs/migration/agent-eval-report-g2.md`——declared 注入 + 规则平台键放宽（ruleset 1.2.0）
 > 后重评得有效分数 **30.0（needs_correction，L0=0/L1=7/L3=1/L-1=12）**；
 > 本报告 §4 的"分数 0.0（全 L-1 占位）"为修复前口径，结论部分（评分基础设施缺口
 > 而非 Agent 质量结论）由 G-2 重评闭环。
@@ -108,8 +108,8 @@ Agent 完成 5 步分析并产出可复现结论（notebook `GSE115978_melanoma_
 
 | 产物 | 路径 |
 |---|---|
-| 宪法 | `bio-audit-v2/docs/agent-eval-protocol.md` |
-| 本报告 | `bio-audit-v2/docs/agent-eval-report.md` |
+| 宪法 | `bio-audit-v2/docs/protocols/agent-eval-protocol.md` |
+| 本报告 | `bio-audit-v2/docs/migration/agent-eval-report.md` |
 | 正式运行 notebook（19 cells） | `cellvoyager-outputs/runs/GSE115978_winG_20260816_final/GSE115978_melanoma_analysis_1.ipynb` |
 | 运行备份 | `cellvoyager-outputs/backups/GSE115978_winG_20260816_final_backup/` |
 | M1 声明（WAL） | `cellvoyager-outputs/data/wal/cv_gse115978_winG_20260816.jsonl` |

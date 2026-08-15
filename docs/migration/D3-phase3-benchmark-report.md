@@ -38,7 +38,7 @@
 | CLI | `benchmark-run` / `benchmark-validate` | 运行器 + 任务集四闸（清单/污染/覆盖/golden） |
 | 测试 | `tests/test_benchmark.py`（20 项）/ `test_benchmark_irr.py`（6 项） | 新增 benchmark 测试（26 项） |
 | 脚本 | `scripts/generate_benchmark_tasks.py` / `assemble_gold.py` | 生成 / gold 组装（可复现管线） |
-| 文档 | `docs/benchmark-protocol.md` | 完整协议（生成/标注/难度/split/gap/功效/黑盒/覆盖/评审） |
+| 文档 | `docs/protocols/benchmark-protocol.md` | 完整协议（生成/标注/难度/split/gap/功效/黑盒/覆盖/评审） |
 | CI | `.github/workflows/ci.yml` | 双矩阵新增 benchmark-validate 步骤 |
 
 ## 三、验收对照（§六.七 D1-D6，16 项逐项）
