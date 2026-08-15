@@ -69,7 +69,16 @@
 | 相对链接预检 | 27 个 md 文件全部 OK |
 | Liquid 风险字符扫描 | docs/ 全量 0 命中（唯一命中为我方 github-pages.md 排障表示例，已改写规避） |
 
-### 云上（push 后回填：CI run id + Pages build id + HTTP 实测表）
+### 云上（2026-08-16，push 572cfb6）
+| 检查 | 结果 |
+|---|---|
+| CI run 31893468210（双矩阵） | **pytest+golden (Python 3.10): success** · **(Python 3.12): success**（含 golden 步骤） |
+| pages-build-deployment run 31893467583 | **success**（headSha 572cfb6；deployment id 5921994696 / environment github-pages） |
+| 首页 + 导航实测 | 首页 200；导航 9 项渲染确认（首页 / README / 快速开始 / API 契约 / 规则贡献 / 设计文档 / 窗口报告 / Release / English） |
+| 文档索引页 | /docs/ · /docs/specs/ · /docs/migration/ · quickstart zh/en · site-design · api/mcp-contract · reward-mapping/protocol · protocols ×2 · environment/github-pages · CHANGELOG · README.en.html **全部 HTTP 200** |
+| 全站链接爬取 | **23 个唯一 URL，0 死链**（排除 HTML 注释后；favicon.ico 为 cayman head-custom 注释占位符，非真实链接） |
+| README.en.md 转换 | 实测 `/README.en.html` → **200 text/html**（GitHub Pages 仅跳过精确文件名 README.md，README.en 正常转换） |
+| 旧 URL | /docs/agent-eval-report*.html 等旧路径 404（预期；引用已全库更新，含仓库外审计内存） |
 
 ## 三、改动清单
 
@@ -95,6 +104,6 @@
 
 ## 五、遗留与声明
 
-- 审计中枢独立验收待执行（H3.6/H3.7 以云上实测为准，见 §二回填）
-- 可选后续（不阻塞）：v0.2.1 GitHub Release 未创建（CHANGELOG 已记录；发不发由审计中枢裁决）；
-  `README.en.md` 是否被 Pages 转为 `.html` 待云上确认（导航 EN 项指向 GitHub blob，不受影响）
+- 审计中枢独立验收待执行（H3.6/H3.7 云上实测证据见 §二，全部通过）
+- 可选后续（不阻塞）：v0.2.1 GitHub Release 未创建（CHANGELOG 已记录；发不发由审计中枢裁决）
+- favicon.ico：cayman head-custom 模板内为**注释占位符**（非真实链接），站点无 favicon 文件，浏览器按惯例忽略——未新增资产（遵守改动范围纪律）

@@ -21,7 +21,7 @@
 |---|---|
 | Markdown 转换 | GitHub Pages 默认启用 `jekyll-optional-front-matter` + `jekyll-default-layout`：**无 front matter 的 `.md` 也会转成 `.html`** 并套用主题 layout；转换后同时提供 `/x.html`（主题页）与 `/x.md`（原文）双路径 |
 | 主题 | `jekyll-theme-cayman`（_config.yml）；主题**无导航栏** → 导航由自定义 layout 实现（见 §3） |
-| 特例 | **`README.md` 与 `CONTRIBUTING.md` 不转 `.html`**（GitHub Pages 行为，实测 /README.html、/CONTRIBUTING.html 404；社区讨论 #30162 同题）→ 导航中这两项指向 GitHub 仓库渲染视图，不指向裸 `.md` |
+| 特例 | **`README.md` 与 `CONTRIBUTING.md` 不转 `.html`**（GitHub Pages 行为，实测 /README.html、/CONTRIBUTING.html 404；社区讨论 #30162 同题）→ 导航中这两项指向 GitHub 仓库渲染视图，不指向裸 `.md`；**`README.en.md` 正常转换**（实测 /README.en.html 200） |
 | 目录 URL | 子目录需要 `index.md` 才提供 `/dir/` 可访问首页（/docs/、/docs/specs/、/docs/migration/ 均配 index） |
 | 站点链接 | 站点上 `.md` 相对链接是否被 jekyll-relative-links 改写**不做假设**——仓库内文档一律写**显式相对 `.html` 链接**（双端安全，见 §6） |
 
