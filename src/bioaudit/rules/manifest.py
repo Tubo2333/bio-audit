@@ -57,8 +57,24 @@ def ruleset_version(path: Optional[Path | str] = None) -> str:
     return load_ruleset(path)["ruleset_version"]
 
 
+def _normalized_bytes(path: Path) -> bytes:
+    """行尾规范化读取（2026-08-15 修复：CI hash_mismatch 根因）。
+
+    Windows 工作区（core.autocrlf=true）文件为 CRLF，git blob 与 Linux CI
+    检出的为 LF——直接对磁盘字节做 SHA256 会让清单哈希跨平台不可复现
+    （B5 ruleset.json 在 Windows 生成、CI 校验即 FAIL）。
+    生成与校验共用本函数，统一按 LF 规范化后计算哈希与大小。
+    """
+    return path.read_bytes().replace(b"\r\n", b"\n")
+
+
 def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashlib.sha256(_normalized_bytes(path)).hexdigest()
+
+
+def _size(path: Path) -> int:
+    """规范化后字节数（与 _sha256 同一基准）。"""
+    return len(_normalized_bytes(path))
 
 
 def _rule_ids_from_files(files: list[Path]) -> dict[str, list[str]]:
@@ -125,7 +141,7 @@ def verify_manifest(
                 "kind": "hash_mismatch", "path": rel,
                 "manifest_sha256": entry.get("sha256"), "disk_sha256": actual_sha,
             })
-        if entry.get("size") != f.stat().st_size:
+        if entry.get("size") != _size(f):
             errors.append({
                 "kind": "size_mismatch", "path": rel,
                 "manifest_size": entry.get("size"), "disk_size": f.stat().st_size,
@@ -201,7 +217,7 @@ def generate_manifest(
         files.append({
             "path": rel,
             "sha256": _sha256(f),
-            "size": f.stat().st_size,
+            "size": _size(f),
         })
 
     id_files = _rule_ids_from_files(list(rd.rglob("*.yaml")))

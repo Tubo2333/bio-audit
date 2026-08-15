@@ -1,46 +1,46 @@
 {
- "ruleset_version": "1.1.0",
+ "ruleset_version": "1.1.1",
  "engine_version": "0.1.3",
  "ontology_version": "0.1.0",
  "generated_at": "2026-08-15",
  "n_rule_files": 43,
  "n_unique_rule_ids": 38,
- "note": "B5 规则治理 2026-08-14：G1.3 裁决修订（裸 MAST L2→L1 对齐 G1.1，A13/D2 冲突归零）；清单格式改为 posix 相对路径",
+ "note": "1.1.1: 行尾规范化哈希（LF），修复跨平台 manifest 校验（CI hash_mismatch 2026-08-15）",
  "files": [
   {
    "path": "DEG/D1.2-DEG-001_filtering.yaml",
-   "sha256": "29e021fb71cb7a63ce1512de325f674d38d2d110de3ecec8297b35d993cd5f3c",
-   "size": 2514
+   "sha256": "62c77ab07a338397a553ac3b2a608f1484df937df43545c1aa7913ef3a262036",
+   "size": 2447
   },
   {
    "path": "DEG/D1.3-DEG-001_normalization.yaml",
-   "sha256": "919cdc6d7cbd8acea2016289868bb48aac21c56396b7e928778c60c8705829f3",
-   "size": 2341
+   "sha256": "991afa601dbc1e3edef28caa7e0e4c6988f0ce628ab45550d209e664e7e67ad7",
+   "size": 2275
   },
   {
    "path": "DEG/M1.1-DEG-001_method_selection.yaml",
-   "sha256": "0946b74e1939c21b51170d24f7e297578c89730119ffa90b1942f2983ecbbd1e",
-   "size": 3710
+   "sha256": "cad2f3dbcbc2d90a82f450c13e1a7686c02590a0e0a286dc8e0881e87f37ee39",
+   "size": 3621
   },
   {
    "path": "DEG/M1.2-DEG-001_multiple_testing.yaml",
-   "sha256": "ccba6e836596988f03f03c48d67eb15e304caf149e16319846ec016dc46bcdf6",
-   "size": 2055
+   "sha256": "60275f2263942e9913592e8e440aaa1a1aa8c701a0da56186a360cefe17d83b1",
+   "size": 1999
   },
   {
    "path": "DEG/M1.3-DEG-001_threshold.yaml",
-   "sha256": "ce4650452702279e474ff1de4ccc5a0cbbb7233d9ea58bd6cd41d42673e4525d",
-   "size": 1910
+   "sha256": "c431e9fb3c910c98ba5a04a5243aa9956427d03142f93211866a23d98e14ec02",
+   "size": 1859
   },
   {
    "path": "pancancer/D1.2-DEG-001_filtering.yaml",
-   "sha256": "29e021fb71cb7a63ce1512de325f674d38d2d110de3ecec8297b35d993cd5f3c",
-   "size": 2514
+   "sha256": "62c77ab07a338397a553ac3b2a608f1484df937df43545c1aa7913ef3a262036",
+   "size": 2447
   },
   {
    "path": "pancancer/D1.3-DEG-001_normalization.yaml",
-   "sha256": "919cdc6d7cbd8acea2016289868bb48aac21c56396b7e928778c60c8705829f3",
-   "size": 2341
+   "sha256": "991afa601dbc1e3edef28caa7e0e4c6988f0ce628ab45550d209e664e7e67ad7",
+   "size": 2275
   },
   {
    "path": "pancancer/D6.1-DRUG-001_ic50_sample_size.yaml",
@@ -74,18 +74,18 @@
   },
   {
    "path": "pancancer/M1.1-DEG-001_method_selection.yaml",
-   "sha256": "0946b74e1939c21b51170d24f7e297578c89730119ffa90b1942f2983ecbbd1e",
-   "size": 3710
+   "sha256": "cad2f3dbcbc2d90a82f450c13e1a7686c02590a0e0a286dc8e0881e87f37ee39",
+   "size": 3621
   },
   {
    "path": "pancancer/M1.2-DEG-001_multiple_testing.yaml",
-   "sha256": "ccba6e836596988f03f03c48d67eb15e304caf149e16319846ec016dc46bcdf6",
-   "size": 2055
+   "sha256": "60275f2263942e9913592e8e440aaa1a1aa8c701a0da56186a360cefe17d83b1",
+   "size": 1999
   },
   {
    "path": "pancancer/M1.3-DEG-001_threshold.yaml",
-   "sha256": "ce4650452702279e474ff1de4ccc5a0cbbb7233d9ea58bd6cd41d42673e4525d",
-   "size": 1910
+   "sha256": "c431e9fb3c910c98ba5a04a5243aa9956427d03142f93211866a23d98e14ec02",
+   "size": 1859
   },
   {
    "path": "pancancer/N7.1-INTE-001_expr_survival_consistency.yaml",

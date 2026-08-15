@@ -30,7 +30,8 @@ from bioaudit.rules.validator import validate_ruleset
 def test_ruleset_version_reads_from_manifest():
     """RULESET_VERSION 不再硬编码：与 ruleset.json 的 ruleset_version 一致。"""
     manifest = load_ruleset()
-    assert RULESET_VERSION == manifest["ruleset_version"] == "1.1.0"
+    assert RULESET_VERSION == manifest["ruleset_version"]
+    assert RULESET_VERSION.count(".") == 2  # semver 形状
     # 清单三元组元数据完整
     assert manifest["engine_version"] == bioaudit.ENGINE_VERSION == bioaudit.__version__
     assert manifest["ontology_version"] == bioaudit.ONTOLOGY_VERSION == "0.1.0"
@@ -88,10 +89,11 @@ def test_report_snapshot_triple_complete():
     assert result["error"] is None
 
     report = result["report"]
-    # 三元组不再为 None（B5 验收项 1/2）
-    assert report["ruleset_version"] == "1.1.0"
+    # 三元组不再为 None（B5 验收项 1/2）；版本从清单/本体读取，不硬编码
+    from bioaudit.rules.manifest import load_ruleset
+    assert report["ruleset_version"] == load_ruleset()["ruleset_version"]
     assert report["ontology_version"] == "0.1.0"
-    assert report["engine_version"] == bioaudit.__version__ == "0.1.3"
+    assert report["engine_version"] == bioaudit.__version__
     # 完整快照字典（C1/P2）
     snap = report["snapshot"]
     assert snap["ruleset_version"] == report["ruleset_version"]
@@ -145,3 +147,29 @@ def test_generate_manifest_roundtrip(tmp_path):
     # 生成后清单可被 verify_manifest 接受（用同一规则目录）
     check = verify_manifest(rules_dir=RULES_DIR, manifest_path=tmp_path / "ruleset.json")
     assert check["ok"] is True
+
+def test_manifest_line_ending_insensitive(tmp_path):
+    """2026-08-15 回归：manifest 哈希/大小对行尾不敏感（CI hash_mismatch 修复）。
+
+    Windows 工作区 CRLF vs Linux CI LF 不应导致 verify FAIL。
+    """
+    from bioaudit.rules import manifest as m
+
+    # 临时规则目录：一份 LF、一份 CRLF 的同一文件
+    rd = tmp_path / "rules"
+    (rd / "sub").mkdir(parents=True)
+    content = b"rule_id: T-001\nstatus: active\ncondition:\n  decision_type: test\nscoring: {}\n"
+    (rd / "sub" / "a.yaml").write_bytes(content)          # LF
+    (rd / "sub" / "b.yaml").write_bytes(content.replace(b"\n", b"\r\n"))  # CRLF
+
+    man = m.generate_manifest(rules_dir=rd, manifest_path=tmp_path / "ruleset.json",
+                              ruleset_version="1.1.1")
+    # 同一内容不同行尾 → 规范化后哈希一致
+    assert man["files"][0]["sha256"] == man["files"][1]["sha256"]
+    assert man["files"][0]["size"] == man["files"][1]["size"]
+
+    # 校验通过（CRLF 文件在 manifest 下也不报 mismatch）
+    rep = m.verify_manifest(rules_dir=rd, manifest_path=tmp_path / "ruleset.json")
+    kinds = [e["kind"] for e in rep["errors"]]
+    assert "hash_mismatch" not in kinds
+    assert "size_mismatch" not in kinds
