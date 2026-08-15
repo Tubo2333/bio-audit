@@ -7,7 +7,7 @@ description: "单细胞级别DEG (Wilcoxon/MAST) 将每个细胞视为独立重�
 condition:
   decision_type: deg_method
   required_context:
-    sequencing: 10X_scRNA_seq
+    sequencing: [10X_scRNA_seq, smartseq2]
   forbidden_context: {}
   context_constraints:
     - "n_patients >= 3"

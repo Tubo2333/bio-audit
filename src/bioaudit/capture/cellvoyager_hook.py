@@ -33,11 +33,11 @@ from bioaudit.capture.session import SessionWhitelist
 logger = logging.getLogger(__name__)
 
 #: 各执行器方法 → 从调用参数提取"即将执行的代码"
-_CODE_EXTRACTORS: dict[str, Callable[[Any, tuple], str]] = {}
+_CODE_EXTRACTORS: dict[str, Callable[[Any, tuple, dict], str]] = {}
 
 
-def _extract_run_last_cell(owner: Any, args: tuple) -> str:
-    nb = args[0]
+def _extract_run_last_cell(owner: Any, args: tuple, kwargs: dict) -> str:
+    nb = args[0] if args else kwargs.get("nb")
     cells = nb.cells if hasattr(nb, "cells") else []
     for cell in reversed(cells):
         ctype = getattr(cell, "cell_type", None) or (
@@ -49,8 +49,15 @@ def _extract_run_last_cell(owner: Any, args: tuple) -> str:
     return ""
 
 
-def _extract_execute_cell(owner: Any, args: tuple) -> str:
-    index = args[0]
+def _extract_execute_cell(owner: Any, args: tuple, kwargs: dict) -> str:
+    # 真实调用两种形态都覆盖：位置参数（session.execute_cell(3)）与
+    # 关键字参数（FastMCP 工具内 session.execute_cell(index=3)，窗口 G 实测）
+    if args:
+        index = args[0]
+    elif "index" in kwargs:
+        index = kwargs["index"]
+    else:
+        return ""
     read = getattr(owner, "read_cell", None)
     if callable(read):
         cell = read(index)
@@ -58,8 +65,10 @@ def _extract_execute_cell(owner: Any, args: tuple) -> str:
     return ""
 
 
-def _extract_insert_execute(owner: Any, args: tuple) -> str:
-    return str(args[-1]) if args else ""
+def _extract_insert_execute(owner: Any, args: tuple, kwargs: dict) -> str:
+    if args:
+        return str(args[-1])
+    return str(kwargs.get("source", ""))
 
 
 _CODE_EXTRACTORS["run_last_cell"] = _extract_run_last_cell
@@ -125,7 +134,7 @@ class CellVoyagerM1Hook:
 
     def _wrap(self, owner: Any, original: Callable, method_name: str):
         def hooked(*args, **kwargs):
-            self._before(owner, method_name, args)
+            self._before(owner, method_name, args, kwargs)
             try:
                 result = original(*args, **kwargs)
                 self._after(owner, method_name, args, ok=True)
@@ -137,13 +146,14 @@ class CellVoyagerM1Hook:
 
     # ── 工具调用前后 ──
 
-    def _before(self, owner: Any, method_name: str, args: tuple) -> None:
+    def _before(self, owner: Any, method_name: str, args: tuple,
+                kwargs: dict | None = None) -> None:
         """工具调用前：签名预解析 → 逐决策上报（payload 含全要素）。"""
         try:
             extractor = _CODE_EXTRACTORS.get(method_name)
             if extractor is None:
                 return
-            code = extractor(owner, args)
+            code = extractor(owner, args, kwargs or {})
             if not code or not code.strip():
                 return
             result = self.parser.parse_code(code, cell_index=self.n_reports)
@@ -201,7 +211,12 @@ def make_cellvoyager_hook(
     declared: Optional[dict] = None,
     whitelist: Optional[SessionWhitelist] = None,
 ) -> CellVoyagerM1Hook:
-    """一站式构造：session 生成 + 白名单注册 + reporter + hook。"""
+    """一站式构造：session 生成 + 白名单注册 + reporter + hook。
+
+    declared : 评测者/数据事实声明（三级可信源：运行宪法/评测配置注入，
+        如数据集平台 sequencing=smartseq2；**与 Agent claim（M1 声明）
+        严格区分**——G-2 纪律：Agent 上报的键永远不进 declared）。
+    """
     session_id = session_id or f"cv_{uuid.uuid4().hex[:10]}"
     wl = whitelist if whitelist is not None else SessionWhitelist()
     wl.register(session_id)

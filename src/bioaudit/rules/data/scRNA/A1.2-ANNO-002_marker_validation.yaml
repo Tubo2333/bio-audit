@@ -7,7 +7,7 @@ description: "任何自动注释方法的结果都应通过经典marker基因的
 condition:
   decision_type: annotation_validation
   required_context:
-    sequencing: 10X_scRNA_seq
+    sequencing: [10X_scRNA_seq, smartseq2]
   forbidden_context: {}
   context_constraints: []
 

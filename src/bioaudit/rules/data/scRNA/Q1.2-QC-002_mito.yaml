@@ -7,7 +7,7 @@ description: "线粒体基因比例过高(>20-25%)指示细胞凋亡或膜破裂
 condition:
   decision_type: qc_mito_threshold
   required_context:
-    sequencing: 10X_scRNA_seq
+    sequencing: [10X_scRNA_seq, smartseq2]
   forbidden_context: {}
   context_constraints: []
 

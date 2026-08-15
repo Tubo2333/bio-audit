@@ -27,8 +27,9 @@
 #   1. choice 只能来自：字面量 / 调用参数确定性映射 / pattern 具名组确定性映射 /
 #      规则词表数值区间；无法判定 → 该候选进 ParseResult.uncertain（不猜）。
 #   2. 数值只能来自：调用参数 / pattern 具名组（代码里真实出现的字面量）/
-#      数据元数据 / 环境声明；三级都无 → 键标 unverified，绝不补默认值。
-#   3. 上下文三级可信源：call_arg > data_metadata > declared。
+#      数据元数据 / declared（评测者/数据事实声明，运行宪法/评测配置注入——
+#      与 Agent 自证严格区分）；四级都无 → 键标 unverified，绝不补默认值。
+#   3. 上下文四级可信源：call_arg > data_metadata > declared。
 #
 # 已知边界（诚实声明）：
 #   - dim_reduction：`sc.pp.pca` 单凭代码不能证明 elbow/JackStraw 选择 →
@@ -171,14 +172,17 @@ types:
           - {min: 0, max: 4, choice: arbitrary_less_than_5}
 
   clustering_method:
-    note: "leiden/louvain 调用 → 规则词表 choice"
+    note: "leiden/louvain 调用 → 规则词表 choice；graph_type=SNN 为工具定义语义
+           （scanpy 图聚类运行在 neighbors SNN 图上，context_fixed，G-2 采集修复）"
     signatures:
       - tool: scanpy.tl.leiden
         pattern: 'sc\.tl\.leiden\s*\('
         choice: Leiden
+        context_fixed: {graph_type: SNN}
       - tool: scanpy.tl.louvain
         pattern: 'sc\.tl\.louvain\s*\('
         choice: Louvain
+        context_fixed: {graph_type: SNN}
 
   clustering_resolution:
     note: "分辨率数值入 context（不当方法名）；0.8 → default_0_8，其余需验证证据 → uncertain"

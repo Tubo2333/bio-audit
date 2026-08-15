@@ -101,16 +101,25 @@ class RuleRegistry:
         """逐条评估规则条件, 返回每个检查项的明细 (透明化核心)."""
         checks = []
 
-        # 1. 必需上下文 (required_context)
+        # 1. 必需上下文 (required_context; G-2: 值为列表 = 任一命中, any-of)
         for key, val in condition.required_context.items():
             actual = context.get(key)
-            checks.append({
-                "type": "required",
-                "expr": f"{key} == {val!r}",
-                "expected": str(val),
-                "actual": repr(actual) if key in context else "(缺失)",
-                "pass": key in context and actual == val,
-            })
+            if isinstance(val, list):
+                checks.append({
+                    "type": "required",
+                    "expr": f"{key} ∈ {val!r}",
+                    "expected": f"∈ {val}",
+                    "actual": repr(actual) if key in context else "(缺失)",
+                    "pass": key in context and actual in val,
+                })
+            else:
+                checks.append({
+                    "type": "required",
+                    "expr": f"{key} == {val!r}",
+                    "expected": str(val),
+                    "actual": repr(actual) if key in context else "(缺失)",
+                    "pass": key in context and actual == val,
+                })
 
         # 2. 禁止上下文 (forbidden_context)
         for key, vals in condition.forbidden_context.items():
@@ -150,10 +159,19 @@ class RuleRegistry:
         return checks
 
     def _condition_matches(self, condition, context: dict) -> bool:
-        """Check if condition matches context. All checks must pass."""
+        """Check if condition matches context. All checks must pass.
+
+        G-2: required_context 值为列表 = any-of（任一命中即通过），
+        用于平台键放宽（如 sequencing ∈ [10X_scRNA_seq, smartseq2]）。
+        """
         # 1. Required context key-value pairs
         for key, val in condition.required_context.items():
-            if key not in context or context[key] != val:
+            if key not in context:
+                return False
+            if isinstance(val, list):
+                if context[key] not in val:
+                    return False
+            elif context[key] != val:
                 return False
 
         # 2. Forbidden context values (A6 FIX: guard against non-list)

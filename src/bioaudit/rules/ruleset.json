@@ -1,11 +1,11 @@
 {
- "ruleset_version": "1.1.1",
- "engine_version": "0.2.0",
+ "ruleset_version": "1.2.0",
+ "engine_version": "0.2.1",
  "ontology_version": "0.1.0",
  "generated_at": "2026-08-15",
  "n_rule_files": 43,
  "n_unique_rule_ids": 38,
- "note": "v0.2.0 Release：engine 版本 0.1.3 → 0.2.0（五阶段重构完成）；规则内容未变",
+ "note": "G-2 窗口：scRNA 规则平台键放宽（sequencing 接受 smartseq2，17 条；N1.1 data_category 接受 raw_counts）——required_context 列表 any-of 语义（engine 0.2.1）；D1.1 双联体保留 10X 专属",
  "files": [
   {
    "path": "DEG/D1.2-DEG-001_filtering.yaml",
@@ -114,8 +114,8 @@
   },
   {
    "path": "scRNA/A1.1-ANNO-001_method.yaml",
-   "sha256": "6d0497d06831b0e0ce71bed3893fb2cc3994acd3ab314a7710baa6bfd5653219",
-   "size": 2692
+   "sha256": "6950b16ad7969858d29cf21e0dfe391b7ec46f923e3ddfbbaa70b86c3aeeb301",
+   "size": 2705
   },
   {
    "path": "scRNA/A1.1-API-001_data_integrity.yaml",
@@ -124,28 +124,28 @@
   },
   {
    "path": "scRNA/A1.2-ANNO-002_marker_validation.yaml",
-   "sha256": "0ae54254831086f7459dc02e48eab2d11e2555c288756f4febcef4a0b5b05efb",
-   "size": 2175
+   "sha256": "75d76feea1a195d53be5a39edaea446853f24bc82a5acd3149290e3d35d9df9a",
+   "size": 2188
   },
   {
    "path": "scRNA/B1.1-BATC-001_integration.yaml",
-   "sha256": "75795b39434f729b44c03d6a8f2087621ae31691bdbc889ddd0d7c9f493c800d",
-   "size": 2402
+   "sha256": "404863f2c4016e0c5d694479084618e63376c07f045af175c8196bb1e5716a17",
+   "size": 2415
   },
   {
    "path": "scRNA/B1.2-BATC-002_requirement.yaml",
-   "sha256": "e0254620524dfda97e06d53b2682b4689fd5fcee19d58ddc9a496ef3db99ad2b",
-   "size": 2259
+   "sha256": "a8186adb276b8bb7ad0e2670f746067bda03a48f8af3532dd4c0e095f68ee149",
+   "size": 2272
   },
   {
    "path": "scRNA/C1.1-CLUS-001_method.yaml",
-   "sha256": "0f136b9f6eb904ee339e81232d561b615b8890f58528e4fee1c34914450ce69a",
-   "size": 2277
+   "sha256": "f78e2cd792b9635085d5a2f48ecb7a606bc20600830baef55e5a7acb4a505352",
+   "size": 2290
   },
   {
    "path": "scRNA/C1.2-CLUS-002_resolution.yaml",
-   "sha256": "75e11b1a08eb836eeb8e838d090cf5c9e7d006897387f2dedd811873cc358e70",
-   "size": 2389
+   "sha256": "7947e0799860e193cca0b620a9005b4a2dd235c881841d7a4ed0f9e6c8444f22",
+   "size": 2402
   },
   {
    "path": "scRNA/D1.1-DOUB-001_detection.yaml",
@@ -154,48 +154,48 @@
   },
   {
    "path": "scRNA/D2.1-DIMR-001_reduction.yaml",
-   "sha256": "94f0ee3ffd6386249b87de9bbea95d420e28cf3534ad63f480bafed178399fec",
-   "size": 2336
+   "sha256": "be2510fcb15abba9f8eb1958efa3466386a9d0a92adfc13100530a8821a35043",
+   "size": 2349
   },
   {
    "path": "scRNA/D2.2-DIMR-002_pca_dimension.yaml",
-   "sha256": "ff33f7fa7437978ee979ce517388e65d8908f1235976a34dd9aa121a7a870002",
-   "size": 2125
+   "sha256": "7c1806a378bcdbad66489bdc9be0d8019c39fe6b6479333b21b2872ffde971df",
+   "size": 2138
   },
   {
    "path": "scRNA/G1.1-DEG-001_pseudobulk.yaml",
-   "sha256": "9818b7fc6caf287b37372e540822a7317dd15e821beed41b4d494cef36b64fd0",
-   "size": 2599
+   "sha256": "a8a25e4c5fd8d63ebfa77400b2d99c71637bb21ef3c9abf6654a938501ec98e2",
+   "size": 2612
   },
   {
    "path": "scRNA/G1.2-DEG-002_multiple_testing.yaml",
-   "sha256": "4165875b87e3d8075d5b545189e43e328f9af9cbed21a5734cad277940cc5cb2",
-   "size": 2189
+   "sha256": "fa2dde5c4e5abaabf213ec4650833d7f7010da394714b5568f11326c4115f289",
+   "size": 2202
   },
   {
    "path": "scRNA/G1.3-DEG-003_method.yaml",
-   "sha256": "d711130e7d5150b5302a354e41f4d67406767338195345428a0dabd4717c4611",
-   "size": 2793
+   "sha256": "83cdad85ecec5317580fd499e0959646922dccb06ba892e49865ca673ab70262",
+   "size": 2806
   },
   {
    "path": "scRNA/H1.1-HVG-001_selection.yaml",
-   "sha256": "65e077f6d65ee4ed2c00fe0f1a9aca8e826ea1b8ec3e8073ebafa91125b6fca8",
-   "size": 2206
+   "sha256": "fd7e287d2c03cae83ff60db14ac2e9a0910e076648d1f2fa667af525454701c4",
+   "size": 2219
   },
   {
    "path": "scRNA/N1.1-NORM-001_normalization.yaml",
-   "sha256": "1093847e1cec21d31150fc98cf40580162aabc952c38d027deb9a85d721cbb58",
-   "size": 2551
+   "sha256": "b6a1bec60bf22fbd4664aac96a45f6af456e83ae05341ec4525418f6368a7a25",
+   "size": 2578
   },
   {
    "path": "scRNA/Q1.1-QC-001_filtering.yaml",
-   "sha256": "27507a36e2ec392f25a35f48066354077326328587da4b3ecf504a31765b91e8",
-   "size": 2397
+   "sha256": "2a426fdbf95c0bac114232d3cf4f872f3c0597cb6bcb53c644f43a249e6bb3af",
+   "size": 2410
   },
   {
    "path": "scRNA/Q1.2-QC-002_mito.yaml",
-   "sha256": "000ad4a7111ce24c3904d3c9f957d2fc3b4deeb641f875626bab205a43f48aeb",
-   "size": 2287
+   "sha256": "5e19f27e7fda7cd33159d6b2dab740e1a721981ba31b1de8ff25aa1dd9b8c56a",
+   "size": 2300
   },
   {
    "path": "scRNA/S1.1-CONS-001_cluster_annotation.yaml",
@@ -214,13 +214,13 @@
   },
   {
    "path": "scRNA/T1.1-TRAJ-001_inference.yaml",
-   "sha256": "4eb56e3ff828c1a5def230e7fd014e9f00fb9e428fbe91bad6b3f0bea71a5717",
-   "size": 2502
+   "sha256": "8f9145da609f532ae196cb659652f47f4bf64992ff3f0371cda0bb28c3e772cd",
+   "size": 2515
   },
   {
    "path": "scRNA/T1.2-TRAJ-002_annotation_precondition.yaml",
-   "sha256": "5d9cbab4f9f71ce957ea2742d0b42ff2132ac590b12bfbc3041e8623a222e20f",
-   "size": 2329
+   "sha256": "21eee409cc6261aa5a4192db86656ac213ab1ce869b951b4bb8d5dfaa560a865",
+   "size": 2342
   }
  ]
 }

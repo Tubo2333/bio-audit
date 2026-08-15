@@ -280,3 +280,76 @@ def test_make_cellvoyager_hook_ready_to_attach(tmp_path, monkeypatch):
     assert wrapped
     ok, _, _ = executor.run_last_cell(executor.notebook)
     assert ok is True
+
+
+# ── 5. 关键字参数调用（窗口 G 真实运行发现；FastMCP 工具以
+#    session.execute_cell(index=...) 调用——C 窗口测试仅覆盖位置参数）──
+
+
+class FakeSessionCell:
+    def __init__(self, source):
+        self._src = source
+
+    def get(self, key, default=None):
+        return self._src if key == "source" else default
+
+
+class FakeNotebookSession:
+    """模拟 NotebookSession 的关键字/位置调用形态（read_cell + execute_cell）。"""
+
+    def __init__(self):
+        self.cells_map = {
+            1: FakeSessionCell("sc.read_h5ad('x.h5ad')"),
+            2: FakeSessionCell("sc.pp.filter_cells(adata, min_genes=200)"),
+        }
+        self.executed = []
+
+    def read_cell(self, index):
+        return {"source": self.cells_map[index].get("source")}
+
+    def execute_cell(self, index):
+        self.executed.append(f"execute_cell:{index}")
+        return {"ok": True}
+
+    def insert_execute_code_cell(self, index=None, source=""):
+        self.executed.append(f"insert_execute:{index}:{source[:20]}")
+        return {"ok": True}
+
+
+def test_hook_kwargs_calls_are_extracted_and_reported(tmp_path):
+    """窗口 G：真实 FastMCP 以 execute_cell(index=...) 关键字调用 → 仍上报。"""
+    reporter = _reporter(tmp_path, session="sess-kw")
+    hook = CellVoyagerM1Hook(reporter)
+    session = FakeNotebookSession()
+    wrapped = hook.attach(session)
+    assert "execute_cell" in wrapped
+    assert "insert_execute_code_cell" in wrapped
+
+    # 关键字调用（FastMCP 工具形态）
+    session.execute_cell(index=2)
+    assert hook.n_reports >= 1
+    records = reporter.verdict_store.get("sess-kw")
+    qc = next((r for r in records if r.decision_type == "qc_filtering"), None)
+    assert qc is not None, "关键字调用也应提取代码并上报"
+    assert qc.choice == "hard_threshold"
+
+    # 位置调用（既有形态不回退）
+    n_before = hook.n_reports
+    session.execute_cell(2)
+    assert hook.n_reports > n_before
+
+
+def test_hook_insert_execute_kwargs_extracted(tmp_path):
+    """insert_execute_code_cell(index=None, source=...) 关键字形态。"""
+    reporter = _reporter(tmp_path, session="sess-kw2")
+    hook = CellVoyagerM1Hook(reporter)
+    session = FakeNotebookSession()
+    hook.attach(session)
+    session.insert_execute_code_cell(
+        index=None, source="sc.pp.normalize_total(adata, target_sum=1e4)"
+    )
+    assert hook.n_reports >= 1
+    records = reporter.verdict_store.get("sess-kw2")
+    norm = next((r for r in records if r.decision_type == "scRNA_normalization"), None)
+    assert norm is not None
+    assert norm.choice == "LogNormalize"

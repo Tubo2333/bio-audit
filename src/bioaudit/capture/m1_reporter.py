@@ -170,6 +170,12 @@ class M1Reporter:
 
         # 5) verdict provisional 落盘（B4：provisional → final/revoked 生命周期）
         try:
+            # 窗口 G 实测修复：DecisionScore 不携带输入 context，快照并入
+            # context 供 final_trajectory 重建（否则重建轨迹 context 全空、
+            # 规则无法匹配 → 分数失真）
+            snapshot = dict(score)
+            snapshot.setdefault("context", {})
+            snapshot["context"].update(payload.get("context") or {})
             record = self.verdict_store.create(
                 session_id=self.session_id,
                 step_id=step_id,
@@ -177,7 +183,7 @@ class M1Reporter:
                 choice=choice,
                 paradigm=self.paradigm,
                 provenance_source=PROVENANCE_SOURCE_M1,
-                score_snapshot=score,
+                score_snapshot=snapshot,
                 status=VerdictStatus.PROVISIONAL,
                 idempotency_key=key,
                 reason="M1 主动上报（即时 verdict，provisional）",

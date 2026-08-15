@@ -7,7 +7,7 @@ description: "Leiden/Louvain 分辨率参数 (resolution) 控制聚类粒度。�
 condition:
   decision_type: clustering_resolution
   required_context:
-    sequencing: 10X_scRNA_seq
+    sequencing: [10X_scRNA_seq, smartseq2]
   forbidden_context: {}
   context_constraints: []
 

@@ -7,7 +7,7 @@ description: "自动注释方法 (SingleR/CellTypist/Azimuth) 基于参考数据
 condition:
   decision_type: annotation_method
   required_context:
-    sequencing: 10X_scRNA_seq
+    sequencing: [10X_scRNA_seq, smartseq2]
   forbidden_context: {}
   context_constraints: []
 

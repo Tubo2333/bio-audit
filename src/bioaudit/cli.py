@@ -244,14 +244,17 @@ def cmd_cross_validate(args: argparse.Namespace) -> int:
             m1 = data if isinstance(data, list) else data.get("decisions", [])
 
         metadata = None
+        declared = None
         if args.metadata:
             metadata = json.loads(Path(args.metadata).read_text(encoding="utf-8"))
+        if args.declared:
+            declared = json.loads(Path(args.declared).read_text(encoding="utf-8"))
 
         if args.m3_json:
             data = json.loads(Path(args.m3_json).read_text(encoding="utf-8"))
             m3 = data if isinstance(data, list) else data.get("candidates", [])
         else:
-            parser = M3Parser(act=args.act, metadata=metadata)
+            parser = M3Parser(act=args.act, metadata=metadata, declared=declared)
             m3 = parser.parse_notebook(Path(args.m3))
 
         expected = None
@@ -554,6 +557,8 @@ def main(argv: list[str] | None = None) -> int:
     p_cv.add_argument("--m3-json", default=None, help="M3 候选 JSON（parse-notebook 输出）")
     p_cv.add_argument("--act", choices=["deg", "pan", "scrna"], default=None)
     p_cv.add_argument("--metadata", default=None, help="数据元数据 JSON（M3 解析用）")
+    p_cv.add_argument("--declared", default=None,
+                      help="评测者/数据事实声明 JSON（三级可信源；与 Agent 自证严格区分）")
     p_cv.add_argument("--expected", default=None, help="预期决策类型 JSON 数组")
     p_cv.add_argument("--session", default=None, help="会话 id（默认 crossval）")
     p_cv.add_argument("--no-verdicts", action="store_true", help="不联动 verdict store")

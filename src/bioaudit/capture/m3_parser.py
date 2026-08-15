@@ -2,7 +2,8 @@
 
 设计依据：trajectory-capture-design-v1 §四/§五
 - 决策点发现（主路径）：签名表命中 → 候选决策点 → 本体 context_schema 校验；
-- 上下文三级可信源：**调用参数 > 数据元数据 > 环境声明**；任一级缺失 →
+- 上下文四级可信源：**调用参数 > 数据元数据 > declared（评测者/数据事实声明，
+  运行宪法/评测配置注入，与 Agent 自证严格区分）**；任一级缺失 →
   键标 ``unverified``，**绝不正则猜数字**（旧 trajectory_capture 伪造
   n_patients=11 / n_cells=50000 即反面教材）；
 - choice 无法确定性判定 → 候选进 :class:`UncertainCandidate`（不猜测；
@@ -141,7 +142,9 @@ class M3Parser:
         数据元数据（二级可信源：adata.uns/obs 摘要，如 n_cells/n_patients/
         sequencing/n_genes…）。
     declared : dict | None
-        执行环境声明（三级可信源：Agent/人工提供的键值）。
+        评测者/数据事实声明（三级可信源：运行宪法/评测配置注入的键值，
+        如数据集平台 sequencing=smartseq2；**与 Agent claim（M1 声明）严格区分**，
+        G-2 纪律：Agent 上报的键永远不进 declared）。
     """
 
     def __init__(

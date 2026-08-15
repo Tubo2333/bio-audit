@@ -7,7 +7,7 @@ description: "单细胞RNA-seq质量控制应使用自适应阈值（MAD/中位�
 condition:
   decision_type: qc_filtering
   required_context:
-    sequencing: 10X_scRNA_seq
+    sequencing: [10X_scRNA_seq, smartseq2]
   forbidden_context: {}
   context_constraints: []
 

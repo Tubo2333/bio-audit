@@ -7,7 +7,7 @@ description: "轨迹推断必须在正确的细胞类型注释基础上进行。
 condition:
   decision_type: trajectory_validation
   required_context:
-    sequencing: 10X_scRNA_seq
+    sequencing: [10X_scRNA_seq, smartseq2]
   forbidden_context: {}
   context_constraints: []
 

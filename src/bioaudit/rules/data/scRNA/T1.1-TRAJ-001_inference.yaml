@@ -7,7 +7,7 @@ description: "轨迹推断(pseudotime analysis)揭示细胞分化/状态转变�
 condition:
   decision_type: trajectory_inference
   required_context:
-    sequencing: 10X_scRNA_seq
+    sequencing: [10X_scRNA_seq, smartseq2]
   forbidden_context: {}
   context_constraints: []
 

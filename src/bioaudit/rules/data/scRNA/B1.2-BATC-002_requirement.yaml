@@ -7,7 +7,7 @@ description: "当存在多个患者/样本来源时, 即使不同患者的细胞
 condition:
   decision_type: batch_correction
   required_context:
-    sequencing: 10X_scRNA_seq
+    sequencing: [10X_scRNA_seq, smartseq2]
   forbidden_context: {}
   context_constraints:
     - "n_patients >= 3"

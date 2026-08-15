@@ -7,7 +7,7 @@ description: "多样本/多患者单细胞数据整合必须进行批次校正�
 condition:
   decision_type: batch_correction
   required_context:
-    sequencing: 10X_scRNA_seq
+    sequencing: [10X_scRNA_seq, smartseq2]
     has_batch: true
   forbidden_context: {}
   context_constraints:

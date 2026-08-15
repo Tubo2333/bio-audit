@@ -7,9 +7,15 @@
   （宁可标 unverified 也不伪造——F6 禁猜规则）
 - :class:`ParseResult`：一次解析的全部输出（可审计决策 + 未定候选 + 元信息）
 
-上下文三级可信源（设计 §四，严格排序，禁止跳级猜测）：
-    call_arg（调用参数） > data_metadata（数据元数据） > declared（环境声明）
-    任一级缺失 → 该键标 ``unverified``，绝不从正则猜数字。
+上下文四级可信源（设计 §四 + 窗口 G-2 定稿，严格排序，禁止跳级猜测）：
+    call_arg（调用参数） > data_metadata（数据元数据） > declared（评测者/数据事实声明）
+    > unverified（任一级都提取不到 → 显式标记，绝不从正则猜数字）。
+
+**G-2 定稿：declared 的边界（关键纪律，execution-plan §六.十二 G2-a.1）**
+- declared 只允许来自**评测者 / 数据事实**——运行宪法或评测配置注入的键值
+  （如数据集平台 GSE115978 = smartseq2）；
+- **与 Agent claim（M1 声明）严格区分**：Agent 上报的键**永远不进 declared**
+  （那是 M1/M3 交叉验证的职责）；declared 提供键 → 该键不再 unverified。
 """
 
 from __future__ import annotations
@@ -23,10 +29,12 @@ PROVENANCE_SOURCE_M1 = "M1声明"     # Agent 主动上报（self-declared）
 PROVENANCE_SOURCE_M3 = "M3解析"     # 产物解析（artifact trace）
 PROVENANCE_SOURCE_UNKNOWN = "unknown"
 
-# ── 上下文可信源（设计 §四，三级 + unverified）──
+# ── 上下文可信源（设计 §四 + G-2 定稿：四级，declared 仅评测者/数据事实）──
 TRUST_CALL_ARG = "call_arg"            # 调用参数（最可信）
 TRUST_DATA_METADATA = "data_metadata"  # 数据元数据（次可信）
-TRUST_DECLARED = "declared"            # 执行环境声明（M1/人工提供）
+TRUST_DECLARED = "declared"            # 评测者/数据事实声明（运行宪法/评测配置注入；
+                                       # 与 Agent claim（M1 声明）严格区分——
+                                       # Agent 上报的键永远不进 declared）
 TRUST_UNVERIFIED = "unverified"        # 任一级都提取不到 → 显式标记，不猜测
 
 #: 全部合法可信源

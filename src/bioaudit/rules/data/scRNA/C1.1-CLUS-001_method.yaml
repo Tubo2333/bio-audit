@@ -7,7 +7,7 @@ description: "Leiden算法是Louvain的改进版, 保证社区连通性 (Traag e
 condition:
   decision_type: clustering_method
   required_context:
-    sequencing: 10X_scRNA_seq
+    sequencing: [10X_scRNA_seq, smartseq2]
     graph_type: SNN
   forbidden_context: {}
   context_constraints: []

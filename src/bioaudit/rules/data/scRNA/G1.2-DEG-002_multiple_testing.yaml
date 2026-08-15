@@ -7,7 +7,7 @@ description: "单细胞DEG涉及大量并行检验(每种细胞类型 × 每个�
 condition:
   decision_type: multiple_testing_correction
   required_context:
-    sequencing: 10X_scRNA_seq
+    sequencing: [10X_scRNA_seq, smartseq2]
   forbidden_context: {}
   context_constraints: []
 

@@ -7,7 +7,7 @@ description: "除了pseudobulk vs cell-level的选择外, DEG方法本身的统�
 condition:
   decision_type: deg_method
   required_context:
-    sequencing: 10X_scRNA_seq
+    sequencing: [10X_scRNA_seq, smartseq2]
   forbidden_context: {}
   context_constraints: []
 

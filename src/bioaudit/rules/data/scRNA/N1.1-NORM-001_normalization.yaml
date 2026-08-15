@@ -7,8 +7,8 @@ description: "单细胞归一化必须在方差稳定化和生物学变异保留
 condition:
   decision_type: scRNA_normalization
   required_context:
-    sequencing: 10X_scRNA_seq
-    data_category: umi_counts
+    sequencing: [10X_scRNA_seq, smartseq2]
+    data_category: [umi_counts, raw_counts]
   forbidden_context: {}
   context_constraints: []
 

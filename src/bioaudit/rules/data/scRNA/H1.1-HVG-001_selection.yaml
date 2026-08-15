@@ -7,7 +7,7 @@ description: "高变基因(HVG)选择是降维和聚类的前置步骤。VST (va
 condition:
   decision_type: hv_gene_selection
   required_context:
-    sequencing: 10X_scRNA_seq
+    sequencing: [10X_scRNA_seq, smartseq2]
   forbidden_context: {}
   context_constraints:
     - "n_genes >= 1000"

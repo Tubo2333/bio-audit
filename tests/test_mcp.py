@@ -12,8 +12,16 @@ import subprocess
 import sys
 from pathlib import Path
 
+# mcp 版本兼容（窗口 G 实测：mcp>=1.x 将常量移至 mcp.types 并更名；
+# 旧版从 mcp.server 导出）——优先新路径，回退旧路径
+try:
+    from mcp.types import INVALID_PARAMS as JSONRPC_INVALID_PARAMS  # mcp >= 1.x
+except ImportError:  # pragma: no cover - 旧版 mcp
+    from mcp.server import (  # type: ignore[no-redef]
+        JSONRPC_INVALID_PARAMS,
+    )
+
 from mcp.server import (
-    JSONRPC_INVALID_PARAMS,
     JSONRPC_METHOD_NOT_FOUND,
     MCP_PROTOCOL_VERSION,
     McpServer,

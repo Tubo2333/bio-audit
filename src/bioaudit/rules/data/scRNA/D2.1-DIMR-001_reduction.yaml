@@ -7,7 +7,7 @@ description: "PCA 是单细胞分析的标准线性降维方法, 为聚类提供
 condition:
   decision_type: dim_reduction
   required_context:
-    sequencing: 10X_scRNA_seq
+    sequencing: [10X_scRNA_seq, smartseq2]
     method: PCA
   forbidden_context: {}
   context_constraints: []
