@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bio-audit"
-version = "0.1.0"
+version = "0.2.0"
 description = "Bio-Audit: 生信 AI Agent 方法学决策的确定性审计层（Scientific Decision CI）— 规则驱动的科学决策 lint / benchmark / reward 引擎"
 readme = "README.md"
 requires-python = ">=3.10"   # H8: 最低 Python（引擎使用 PEP 604 联合类型）；CI 双版本矩阵在 B6 落地

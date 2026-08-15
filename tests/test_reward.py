@@ -514,7 +514,8 @@ def test_report_contains_experimental_reward_block():
     assert block["trajectory_reward"] == 0.85
     # C3 语义不变：既有报告字段与引擎版本不受影响
     assert state["report"]["trajectory_score"] == 85.0
-    assert state["report"]["engine_version"] == "0.1.3"
+    import bioaudit
+    assert state["report"]["engine_version"] == bioaudit.__version__
 
 
 def test_report_reward_block_failure_is_non_fatal():

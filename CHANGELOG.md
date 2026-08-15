@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.0 — 2026-08-16（v0.2.0 Release：五阶段重构完成，demo → 可迭代产品）
+
+**里程碑版本**：从"四套分裂演示 demo"升级为"单仓库可迭代产品"，三价值层（lint / benchmark / reward）全部落地。
+
+- **阶段 0 止血**：D5 条件提升 bug 修复（12 决策降级，CellVoyager 41→29）；DEG 双副本去重（43 文件 → 38 唯一规则）；分数口径统一（标签=报告=实测）；R0 重算（Spearman 0.9747 修复后仍成立）；密钥清除
+- **阶段 1 地基**：单仓库 `bio-audit`（pyproject/Apache-2.0/路径锚定）；决策类型本体化（34 类型 + context schema + aliases）；API 契约（pydantic 校验 + 错误码 + paradigm 消歧）；轨迹 v2 迁移（provenance）；规则治理三闸 + 三元组快照；CI 双矩阵（pytest + golden + 三闸）
+- **阶段 2 采集**：M1 主动上报（CellVoyager hook，异常隔离）+ M3 解析器（signatures 驱动，禁猜规则）+ 交叉验证（四类判定）+ verdict 状态位（provisional/final/revoked）+ MCP server + 事件告警
+- **阶段 3 benchmark**：30 条任务集（首批，3 范式 × 难度梯度，348 决策）+ 双标注 IRR（κ=0.81 校准批达标）+ 预注册（gap 区间/划分/门槛）+ 防泄漏三线 + 功效分析（bootstrap CI + Holm）
+- **阶段 4 reward**：映射"宪法"（非线性 0/0.30/0.60/0.85/1.00，-1 mask，γ=0.30 硬惩罚）+ 三配方消融 + spike-in 强锚点（三范式 drop ≥0.61）+ 排序一致性验收（分层检验 p=0.001）
+- 数字：**pytest 206/206** · CI 双矩阵全绿 · golden 20 轨迹 137 决策 0 差异 · GitHub Pages 上线
+- 文档栈：审计报告 / 设计定稿（本体·采集）/ 执行方案 / 各窗口报告 / 里程碑总结（docs/specs/2026-08-16-v2-milestone-summary.md）
+
 ## 0.1.5 — 2026-08-16（窗口 E：阶段 4 reward 训练信号）
 
 - **reward 包**（`src/bioaudit/reward/`，外围输出层，评分路径零改动）：
