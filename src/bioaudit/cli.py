@@ -15,6 +15,9 @@
   verdict <session_id>                         C3：会话 verdict 清单（final-only 视图）
   benchmark-run [--split] [--act] [--seed]     D4：任务集批量评测 + 功效报告（bootstrap CI）
   benchmark-validate                           D5/E8：任务集三闸（清单+污染+覆盖）+ golden
+  reward <trajectory> [--act] [--recipe]       E1：reward API（step_rewards + 轨迹 reward + meta）
+  reward-calibrate [--seed] [--n-boot]         E3：30 任务校准（消融 + 排序一致性 + 分层检验）
+  reward-validate                              E4：reward 五闸（映射/确定性/锚点/消融/golden）
 """
 
 import argparse
@@ -418,6 +421,60 @@ def cmd_benchmark_validate(args: argparse.Namespace) -> int:
     return 0 if not errors else 1
 
 
+# ── 窗口 E：reward 命令（E1 API / E3 校准 / E4 门禁）──
+
+
+def cmd_reward(args: argparse.Namespace) -> int:
+    """E1：reward API 的 CLI 入口（外围输出层，零评分路径改动）。"""
+    from bioaudit.errors import BioAuditError
+    from bioaudit.reward.api import reward
+
+    try:
+        trajectory = _load_trajectory(Path(args.trajectory))
+        prm_weights = None
+        if args.prm_weights:
+            prm_weights = json.loads(Path(args.prm_weights).read_text(encoding="utf-8"))
+        result = reward(
+            trajectory, act=args.act, recipe=args.recipe,
+            session_id=args.session, prm_weights=prm_weights,
+        )
+    except BioAuditError as exc:
+        _print_bioaudit_error(exc)
+        return 1
+    except (OSError, ValueError, json.JSONDecodeError, RuntimeError) as exc:
+        print(json.dumps({"error": {"code": "bad-request", "message": str(exc)}},
+                         ensure_ascii=False, indent=1))
+        return 1
+    print(json.dumps(result, ensure_ascii=False, indent=1))
+    return 0
+
+
+def cmd_reward_calibrate(args: argparse.Namespace) -> int:
+    """E3：30 条任务校准（三组消融 + 排序一致性 + 分层均值检验 + 多种子）。"""
+    from bioaudit.reward.calibration import run_calibration
+
+    try:
+        report = run_calibration(
+            tasks_dir=args.tasks_dir, seed=args.seed, n_boot=args.n_boot,
+        )
+    except Exception as exc:
+        print(json.dumps({"error": {"code": "internal-error", "message": str(exc)}},
+                         ensure_ascii=False, indent=1))
+        return 1
+    print(json.dumps(report, ensure_ascii=False, indent=1))
+    return 0
+
+
+def cmd_reward_validate(args: argparse.Namespace) -> int:
+    """E4.13：reward 自检五闸（映射/确定性/spike-in 锚点/消融/golden）+ 校准证据。"""
+    from bioaudit.reward.validate import main as reward_validate_main
+
+    return reward_validate_main([
+        *(["--baseline", args.baseline] if args.baseline else []),
+        *(["--json"] if args.json else []),
+    ])
+
+
 def main(argv: list[str] | None = None) -> int:
     # JSON 输出含中文 → 强制 UTF-8（Windows 控制台 GBK 会破坏管道捕获）
     try:
@@ -433,10 +490,11 @@ def main(argv: list[str] | None = None) -> int:
     p_run.set_defaults(func=cmd_run)
 
     p_golden = sub.add_parser("golden", help="golden 回归（0 差异验收）")
-    p_golden.add_argument(
-        "--baseline",
-        default=str(Path(__file__).resolve().parent.parent.parent / "tests" / "golden" / "golden_expected_output_after.json"),
+    _golden_default = (
+        Path(__file__).resolve().parent.parent.parent / "tests" / "golden"
+        / "golden_expected_output_after.json"
     )
+    p_golden.add_argument("--baseline", default=str(_golden_default))
     p_golden.add_argument(
         "--json", action="store_true",
         help="输出原始 JSON 报告（默认输出即 JSON，此开关与其它子命令对齐，供 CI 使用）",
@@ -538,6 +596,37 @@ def main(argv: list[str] | None = None) -> int:
     p_bv.add_argument("--json", action="store_true",
                       help="输出原始 JSON 报告（默认输出即 JSON，供 CI 使用）")
     p_bv.set_defaults(func=cmd_benchmark_validate)
+
+    # ── 窗口 E：reward 命令 ──
+    p_rw = sub.add_parser(
+        "reward", help="E1：reward API（step_rewards + trajectory_reward + meta）",
+    )
+    p_rw.add_argument("trajectory", help="轨迹 JSON 文件路径（v1 数组或 v2 对象/任务）")
+    p_rw.add_argument("--act", choices=["deg", "pan", "scrna"], default=None,
+                      help="范式（默认从轨迹 act 键推断；B2 同名异构消歧）")
+    p_rw.add_argument("--recipe", choices=["A", "B", "C"], default="B",
+                      help="配方：A=纯规则分 / B=+L0 硬惩罚（默认）/ C=PRM 预留")
+    p_rw.add_argument("--session", default=None,
+                      help="采集会话 id（只消费 final verdict；revoked → mask）")
+    p_rw.add_argument("--prm-weights", default=None,
+                      help="配方 C 权重 JSON（{step_id: weight}，PRM 预留接口）")
+    p_rw.set_defaults(func=cmd_reward)
+
+    p_rc = sub.add_parser(
+        "reward-calibrate", help="E3：30 任务校准（消融 + 排序一致性 + 分层检验 + 多种子）",
+    )
+    p_rc.add_argument("--tasks-dir", default=None, help="任务目录（默认包内 data/tasks）")
+    p_rc.add_argument("--seed", type=int, default=42, help="bootstrap 种子（默认 42）")
+    p_rc.add_argument("--n-boot", type=int, default=2000, help="bootstrap 重采样数")
+    p_rc.set_defaults(func=cmd_reward_calibrate)
+
+    p_rv = sub.add_parser(
+        "reward-validate", help="E4：reward 自检（映射/确定性/spike-in 锚点/消融/golden）",
+    )
+    p_rv.add_argument("--baseline", default=None, help="golden 基线（默认包内副本）")
+    p_rv.add_argument("--json", action="store_true",
+                      help="输出原始 JSON 报告（默认输出即 JSON，供 CI 使用）")
+    p_rv.set_defaults(func=cmd_reward_validate)
 
     args = parser.parse_args(argv)
     return args.func(args)

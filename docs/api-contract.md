@@ -181,7 +181,77 @@ match_details(
 - 校验器：`bioaudit.models.trajectory.validate_trajectory`；CLI：`bio-audit trajectory-validate`；
 - 缺必填字段 → `validation-error`（A15）。
 
-## 八、行为变更清单（相对 B3 前）
+## 九、入口 4：reward（窗口 E / E1.1，阶段 4）
+
+```python
+reward(
+    trajectory: list[dict] | dict,   # v1 决策数组 / v2 轨迹 / benchmark 任务
+    act: str | None = None,          # "deg" | "pan" | "scrna"；None → 从轨迹 act 键推断
+    recipe: str = "B",               # "A" 纯规则分 | "B" +L0 硬惩罚（默认）| "C" PRM 预留
+    session_id: str | None = None,   # 采集会话：只消费 final verdict（B4）
+    verdicts: list[dict] | None = None,  # VerdictRecord.as_dict() 列表（离线/测试）
+    prm_weights: dict[str, float] | None = None,  # 配方 C 权重（PRM 预留接口）
+    snapshot: SnapshotTriple | None = None,       # 三元组快照（默认 current_snapshot()）
+) -> dict
+```
+
+### 响应 schema
+
+```jsonc
+{
+  "step_rewards": [
+    {"step_id": "S1", "decision_type": "api_data_integrity", "order": 0,
+     "source": "declared",           // declared | backfilled（M3 补漏，阶段末尾聚合）
+     "level": 3, "reward": 0.85,
+     "masked": false, "mask_reason": null}   // mask_reason: level_minus_one | revoked | provisional_not_final | no_verdict_record
+  ],
+  "trajectory_reward": 0.85,          // 全 mask → null（不可评估，不给 0 虚假信号）
+  "meta": {
+    "reward_schema": "reward.v1",
+    "status": "experimental_uncalibrated",   // E4.10：C3 语义不变，禁止当校准信号
+    "recipe": "B",
+    "verdict_mode": "all_final" | "final_only",
+    "aggregation": "mean" | "weighted_mean",
+    "saturation": "ceiling_0.85_no_micro_adjustment",
+    "n_decisions": 12, "n_unmasked": 12, "n_masked": 0,
+    "mask_reasons": {}, "n_l0": 0, "n_l1": 0,
+    "has_l0_penalty_applied": false,
+    "ceiling_reward": 0.85, "evidence_adjustment_enabled": false,
+    "snapshot": {"ruleset_version": "1.1.0", "ontology_version": "0.1.0", "engine_version": "0.1.3"}
+  }
+}
+```
+
+### 契约要点（E1-E4 纪律）
+
+1. **外围输出层**：只消费 run_audit 的 step_scores，不触碰评分路径
+   （golden 0 差异硬验收，E4.11）；report 新增 `reward` 块（experimental 标注），
+   既有字段不变；
+2. **-1 必须 mask**（F1）：不参与分子与分母；全 mask → `trajectory_reward: null`；
+3. **只消费 final**（B4）：传 session_id/verdicts 时 revoked/provisional/无记录
+   → mask；不传 = all_final 模式（legacy/benchmark）；
+4. **F4**：交叉验证四类判定（虚报/漏报/未验证）不进 reward（只进报告）；
+5. **快照三元组**（C1/P2）：meta.snapshot 绑定 ruleset/ontology/engine 版本；
+6. 非法输入复用 B3 错误码（bad-request / validation-error / paradigm-not-found），
+   reward 管道失败 → 内部异常包装后抛出（不裸抛）。
+
+### 映射与配方（定稿，数值论证见 docs/reward-mapping.md）
+
+| level | 0 | 1 | 2 | 3 | 4 | -1 |
+|-------|---|---|---|---|---|-----|
+| reward | 0.00 | 0.30 | 0.60 | 0.85 | 1.00 | **mask** |
+
+配方 B（默认）：`mean(未 mask 步骤) × 0.30`（当且仅当存在未 mask L0，二元惩罚）。
+
+### 相关 CLI
+
+```
+bio-audit reward <trajectory> [--act] [--recipe A|B|C] [--session <id>] [--prm-weights <json>]
+bio-audit reward-calibrate [--seed] [--n-boot]      # E3：30 任务校准报告
+bio-audit reward-validate                            # E4：五闸（映射/确定性/spike-in/消融/golden）
+```
+
+## 十、行为变更清单（相对 B3 前）
 
 | 旧行为 | 新行为 |
 |--------|--------|

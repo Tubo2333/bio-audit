@@ -75,6 +75,29 @@ def _record_input_rejected(event_store: EventStore, code: str, message: str) -> 
         logger.warning("EventStore 记录 input_rejected 失败（非致命）")
 
 
+def _reward_block(state: dict, act: str | None, snapshot: dict) -> dict:
+    """E4.10：从已算出的 step_scores 生成报告 reward 块（纯函数，不重跑管道）。
+
+    失败时返回降级块（含 error 说明），绝不使审计主流程失败——reward 是
+    外围输出层，报告主结构（分数/verdict）永远先行。
+    """
+    try:
+        from bioaudit.reward.api import report_reward_block
+
+        return report_reward_block(
+            step_scores=state.get("step_scores", []),
+            act=act, recipe="B", snapshot=snapshot,
+        )
+    except Exception as exc:  # reward 层失败不拖垮报告（外围层纪律）
+        logger.warning("reward 块生成失败（非致命）: %s", exc)
+        return {
+            "status": "experimental_uncalibrated",
+            "error": f"reward 块生成失败（非致命）: {exc}",
+            "trajectory_reward": None,
+            "step_rewards": [],
+        }
+
+
 def run_audit(
     trajectory: list[dict] | dict,
     act: str | None = None,
@@ -328,6 +351,9 @@ def run_audit(
             ],
             # C5（F11）：事件写入失败显式告警进报告（不再静默丢写）
             "event_store_warnings": state.get("event_store_warnings", []),
+            # E4.10（阶段 4）：reward 字段进报告——**experimental/未校准标注**
+            # （C3 语义不变；外围输出层，不改变任何评分路径/既有字段）
+            "reward": _reward_block(state, act, snapshot.as_dict()),
         }
         state["report"] = report
         _append_event(event_store, state, AuditEvent(

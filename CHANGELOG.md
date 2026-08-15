@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.1.5 — 2026-08-16（窗口 E：阶段 4 reward 训练信号）
+
+- **reward 包**（`src/bioaudit/reward/`，外围输出层，评分路径零改动）：
+  mapping（E1.2 映射定稿：level→reward 非线性 0/0.30/0.60/0.85/1.00，-1 mask，
+  85.0 天花板明确不做微调）/ recipes（A 纯规则分 / B +L0 硬惩罚 γ=0.30 二元 /
+  C PRM 预留接口，占位权重均匀）/ api（`reward(trajectory) -> {step_rewards,
+  trajectory_reward, meta}`，meta 带三元组快照 C1/P2）/ calibration（E3：
+  ρ/τ + bootstrap CI + 分层均值检验 + 多种子 + spike-in）/ validate（五闸）
+- **纪律落地**：-1 必须 mask（不参与分子分母，全 mask → None）；只消费 final
+  verdict（B4：revoked/provisional/无记录 → mask）；F4 交叉验证四类判定不进
+  reward（代码 + 测试双守卫）；**golden 20 轨迹 137 决策 0 差异**
+- **校准实测（30 任务冻结）**：配方 B 排序一致性 ρ=0.6091 [0.2894, 0.8335]、
+  τ_b=0.4898 [0.2131, 0.7213]；分层均值检验 good 0.6611 vs bad 0.2862，
+  diff=+0.375 [0.195, 0.536]，p=0.001（显著分离）；硬惩罚使分离放大 3.4×；
+  多种子点估计恒定 + CI 稳定；spike-in 强锚点 scrna_correct + L0 注入
+  drop=0.6146 ≥ 0.30（三范式同验）
+- **report 集成（E4.10）**：run_audit report 新增 `reward` 块（status=
+  experimental_uncalibrated，C3 语义不变）；既有字段零改动
+- **CLI**：`reward`（E1 API）/ `reward-calibrate`（E3 校准报告）/
+  `reward-validate`（E4 五闸：映射/确定性/spike-in/消融/golden）
+- **CI**：双矩阵新增 reward-validate 步骤（E4.13）
+- **文档**：`docs/reward-mapping.md`（映射定稿决策记录——"宪法"）、
+  `docs/reward-protocol.md`（配方/验收统计量/锚点协议）、api-contract.md §九
+- 代码侧 `__version__` 保持 0.1.3（外围层，与快照三元组/任务集快照一致）
+- 测试：pytest **206/206**（174 + 新增 32：tests/test_reward.py）；
+  报告：`docs/migration/E4-phase4-reward-report.md`
+
 ## 0.1.4 — 2026-08-16（窗口 D：阶段 3 benchmark 评测基准）
 
 - **benchmark 包**（`src/bioaudit/benchmark/`，外围层，评分路径零改动）：

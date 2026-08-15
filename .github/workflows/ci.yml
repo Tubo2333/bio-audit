@@ -51,6 +51,9 @@ jobs:
       - name: benchmark 三闸（D5/E8：清单 + 污染 + 覆盖）+ golden（窗口 D）
         run: bio-audit benchmark-validate --json
 
+      - name: reward 自检（窗口 E：映射/确定性/spike-in 锚点/消融/分层检验 + golden）
+        run: bio-audit reward-validate --json
+
       - name: MCP server 自检（C4：独立启动 + 端到端 audit_decision）
         run: python -m mcp.server --selfcheck
 

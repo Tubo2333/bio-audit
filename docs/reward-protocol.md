@@ -1,0 +1,108 @@
+# Bio-Audit Reward 协议（阶段 4 · 窗口 E）
+
+> **版本**：v1（2026-08-16，与映射定稿 docs/reward-mapping.md 绑定）
+> **依据**：refactor-plan-v1.1 F1-F7 + 拍板 #1（F4 不进 reward）+ 拍板 #2（验收方式）
+> + execution-plan §六.八（E1-E4 验收清单，13 项冻结）
+> **机器可读产出**：`bio-audit reward-calibrate`（校准报告）/ `bio-audit reward-validate`（五闸）
+> **数据**：30 条 benchmark 任务（taskset v1.0.0）+ 20 条 legacy 轨迹（干净底物）
+
+---
+
+## 一、目标与范围
+
+reward 是**外围输出层**：把引擎 level 判定变换为训练信号（step_rewards +
+trajectory_reward），**不改变任何评分路径**（golden 20 轨迹 137 决策 0 差异
+为硬验收）。本文档固定配方、验收统计量与锚点协议；映射数值见
+reward-mapping.md（宪法）。
+
+## 二、配方定义（E2.5/E2.6）
+
+| 配方 | 定义 | 与 A 的差 |
+|------|------|-----------|
+| A | 纯规则分：mean(未 mask 步骤 reward) | 基线 |
+| B | A × γ=0.30，当且仅当存在未 mask L0（二元） | 硬惩罚效应 |
+| C | 加权 mean（PRM 预留接口；占位权重=1.0 均匀） | PRM 加权效应 |
+
+- 同一输入三组配方输出可比（同 schema、同任务数、同引擎 step_scores）；
+- 默认配方 = **B**（规则分 + 硬惩罚，E2.5 定稿）；
+- A/B/C 正交隔离：B−A = 硬惩罚效应，C−A = PRM 加权效应；组合配方未冻结。
+
+## 三、mask 语义（F1 + B4 纪律）
+
+| 条件 | mask 原因 | 处理 |
+|------|-----------|------|
+| level = -1（无法评估） | level_minus_one | 不参与分子与分母 |
+| verdict = revoked | revoked | 只消费 final（B4） |
+| verdict = provisional | provisional_not_final | 只消费 final（B4） |
+| 有会话但无 verdict 记录 | no_verdict_record | 只消费 final（B4） |
+| 全步骤 mask | — | trajectory_reward = **None**（不给 0 虚假信号） |
+
+无采集会话（legacy/benchmark）→ 全部视为 final（meta.verdict_mode=all_final）。
+
+## 四、验收统计量（E3.7，拍板 #2 预注册）
+
+**放弃 Spearman 点估计门槛**（F5 改验收）。预注册统计量：
+
+1. **排序一致性**（弱锚点方向）：reward 排序 vs gold 质量排序
+   - gold 质量 q = `correct / (correct + error)`（edge 中立；全 edge → 剔除）；
+   - 统计量：Spearman ρ + Kendall τ_b，**如实报告**（含任务级重采样
+     percentile bootstrap CI，B=2000，seed=42）；不做通过/失败阈值；
+2. **分层均值检验**（验收主判据）：
+   - 预注册分组：good = `n_gold_error == 0`；bad = `n_gold_error ≥ 1`；
+   - 统计量：`mean(good) − mean(bad)`（期望 > 0）+ 两样本置换 bootstrap p
+     （B=2000 双尾）+ 均值差 CI；**显著分离 = diff > 0 且 p < 0.05**；
+3. **多种子稳定性**（F6）：ρ/τ 点估计跨种子恒定（reward 无随机源 →
+   确定性）+ bootstrap CI 边界跨种子偏差 ≤ 0.05（种子集 {42, 1, 7, 123, 2026}）。
+
+## 五、校准锚点（E3.9，F7 拍板）
+
+- **弱锚点**：benchmark gold 标注（§四排序一致性 + 分层检验）——gold 与
+  规则分非单调（F7：audit 评方法、F1 评结果），只作证据不作门槛；
+- **强锚点（spike-in 合成数据）**：
+  - 底物：`scrna_correct`（12 步全 L3，reward 0.85；deg_correct/pan_correct 同族）；
+  - 注入：1 条**引擎实测判 L0** 的决策（自校验：audit_decision level==0，
+    候选含 required_context，见 `reward/validate.py` INJECTION_CANDIDATES）；
+  - 判据：`drop = reward(干净) − reward(注入) ≥ 0.30` 且注入步骤 level==0；
+  - **0.30 阈值的依据**：注入 1 个 L0 后配方 B = (n−1)/n·0.85·γ；n≥2 时
+    drop ≥ 0.85·(1−γ)·(n−1)/n ≥ 0.85×0.7×0.5 = 0.2975 ≈ 0.30（n=2 边界），
+    取 0.30 保守整数阈值——远低于实测 0.61（n=12），抗轨迹长度波动；
+  - 三范式各落地一组（deg/pan/scrna），测试 + reward-validate 双守卫。
+
+## 六、reward-validate 五闸（E4.13，CI 双矩阵）
+
+1. 映射健全（单调非降、-1 mask、天花板 0.85）；
+2. 确定性（同输入两次 reward 逐字节一致）；
+3. spike-in 强锚点（drop ≥ 0.30 + 注入判 L0 自校验）；
+4. 三组消融可运行（同输入、同任务数）；
+5. golden 0 差异（评分路径保护）。
+
+排序一致性/分层检验结果随五闸输出为**证据**（人工验收用），不作门禁阈值。
+
+## 七、实测结果（2026-08-16，30 任务冻结）
+
+| 配方 | Spearman ρ [CI] | Kendall τ_b [CI] | 好组均值 | 坏组均值 | diff [CI] | p |
+|------|-----------------|-------------------|----------|----------|-----------|-----|
+| A | 0.6279 [0.2916, 0.8380] | 0.4949 [0.2099, 0.7182] | 0.7692 | 0.6592 | +0.110 [0.036, 0.183] | 0.007 |
+| **B** | **0.6091 [0.2894, 0.8335]** | **0.4898 [0.2131, 0.7213]** | **0.6611** | **0.2862** | **+0.375 [0.195, 0.536]** | **0.001** |
+| C | 0.6279 [0.2916, 0.8380] | 0.4949 [0.2099, 0.7182] | 0.7692 | 0.6592 | +0.110 [0.036, 0.183] | 0.007 |
+
+- **分层检验（主判据）**：配方 B good vs bad 显著分离（diff=+0.375，p=0.001）；
+  硬惩罚把分离度放大 3.4 倍且不扭曲排序（ρ 0.628→0.609，CI 重叠）——B 是
+  默认配方的实证依据；
+- **多种子**：5 种子 ρ/τ 点估计完全一致（0.6091/0.4898，确定性），CI 边界
+  偏差 ≤ 0.05（稳定）；
+- **spike-in**：scrna_correct + no_doublet_detection → 0.85 → 0.2354，
+  drop = 0.6146 ≥ 0.30 ✓（deg/pan 同验）；
+- **解读（如实）**：ρ≈0.61 属中等强度——预期内：gold 评"结果"（含未检出
+  错误 = FN，D4 recall 0.833 即非 1.0），reward 评"方法"，F7 的非单调映射
+  使得完美排序本不可达；验收判据是**分层分离显著 + 排序一致有正证据**，
+  而非 ρ 门槛（拍板 #2）。
+
+## 八、遗留与变更流程
+
+1. 批 2 任务集（30→60）落地后：校准重跑（本文档 §七 表格更新 + 新预注册
+   记录，旧值留档）；分层检验随任务集变化如实重新评估；
+2. PRM 落地后：配方 C 占位权重替换为真实模型输出，走 reward-mapping.md §10
+   变更流程；
+3. 报告/reward 字段均标注 `experimental_uncalibrated`（C3 语义不变）——
+   任何消费方不得把 reward 当校准信号用于生产决策。
