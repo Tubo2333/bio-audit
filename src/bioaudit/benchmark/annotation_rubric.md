@@ -1,8 +1,14 @@
-# 真值标注 rubric（annotation.v1）
+# 真值标注 rubric（annotation.v1.1）
 
 > **角色分离（E6）**：标注者只读本 rubric 与任务文件。**不要读取任何规则文件、
 > 规则清单、评分文档或引擎源码**——你的标注基于方法学常识与任务上下文，与规则
 > 库内容无关。标注对象：任务轨迹中每条决策的"该 Agent 的这一步选择是否合理"。
+>
+> **版本历史**：
+> - annotation.v1（2026-08-16）：三分类定义 + 判定要点（窗口 D 首批 30 条）。
+> - **annotation.v1.1（2026-08-16，批 2）**：新增 §四 六条澄清条款。澄清条款
+>   由批 1 双标注分歧仲裁（32 条）提炼，**只澄清判定边界，不改变三分类定义**
+>   （correct/error/edge 语义不变，批 1 标注不追溯重判）。
 
 ## 标注对象
 
@@ -38,6 +44,76 @@
 5. **输出格式**：JSONL，每行一条：
    `{"task_id": "...", "step_id": "...", "label": "correct|error|edge", "confidence": 0.0-1.0, "note": "一句话理由（可选）"}`
    每个任务的每条决策必须输出一行（无遗漏）。
+
+## 四、v1.1 澄清条款（批 2，2026-08-16 生效）
+
+以下六条由批 1 分歧仲裁（32 条，`data/annotation/arbitration.jsonl`）提炼，
+**在批 2 及以后标注中强制执行**；批 1 已仲裁定案的标签不追溯重判。
+
+### 4.1 TMM 等归一化方法的"工具链耦合"判定
+
+- 归一化方法**必须与下游差异分析工具链匹配**来判定：
+  * TMM（edgeR 内建）/RLE（DESeq2 内建）配合**原始 counts** 输入其原生工具链
+    （edgeR/limma-voom、DESeq2）= **correct**；
+  * TMM/RLE 与 DESeq2 联用（DESeq2 自行估计 size factors、需要原始 counts，
+    归一化输入冗余/不匹配）= **edge**（可辩护但非最优，概念不严谨，不构成失真）；
+  * TPM 等长度归一化值输入基于 counts 的差异工具 = 方法-工具不匹配，按
+    context 判 error 或 edge（若 Agent 宣称用 counts 类方法分析 TPM → error；
+    仅作描述性对比 → edge）。
+- 批 1 实证：TMM+D2 联用 DESeq2 类分歧 8 条全部仲裁为 edge（arbitration
+  bmd_pan_001/002/003/004/005/006/007/008/009/010 D2）。
+
+### 4.2 "只评本步 vs 管线衔接"
+
+- **每步独立判定**：不得因轨迹其它步骤的错误牵连本步（批 1 实证：bmd_scrna_006
+  A8 分辨率与 S8 出入、S12 与 S9 内部不一致、bmd_scrna_008 S12——全部以本步
+  选择为准判 correct）。
+- 例外：**一致性族类型**（annotation_deg_consistency /
+  trajectory_annotation_consistency / expression_survival_consistency /
+  immune_expression_consistency 等，context 含 `integration_type:
+  cross_module`）的判定对象**本身就是跨模块衔接**，允许也要求检查其它模块的
+  事实是否支撑本步声明。
+- 相邻步骤提供的**输入形态**（如 counts vs 已归一化表达量）可作为本步的
+  context 信息，但不得把"上游步骤的选择对错"代入本步标签。
+
+### 4.3 报告/解释不足类归属（如"方向矛盾未讨论"）
+
+- "发现矛盾但未讨论/未解释"（如表达上调但生存 HR 保护性、免疫浸润与表达方向
+  相反）属于**解释与报告不足**，不是方法本身错误：
+  * 默认 **edge**（保守；批 1 实证：bmd_pan_005 A1、bmd_pan_007 D15、
+    bmd_pan_009 D16 全部仲裁为 edge）；
+  * 仅当该矛盾被 Agent **直接用于支撑明确结论**（如据此宣称"该基因是促癌
+    因子"）或导致结论实质性失真时 → **error**。
+
+### 4.4 note 与 choice 矛盾的仲裁依据
+
+- **标签以 choice 为准**：标注者 note 与自己的 label 矛盾 → 以 label（choice）
+  为准，note 只作参考（批 1 实证：bmd_pan_003 D13——A 的 note 支持校正、与其
+  error 标签矛盾，仲裁判 correct）。
+- **Agent 的 rationale 与 choice 矛盾** → 以**实际采取的动作（choice）**为准；
+  rationale 只是理由说明，不得反向改写 choice 的语义（批 1 实证：bmd_scrna_002
+  S10——B 的 note 描述"细胞级 Wilcoxon"与本步 pseudobulk choice 不符，以 choice
+  为准判 correct）。
+- 仲裁定案时同样以"实际 choice + context"为准绳，标注文本矛盾不作为改判依据。
+
+### 4.5 模板笔误权重（数据集编号/复制粘贴类）
+
+- **数据集编号、GSE 号、样本数等与 context 不一致的笔误**（同一文本在多任务
+  复现的模板痕迹）：不影响方法学选择 → **不判 error**（批 1 实证：bmd_scrna_001/
+  002/004/008 S1 的 GSE 号不一致全部仲裁为 correct）。
+- 仅当笔误暗示**方法学错误**（如笔误导致平台/数据类型判断错误并实际改变了
+  方法选择）时按真实方法学判定，笔误本身不入罪。
+
+### 4.6 双细胞去除与下游设计的依赖
+
+- 是否跳过双细胞去除（no_doublet_detection）**取决于下游分析设计**：
+  * 下游为**患者级聚合分析**（pseudobulk DEG、患者级比较）时，双细胞对聚合
+    结果影响有限 → 跳过可辩护 = **edge**（批 1 实证：bmd_scrna_002 S3 仲裁
+    edge；85K 细胞、下游 pseudobulk）；
+  * 下游为**细胞级分析**（聚类/注释/细胞级差异检验/轨迹）且双细胞率不低
+    （>5%，或大细胞数）→ 跳过 = **error**；
+  * 小数据集（<10K 细胞）且双细胞率低 → 跳过可辩护 = **edge**。
+- rationale 中的量化声明（如"<5%"）无依据时，只削弱辩护强度，不单独入罪。
 
 ## 难度评估（供预注册分层，不参与 gold）
 

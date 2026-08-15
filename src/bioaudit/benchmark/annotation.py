@@ -22,7 +22,9 @@ from collections import Counter
 from pathlib import Path
 from typing import Iterable, Optional
 
-ANNOTATION_VERSION = "annotation.v1"
+#: 标注管线版本（批 2 起 = annotation.v1.1：D 窗口遗留 6 条澄清点，见
+#: benchmark/annotation_rubric.md §四；批 1 标注保留 annotation.v1 不追溯重判）
+ANNOTATION_VERSION = "annotation.v1.1"
 
 
 # ── IRR 统计量 ─────────────────────────────────────────────────────────────────

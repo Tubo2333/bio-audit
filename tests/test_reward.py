@@ -557,7 +557,7 @@ def test_cli_reward_calibrate_smoke(capsys):
     rc = main(["reward-calibrate", "--n-boot", "100"])
     out = json.loads(capsys.readouterr().out)
     assert rc == 0
-    assert out["n_tasks"] == 30
+    assert out["n_tasks"] == 60
     assert set(out["ablation"]["recipes"]) == {"A", "B", "C"}
 
 

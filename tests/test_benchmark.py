@@ -57,7 +57,7 @@ from bioaudit.benchmark.runner import (  # noqa: E402
 def test_all_shipped_tasks_parse_and_have_gold(tmp_path):
     """任务集全部通过 Task schema（gold+difficulty+benchmark provenance 在场）。"""
     tasks = load_tasks(TASKS_DIR)
-    assert len(tasks) >= 30, "首批任务集 ≥30 条（D1.1：60 条分两批，批 1 已声明）"
+    assert len(tasks) >= 60, "任务集 ≥60 条（F1.1：批 1 30 + 批 2 30）"
     for t in tasks:
         task = Task(**t)
         assert task.provenance.source == "benchmark"
@@ -117,10 +117,26 @@ def test_consistency_family_types_exist():
 
 def test_pre_registration_record_frozen():
     rec = PRE_REGISTRATION
-    assert rec["record_id"] == "benchmark-pr-2026-08-16-01"
+    assert rec["record_id"] == "benchmark-pr-2026-08-16-02"
+    assert rec["supersedes"] == "benchmark-pr-2026-08-16-01"
     assert rec["gap"]["tolerance_interval"] == [-0.10, 0.10]
     assert rec["irr_gate"]["primary"] == "cohen_kappa_3class >= 0.8"
     assert rec["split"]["seed"] == 42
+    assert rec["annotation_rubric_version"] == "annotation.v1.1"
+
+
+def test_pre_registration_v1_archived():
+    """批 1 预注册旧值留档（E1：不覆盖旧记录，v1 常量 + 磁盘副本）。"""
+    from bioaudit.benchmark.protocol import PRE_REGISTRATION_V1
+
+    assert PRE_REGISTRATION_V1["record_id"] == "benchmark-pr-2026-08-16-01"
+    assert PRE_REGISTRATION_V1["gap"]["tolerance_interval"] == [-0.10, 0.10]
+    from bioaudit.benchmark.protocol import pre_registration_v1_archive_path
+
+    p = pre_registration_v1_archive_path()
+    assert p.exists(), "批 1 预注册留档文件必须存在"
+    data = json.loads(p.read_text(encoding="utf-8"))
+    assert data["record_id"] == "benchmark-pr-2026-08-16-01"
 
 
 def test_check_gap_alarm_logic():
@@ -314,11 +330,13 @@ def test_apply_spec_deterministic():
 
 def test_taskset_manifest_valid_and_versioned():
     manifest = load_taskset(TASKS_DIR)
-    assert manifest["taskset_version"] == "1.0.0"
-    assert manifest["n_tasks"] == len(load_tasks(TASKS_DIR))
+    assert manifest["taskset_version"] == "1.1.0"
+    assert manifest["n_tasks"] == len(load_tasks(TASKS_DIR)) == 60
     assert isinstance(manifest["snapshot"], dict) and manifest["snapshot"]["ruleset"]
     assert isinstance(manifest["model_info"], dict)
     assert manifest["split"]["public"] and manifest["split"]["hidden"]
+    assert manifest["irr"]["calibration_batch2"]["gate_pass"] is True
+    assert manifest["irr"]["calibration_batch1"]["cohen_kappa"] == 0.8087  # 旧值留档
     report = validate_taskset(TASKS_DIR)
     assert report["ok"], report["errors"]
 

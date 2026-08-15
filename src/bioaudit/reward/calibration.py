@@ -281,7 +281,7 @@ def ablate(
             "ablation": "A=纯规则分(mean)；B=A×γ(γ={})当且仅当存在未 mask L0；"
                         "C=PRM 加权 mean（占位权重均匀 → 默认 C≡A，接口独立测试）"
                         .format(HARD_PENALTY_GAMMA),
-            "same_input": "同一 30 条任务（同一引擎 step_scores）三组配方",
+            "same_input": "同一 60 条任务（同一引擎 step_scores）三组配方",
             "seed": seed, "n_boot": n_boot,
         },
     }
