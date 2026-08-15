@@ -13,6 +13,8 @@
   trace <session_id>                           C5：引擎审计过程日志（审计者也可审计）
   capture-validate                             C2/C6：签名表校验 + 样例自检（CI 门禁）
   verdict <session_id>                         C3：会话 verdict 清单（final-only 视图）
+  benchmark-run [--split] [--act] [--seed]     D4：任务集批量评测 + 功效报告（bootstrap CI）
+  benchmark-validate                           D5/E8：任务集三闸（清单+污染+覆盖）+ golden
 """
 
 import argparse
@@ -340,6 +342,82 @@ def cmd_verdict(args: argparse.Namespace) -> int:
     return 0
 
 
+# ── 窗口 D：benchmark 命令（D4.9 运行器 / D5.13 任务集三闸）──
+
+
+def cmd_benchmark_run(args: argparse.Namespace) -> int:
+    """D4：批量评测 → 结果表 + 功效报告（bootstrap CI + 多重比较 + gap 检查）。"""
+    from bioaudit.benchmark.runner import run_benchmark
+
+    try:
+        report = run_benchmark(
+            tasks_dir=args.tasks_dir,
+            split=args.split,
+            act=args.act,
+            seed=args.seed,
+            n_boot=args.n_boot,
+        )
+    except Exception as exc:
+        print(json.dumps({"error": {"code": "internal-error", "message": str(exc)}},
+                         ensure_ascii=False, indent=1))
+        return 1
+    print(json.dumps(report, ensure_ascii=False, indent=1))
+    return 0
+
+
+def cmd_benchmark_validate(args: argparse.Namespace) -> int:
+    """D5.13/E8：任务集三闸（清单+污染+覆盖）+ golden 回归（评分路径保护）。
+
+    任一闸失败 → exit 1（与 ruleset-validate 同门禁风格）。
+    """
+    from bioaudit.benchmark.contamination import collect_rule_fragments, scan_dir, scan_file
+    from bioaudit.benchmark.coverage import audit as coverage_audit
+    from bioaudit.benchmark.manifest import validate_taskset
+    from bioaudit.benchmark.paths import GENERATOR_PROMPT, TASKS_DIR
+    from bioaudit.regression import replay_golden
+
+    errors = []
+    gates = {}
+
+    # 闸 1：taskset 清单 + Task schema + split 完整性
+    m = validate_taskset(args.tasks_dir)
+    gates["taskset"] = m
+    if not m["ok"]:
+        errors.extend(m["errors"])
+
+    # 闸 2：污染扫描（E2：规则标识/标题命中即标记；生成器提示词零规则内容 E6）
+    fragments = collect_rule_fragments(args.rules_dir)
+    cont = scan_dir(TASKS_DIR if args.tasks_dir is None else args.tasks_dir, fragments)
+    prompt_cont = scan_file(GENERATOR_PROMPT, fragments)
+    gates["contamination"] = {"tasks": cont, "generator_prompt": prompt_cont}
+    if not cont["ok"]:
+        errors.append({"kind": "contamination", "detail": cont["files_with_rule_hits"]})
+    if not prompt_cont["ok"]:
+        errors.append({"kind": "generator_prompt_contamination", "detail": "E6 违规"})
+
+    # 闸 3：覆盖审计（E5：34 类型 + 38 规则；零触发 = 0 或显式豁免）
+    cov = coverage_audit(args.tasks_dir, exemptions={})
+    gates["coverage"] = cov
+    if not cov["ok"]:
+        errors.append({"kind": "coverage",
+                       "detail": {"missing_types": cov["missing_types"],
+                                  "remaining_missing_rules": cov["remaining_missing_rules"]}})
+
+    # 闸 4：golden 回归（D6.14：benchmark 是外围层，评分路径零改动）
+    ok, golden = replay_golden(baseline=args.baseline)
+    gates["golden"] = golden
+    if not ok:
+        errors.append({"kind": "golden_diff", "detail": golden["diffs"][:5]})
+
+    out = {
+        "ok": not errors,
+        "gates": gates,
+        "errors": errors,
+    }
+    print(json.dumps(out, ensure_ascii=False, indent=1))
+    return 0 if not errors else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     # JSON 输出含中文 → 强制 UTF-8（Windows 控制台 GBK 会破坏管道捕获）
     try:
@@ -438,6 +516,28 @@ def main(argv: list[str] | None = None) -> int:
     p_vd = sub.add_parser("verdict", help="C3：会话 verdict 清单（final-only 视图）")
     p_vd.add_argument("session_id", help="会话 id")
     p_vd.set_defaults(func=cmd_verdict)
+
+    # ── 窗口 D：benchmark 命令 ──
+    p_br = sub.add_parser(
+        "benchmark-run", help="D4：任务集批量评测 + 功效报告（bootstrap CI + gap）",
+    )
+    p_br.add_argument("--tasks-dir", default=None, help="任务目录（默认包内 data/tasks）")
+    p_br.add_argument("--split", choices=["public", "hidden"], default=None,
+                      help="评测子集（默认全量；None 时输出 gap 检查）")
+    p_br.add_argument("--act", choices=["deg", "pan", "scrna"], default=None)
+    p_br.add_argument("--seed", type=int, default=42, help="bootstrap 种子（默认 42）")
+    p_br.add_argument("--n-boot", type=int, default=2000, help="bootstrap 重采样数")
+    p_br.set_defaults(func=cmd_benchmark_run)
+
+    p_bv = sub.add_parser(
+        "benchmark-validate", help="D5/E8：任务集三闸（清单+污染+覆盖）+ golden",
+    )
+    p_bv.add_argument("--tasks-dir", default=None, help="任务目录（默认包内 data/tasks）")
+    p_bv.add_argument("--rules-dir", default=None, help="规则目录（默认包内）")
+    p_bv.add_argument("--baseline", default=None, help="golden 基线（默认包内副本）")
+    p_bv.add_argument("--json", action="store_true",
+                      help="输出原始 JSON 报告（默认输出即 JSON，供 CI 使用）")
+    p_bv.set_defaults(func=cmd_benchmark_validate)
 
     args = parser.parse_args(argv)
     return args.func(args)

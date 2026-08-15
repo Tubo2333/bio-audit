@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.1.4 — 2026-08-16（窗口 D：阶段 3 benchmark 评测基准）
+
+- **benchmark 包**（`src/bioaudit/benchmark/`，外围层，评分路径零改动）：
+  models（Task = v2 轨迹 + gold + difficulty）/ manifest（taskset.json semver）/
+  difficulty（E4 预注册 rubric，不依赖审计分数）/ protocol（E1 预注册记录 +
+  split 分层随机 seed=42 + gap 容忍区间 [−0.10, +0.10] 负向告警）/
+  generator（E6：提示词零规则内容 + 语料变换）/ annotation（E3：κ/α ≥ 0.8 +
+  仲裁 + 共识强度）/ runner（D4：批量评测 + bootstrap CI + Holm 校正）/
+  contamination（E2 黑盒污染扫描）/ coverage（E5：34 类型 + 38 规则全覆盖）
+- **任务集 v1.0.0**：`src/bioaudit/data/tasks/` 首批 30 条（scrna 12 / pan 10 /
+  deg 8；批 2 排期补齐至 60）；双标注 + IRR 实测（详见完成报告）；
+  taskset.json（semver + 文件哈希 + 快照三元组 + split + 模型信息）
+- **CLI**：`benchmark-run`（运行器 + 功效报告）/ `benchmark-validate`
+  （四闸：清单 + 污染 + 覆盖 + golden）
+- **CI**：双矩阵新增 benchmark-validate 步骤（D6.16）
+- golden 回归：**20 轨迹 137 决策 0 差异**；测试全量绿（详见完成报告）
+- 报告：`docs/migration/D3-phase3-benchmark-report.md`；
+  协议：`docs/benchmark-protocol.md`
+
 ## 0.1.3 — 2026-08-14（B5 规则治理 + B6 回归 CI，阶段 1 窗口 ⑦）
 
 - **B5 ruleset.json 正式启用**：`rules/manifest.py`（加载/校验/生成）——

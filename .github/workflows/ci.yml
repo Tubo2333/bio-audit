@@ -48,6 +48,9 @@ jobs:
       - name: 采集层自检（C2/C6：签名表校验 + 样例 notebook 解析冒烟）
         run: bio-audit capture-validate --notebook tests/fixtures/sample_scrna_notebook.ipynb
 
+      - name: benchmark 三闸（D5/E8：清单 + 污染 + 覆盖）+ golden（窗口 D）
+        run: bio-audit benchmark-validate --json
+
       - name: MCP server 自检（C4：独立启动 + 端到端 audit_decision）
         run: python -m mcp.server --selfcheck
 
