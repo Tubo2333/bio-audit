@@ -191,6 +191,8 @@ demo 时代 scrna_crc_error/scrna_error 按"wilcoxon = 错误"设计，但其规
 | capture-validate | PASS（0 错误 0 警告） |
 | MCP selfcheck | PASS |
 | R0 锚定（scrna_r0） | 确定性重生成逐字节一致（**J2 后 meta 重算**：规则数 22→23，评分内容不变；旧 16f31ff4 → 新 665ef6d5，asset_manifest change_log 记录） |
+| **CI 云上**（教训 #5） | GitHub Actions 双矩阵（3.10/3.12）**全绿**（run 31929985437；3.10 因 pip 缓存恢复超时耗时 14m20s，非失败注解）；Pages 构建 built；关键页面 HTTP 200（J 报告/I 报告/索引/CHANGELOG/首页） |
+| git（教训 #4） | commit + push 完成（J1 82a86e8 → J2/J3 19c9b65 → 报告 8b59b74 → ruff 修复 fc5e809 → R0 元数据 08f2b35 → 本报告证据） |
 
 ### 5.2 benchmark-run 60 任务集复跑（J1 → J2 全程留档）
 
