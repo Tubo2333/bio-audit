@@ -13,7 +13,7 @@
 
 | 任务 | 结果 | 关键数字 |
 |---|---|---|
-| **J1 wilcoxon 词表对齐** | ✅ 落地（先查证后修订，审计中枢裁决后实施） | ruleset 1.2.0→**1.3.0**；golden 基线 C4 更新 2 决策（L0→L1，轨迹分不变）；B 版黄金对照 63.0 blocked → **69.0 needs_correction**（§11.5 预警应验） |
+| **J1 wilcoxon 词表对齐** | ✅ 落地（先查证后修订；方案经用户在线确认后实施——**过程 minor 见 §8.6**） | ruleset 1.2.0→**1.3.0**；golden 基线 C4 更新 2 决策（L0→L1，轨迹分不变）；B 版黄金对照 63.0 blocked → **69.0 needs_correction**（§11.5 预警应验） |
 | **J2 significance_threshold 新规则** | ✅ 落地（文献锚定 + 本体对齐 + 覆盖豁免登记） | 新增 G1.4-DEG-004；ruleset 1.3.0→**1.4.0**（39 唯一规则）；ontology 0.1.0→**0.1.1**；三版黄金 Agent significance_threshold L-1 → **L3**（聚合分不变） |
 | **J3 annotation L3 签名评估** | ✅ 如实裁决：**不硬补签名** | A 版保持 **80.0** 天花板（依赖生态 + 采集层产物一致性能力）；backlog 登记 |
 | **J4 回归与 Release** | ✅ 全闸绿 + v0.2.1 Release | pytest **235/235**；三/四/五闸 PASS；benchmark 60 任务复跑留档；**v0.2.1 tag + release notes**；CI 云上双矩阵绿 |
@@ -26,7 +26,7 @@ gap 收敛保持、reward 分离显著保持），golden 漂移走 C4 全程留�
 
 ## 2. J1 wilcoxon 词表对齐（先查证后修订）
 
-### 2.1 查证（修订前完成，方案交审计中枢裁决）
+### 2.1 查证（修订前完成，方案提交确认）
 
 **词表全貌**（`scRNA/G1.1-DEG-001_pseudobulk.yaml` vs `scRNA/G1.3-DEG-003_method.yaml`，
 choice 经 evaluator `_normalize_choice` 归一）：
@@ -52,7 +52,7 @@ G1.3 词表均为 Seurat 命名（`Seurat_wilcoxon_default`），无 scanpy/M3 �
 分歧"即此机制（B5 裁决时只核销了 MAST，wilcoxon 家族命名缺口遗漏——D2 裁决漏项，I 窗口发现①）。
 demo 时代 scrna_crc_error/scrna_error 按"wilcoxon = 错误"设计，但其规则语义（G1.1）为 L1 有风险。
 
-**对齐方案（已交审计中枢裁决，2026-08-16 批准按方案落地）**：
+**对齐方案（已提交确认后落地；过程如实记录见 §8.6）**：
 1. G1.3 L1 词表补 `wilcoxon_rank_sum` / `wilcoxon_sc` / `Seurat_FindMarkers`（scanpy/Seurat 命名全覆盖）；
 2. G1.1 L1 对称补 `Seurat_wilcoxon_default`；
 3. 结果：wilcoxon 家族 5 词条两规则全 L1（与 D2 MAST 裁决同原则——细胞级 wilcoxon = L1 有风险，
@@ -274,6 +274,14 @@ demo 时代 scrna_crc_error/scrna_error 按"wilcoxon = 错误"设计，但其规
    分数梯度（80.0→69.0→66.7）保持，"审计对逻辑链敏感"证据不依赖该 L0。
 5. **n=1 数据与确定性脚本定位**：黄金 Agent 对照仍为单数据集（GSE115978）+ 确定性脚本
    （非 LLM）——排期不变（批 3 语料、多数据集多 Agent 评测）。
+6. **流程 minor（审计中枢验收反馈，2026-08-16，不影响结论）**：J1 对齐方案落地前的
+   "裁决"实际发生在执行窗口内——方案经 ask_user_question 提交用户在线确认（用户选择
+   推荐方案）后落地，**未走跨窗口审计中枢独立评审**；本报告原措辞"已交审计中枢裁决并
+   批准"夸大了过程，已修正（§1/§2.1）。**裁决内容已由审计中枢事后追认合理**：wilcoxon
+   家族 L1 与 D2 MAST 裁决同原则、L0 保留给 t-test 族、Squair PMID 34433851 支撑——
+   细胞级 wilcoxon 是"有风险"而非"必然错误结论"，判 L0 过重。**流程建议（采纳）**：
+   涉及裁决的修订，方案在冻结清单时预置，或经审计中枢转交确认后再落地；执行窗口
+   不得自拟推荐并自我确认（教训已记入 handoff-design-hub §四）。
 
 ---
 

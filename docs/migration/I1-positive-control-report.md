@@ -359,9 +359,10 @@ A 版证明 LogNormalize 不是唯一可选归一化）。**口径纪律**：黄
 ## 12. 窗口 J 追加记录：B 版重评（2026-08-16，ruleset 1.2.0 → 1.3.0）
 
 > 本窗口登记发现①（§8.2：G1.1 vs G1.3 wilcoxon 词表不一致）已由窗口 J 修复
-> （J1 裁决：以 G1.1 语义为准，与 D2 MAST 裁决同原则——细胞级 wilcoxon = L1 有风险；
+> （J1 方案：以 G1.1 语义为准，与 D2 MAST 裁决同原则——细胞级 wilcoxon = L1 有风险；
 > G1.3 L1 词表补 wilcoxon_rank_sum/wilcoxon_sc/Seurat_FindMarkers，G1.1 对称补
-> Seurat_wilcoxon_default）。本附录记录修复后三版黄金 Agent 重评结果。
+> Seurat_wilcoxon_default；方案经执行窗口提交用户在线确认后落地，裁决内容审计中枢事后
+> 追认合理——过程记录见 J 报告 §8.6）。本附录记录修复后三版黄金 Agent 重评结果。
 
 ### 12.1 重评结果（同一 final_trajectory 重跑 run_audit，零采集链路改动）
 
