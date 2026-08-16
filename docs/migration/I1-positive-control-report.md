@@ -284,7 +284,7 @@ A 版证明 LogNormalize 不是唯一可选归一化）。**口径纪律**：黄
 | clustering_resolution | 仅 0.8 → default_0_8；1.0/其他 → uncertain | 同上 |
 | qc_mito_threshold | 仅固定阈值 25/50 有签名；MAD 自适应 mito → 无签名 | MAD mito 决策不进轨迹 |
 | api_data_integrity | read_h5ad 为 context-only 签名 | 完整性检查无法被确定性验证 |
-| **deg_method（G1.1 vs G1.3 词表不一致）** | `wilcoxon_rank_sum`（M3 签名输出）不在 G1.3 词表（其词表为 `Seurat_wilcoxon_default`） | B 版 L0 的直接机制；规则层词表缺陷（D2 裁决漏项），登记建议修复 |
+| **deg_method（G1.1 vs G1.3 词表不一致）** | `wilcoxon_rank_sum`（M3 签名输出）不在 G1.3 词表（其词表为 `Seurat_wilcoxon_default`） | B 版 L0 的直接机制；规则层词表缺陷（D2 裁决漏项），登记建议修复 —— **已修复（窗口 J1，2026-08-16）：G1.3 词表对齐 G1.1（wilcoxon 家族全 L1），ruleset 1.3.0，重评见 §12** |
 
 ### 8.3 规则覆盖缺口（如实登记，不在本窗口补规则）
 
@@ -346,11 +346,52 @@ A 版证明 LogNormalize 不是唯一可选归一化）。**口径纪律**：黄
    噪声级（每次运行聚类数一致，见 §4.3 三版 n_clusters 均为 19）。
 5. **B 版 L0 机制依赖 G1.3 词表缺口**——若规则库修复该词表（§8.2），
    B 版将变为 L1/needs_correction（~69.0），梯度仍成立但"blocked"证据
-   消失；本窗口按当前规则版本如实报告。
+   消失；本窗口按当前规则版本如实报告。**（2026-08-16 窗口 J 已修复并应验：
+   ruleset 1.3.0 重评 B 版 = 69.0 needs_correction，见 §12。）**
 6. **hard_threshold 在 C 版滤掉 0 个细胞**——结果面与 A 几乎相同，恰好
    强化"审计评方法不评结果"的论证，但该巧合不可外推。
 7. **sctransform 丢弃 8 个极稀疏基因**（参考实现行为，≤4 细胞表达）——
    已如实记录（A/B/C 均 1997 genes）；对评分零影响（HVG/基因集不参与评分）。
+
+---
+
+## 12. 窗口 J 追加记录：B 版重评（2026-08-16，ruleset 1.2.0 → 1.3.0）
+
+> 本窗口登记发现①（§8.2：G1.1 vs G1.3 wilcoxon 词表不一致）已由窗口 J 修复
+> （J1 裁决：以 G1.1 语义为准，与 D2 MAST 裁决同原则——细胞级 wilcoxon = L1 有风险；
+> G1.3 L1 词表补 wilcoxon_rank_sum/wilcoxon_sc/Seurat_FindMarkers，G1.1 对称补
+> Seurat_wilcoxon_default）。本附录记录修复后三版黄金 Agent 重评结果。
+
+### 12.1 重评结果（同一 final_trajectory 重跑 run_audit，零采集链路改动）
+
+| 版本 | 窗口 I 实测（ruleset 1.2.0） | **J1 重评（ruleset 1.3.0）** | L 分布（L4/L3/L2/L1/L0/-1） |
+|---|---|---|---|
+| **A 黄金版** | 80.0 · pass | **80.0 · pass（不变）** | 0/8/1/0/0/1 |
+| **B 逻辑断裂** | 63.0 · blocked | **69.0 · needs_correction** | 0/7/1/1/0/1 |
+| **C 微妙错误** | 66.7 · needs_correction | **66.7 · needs_correction（不变）** | 0/7/1/1/0/1 |
+
+- **B 版**：deg_method（wilcoxon_rank_sum）L0 → **L1**（两规则词表对齐后均评 L1），
+  method_selection 维度 0.63 → 0.69 = (0.85×3 + 0.60 + 0.30)/5 → **69.0**；
+  verdict blocked → **needs_correction**（无 L0，有 L1）。
+  → §11.5 诚实局限 5 的预警**应验**："B 版将变为 L1/needs_correction（~69.0），
+  梯度仍成立但 'blocked' 证据消失"——修复后 blocked 证据确实消失，如当时声明。
+- **A/C 版**：无 wilcoxon 决策，分数/verdict 不变（80.0 pass / 66.7 needs_correction）。
+- **梯度结论更新**：同数据同流程仅一处方法学差异 → 审计分梯度 80.0 → 69.0 → 66.7
+  保持成立；verdict 梯度由 pass/blocked/needs_correction 变为 pass/needs_correction/
+  needs_correction——B 版严重性证据从"危险级 L0"修正为"有风险级 L1"（与 G1.1
+  科学语义一致：伪重复 = 有风险，L0 保留给 t-test 族），"审计对逻辑链敏感"的
+  量化证据不依赖该 L0，仍成立（分数梯度 + 严重性排序）。
+
+### 12.2 连锁影响（J1，如实留档）
+
+| 项 | ruleset 1.2.0（修复前） | ruleset 1.3.0（修复后） |
+|---|---|---|
+| golden（20 轨迹 137 决策） | 基线 L0×2（scrna_crc_error/scrna_error S10） | **基线更新**（C4）：该 2 决策 L0→L1；轨迹分/verdict 不变（其他 L0 主导，29.0/40.0 blocked） |
+| benchmark 60 任务 | mean 0.5528 / recall 0.820 / F1 0.781 / gap +0.046 | mean **0.5542** / 检出指标**不变** / gap **+0.048**（区间内，无告警）；bmd_scrna_005 67.7→70.0、bmd_scrna_014 68.0→74.0（→needs_correction） |
+| reward 校准 | ρ 0.6179 / τ_b 0.5033 / 分层差 +0.3614（p=0.000） | ρ **0.6008** / τ_b **0.4884** / 分层差 **+0.3434**（p=0.000 保持显著） |
+| pytest | 235/235 | 235/235（评分路径零代码改动，仅规则数据 + 基线） |
+
+详细报告：`bio-audit-v2/docs/migration/J1-rule-quality-report.md`（窗口 J）。
 
 ---
 

@@ -52,10 +52,10 @@ AI Agent 做生信分析已经相当熟练：代码能跑、输出像样、总�
 | 黄金 Agent 变体（同数据同流程，仅一处方法学差异） | 分数 · verdict | 注入的方法学错误 |
 |---|---|---|
 | **A 黄金版**（MAD QC → SCTransform → VST HVG → PCA-elbow → Harmony → Leiden → CellTypist → pseudobulk DESeq2 → BH） | **80.0 · pass** | 无 |
-| **B 逻辑断裂版**（cell-level DEG 替代 pseudobulk，伪重复） | **63.0 · blocked** | DEG 把细胞当独立样本（终答照常输出差异基因列表） |
+| **B 逻辑断裂版**（cell-level DEG 替代 pseudobulk，伪重复） | **69.0 · needs_correction**（J1 修复前 63.0 · blocked） | DEG 把细胞当独立样本（终答照常输出差异基因列表） |
 | **C 微妙错误版**（固定硬阈值替代 MAD 自适应 QC） | **66.7 · needs_correction** | QC 固定阈值（该数据恰好一个细胞都没滤掉，结果表面与 A 几乎相同） |
 
-三版终答"表面完成度"相同，仅方法学逻辑不同 → 审计分与 verdict 呈梯度（pass → blocked → needs_correction）——**审计评的是科学逻辑链，不是只看终答**。报告：[窗口 I 阳性对照报告](https://tubo2333.github.io/bio-audit/docs/migration/I1-positive-control-report.html)。（注：A 版 80.0 未达 85.0 目标，偏差归因于注释方法 L3 通道的采集签名缺口，报告 §6 如实记录。）
+三版终答"表面完成度"相同，仅方法学逻辑不同 → **审计分呈梯度（80.0 → 69.0 → 66.7）**——**审计评的是科学逻辑链，不是只看终答**。报告：[窗口 I 阳性对照报告](https://tubo2333.github.io/bio-audit/docs/migration/I1-positive-control-report.html)。（注 1：A 版 80.0 未达 85.0 目标，偏差归因于注释方法 L3 通道的采集签名缺口，报告 §6 如实记录。注 2：B 版在窗口 J 规则修复（ruleset 1.3.0，wilcoxon 词表对齐）后由 63.0·blocked 改为 69.0·needs_correction——细胞级 wilcoxon 按 G1.1 语义为"有风险"而非"危险"，I 报告 §11.5 预警的"blocked 证据消失"已应验；分数梯度保持。）
 
 引擎自身的可信度也有独立验证（R0-R3）：模拟数据真值锚定下，审计分数与实际 F1 的排序一致性 Spearman ρ=0.9747（D5 修复后重算，结论不变）；权威文献案例 4/4 全部正确判级。
 

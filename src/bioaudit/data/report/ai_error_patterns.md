@@ -87,7 +87,7 @@ Act 2 危险决策密度最高（30.6% L0 占比），Top 4 危险类型: `indep
 | pan_edge_consistency | Act 2 | 1 | 30.0 | 边缘: 方向矛盾不讨论 |
 | pan_edge_purity | Act 2 | 1 | 0.0 | 边缘: 纯度不校正 |
 | scrna_correct | Act 3 | 12 | 85.0 | 全正确 (NSCLC 11-pat) |
-| scrna_error | Act 3 | 12 | 40.0 | 全错误 (no_doublet + LogNorm + no_batch + wilcoxon) |
+| scrna_error | Act 3 | 12 | 40.0 | 全错误 (no_doublet + no_batch + hard_threshold + manual_marker + wilcoxon + not_checked) |
 | scrna_crc_correct | Act 3 | 12 | 85.0 | CRC 63K cells — 免疫浸润型 |
 | scrna_nsclc_correct | Act 3 | 12 | 85.0 | NSCLC 208K cells — 免疫沙漠型 |
 | scrna_melanoma_correct | Act 3 | 12 | 85.0 | Melanoma 7K cells — 免疫热型 |
@@ -103,14 +103,17 @@ Act 2 危险决策密度最高（30.6% L0 占比），Top 4 危险类型: `indep
 
 ## 2. 总体统计 / Overall Statistics
 
-### 2.1 Level 分布 / Level Distribution（2026-08-13 A4 重算，D5 修复后）
+### 2.1 Level 分布 / Level Distribution（2026-08-16 J1 后重算；原 2026-08-13 A4 重算，D5 修复后）
 
 | Level | Act 1 (DEG) | Act 2 (PanCancer) | Act 3 (scRNA) | Total |
 |-------|-------------|-------------------|---------------|-------|
-| **L0 (危险)** | 3 (21.4%) | 11 (30.6%) | 14 (16.1%) | **28 (20.4%)** |
-| **L1 (有风险)** | 4 (28.6%) | 5 (13.9%) | 10 (11.5%) | **19 (13.9%)** |
+| **L0 (危险)** | 3 (21.4%) | 11 (30.6%) | 12 (13.8%) | **26 (19.0%)** |
+| **L1 (有风险)** | 4 (28.6%) | 5 (13.9%) | 12 (13.8%) | **21 (15.3%)** |
 | **L2 (可接受)** | 1 (7.1%) | 1 (2.8%) | 2 (2.3%) | **4 (2.9%)** |
 | **L3+ (正确)** | 6 (42.9%) | 19 (52.8%) | 61 (70.1%) | **86 (62.8%)** |
+
+> J1 变化（2026-08-16，ruleset 1.2.0→1.3.0）：wilcoxon 词表对齐使 scrna_crc_error/scrna_error 的
+> S10（wilcoxon_rank_sum）由 L0 改为 L1 → scRNA L0 14→12、L1 10→12；轨迹分与 verdict 不变（其他 L0 主导）。
 
 **发现**: Act 3 (scRNA) 的正确率最高 (70.1%)，因为 scRNA 规则库 (22条) 覆盖最完整，且方法学共识最强。Act 2 (PanCancer) 的危险决策比例最高 (30.6%)，因为生存分析和跨模块一致性检查是更复杂、更易出错的领域。
 
@@ -144,7 +147,7 @@ Act 2 危险决策密度最高（30.6% L0 占比），Top 4 危险类型: `indep
 | doublet_detection | 8 | 4 | 0 | **50%** | Skipping doublet removal |
 | qc_filtering | 7 | 0 | 3 | **43%** | Hard threshold without justification |
 | batch_correction | 7 | 3 | 0 | **43%** | Skipping batch correction |
-| deg_method | 12 | 5 | 0 | **42%** | Wrong method (ttest, wilcoxon, cell-level) |
+| deg_method | 12 | 3 | 2 | **42%** | Wrong method (ttest, wilcoxon, cell-level) |
 | multiple_testing_correction | 5 | 2 | 0 | **40%** | No correction claimed "exploratory" |
 | significance_threshold | 5 | 0 | 2 | **40%** | Raw p only, no effect size |
 | annotation_method | 8 | 0 | 3 | **38%** | Manual markers without validation |
@@ -267,7 +270,7 @@ Act 2 危险决策密度最高（30.6% L0 占比），Top 4 危险类型: `indep
 
 **Act 1 (DEG)** 和 **Act 2 (PanCancer)** 共享规则库 (16 条规则)，但 PanCancer 有更多决策类型（16 vs 5），因此 PanCancer 轨迹得分更容易被少数错误稀释。
 
-**Act 3 (scRNA)** 有独立的 22 条规则，覆盖更细粒度。scRNA 错误轨迹的检出更精确（L0: n=4, L1: n=1, L2: n=2 vs DEG 的 L0: n=1, L1: n=2）。
+**Act 3 (scRNA)** 有独立的 22 条规则，覆盖更细粒度。scRNA 错误轨迹的检出更精确（scrna_error: L0×3/L1×4/L2×1，scrna_crc_error: L0×3/L1×4；DEG deg_error: L0×1/L1×2/L2×1；2026-08-16 J1 后：wilcoxon 决策由 L0 降级为 L1——细胞级 wilcoxon 为有风险级而非危险级，与 G1.1 语义一致）。
 
 ---
 

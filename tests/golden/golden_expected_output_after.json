@@ -1,7 +1,4 @@
 {
- "generated_at": "2026-08-13",
- "engine": "fullflow-demo 当前引擎（D5 修复后 + DEG 双副本统一 + mappings 补齐）",
- "note": "A2 D5 修复后基线；A3 后重跑（DEG 双副本统一 + C2 去重告警 + mappings 补齐）",
  "n_trajectories": 20,
  "n_decisions": 137,
  "trajectories": [
@@ -1671,7 +1668,7 @@
    "verdict": "blocked",
    "dimension_scores": {
     "data_handling": 0.29,
-    "method_selection": 0.5286
+    "method_selection": 0.5714
    },
    "step_scores": [
     {
@@ -1877,9 +1874,9 @@
       "G1.1-DEG-001_pseudobulk",
       "G1.3-DEG-003_method"
      ],
-     "level": 0,
-     "numeric_score": 0.0,
-     "explanation": "危险 — 方法选择将导致错误结论",
+     "level": 1,
+     "numeric_score": 0.3,
+     "explanation": "有风险 — 方法选择值得商榷",
      "evidence_citations": [
       "[L-Confirmed] Confronting false discoveries in single-cell differential expression — Squair et al. 2021, Nature Communications — **[PMID: 34433851](https://pubmed.ncbi.nlm.nih.gov/34433851/)**",
       "[L-Confirmed] Confronting false discoveries in single-cell differential expression — Squair et al. 2021, Nature Communications — **[PMID: 34433851](https://pubmed.ncbi.nlm.nih.gov/34433851/)**",
@@ -1894,7 +1891,7 @@
       "NEBULA",
       "scVI_LDEE"
      ],
-     "reward_signal": 0.0
+     "reward_signal": 0.3
     },
     {
      "step_id": "S11",
@@ -2048,7 +2045,7 @@
    "verdict": "blocked",
    "dimension_scores": {
     "data_handling": 0.4,
-    "method_selection": 0.4143
+    "method_selection": 0.4571
    },
    "step_scores": [
     {
@@ -2255,9 +2252,9 @@
       "G1.1-DEG-001_pseudobulk",
       "G1.3-DEG-003_method"
      ],
-     "level": 0,
-     "numeric_score": 0.0,
-     "explanation": "危险 — 方法选择将导致错误结论",
+     "level": 1,
+     "numeric_score": 0.3,
+     "explanation": "有风险 — 方法选择值得商榷",
      "evidence_citations": [
       "[L-Confirmed] Confronting false discoveries in single-cell differential expression — Squair et al. 2021, Nature Communications — **[PMID: 34433851](https://pubmed.ncbi.nlm.nih.gov/34433851/)**",
       "[L-Confirmed] Confronting false discoveries in single-cell differential expression — Squair et al. 2021, Nature Communications — **[PMID: 34433851](https://pubmed.ncbi.nlm.nih.gov/34433851/)**",
@@ -2272,7 +2269,7 @@
       "NEBULA",
       "scVI_LDEE"
      ],
-     "reward_signal": 0.0
+     "reward_signal": 0.3
     },
     {
      "step_id": "S11",

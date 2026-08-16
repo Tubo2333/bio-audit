@@ -34,10 +34,13 @@ scoring:
   level_1:
     methods:
       - MAST
+      - wilcoxon_rank_sum
+      - wilcoxon_sc
+      - Seurat_FindMarkers
       - Seurat_wilcoxon_default
       - ttest_on_normalized
     description: "MAST(细胞级,无重复校正)/Wilcoxon/t-test — 经典但未针对单细胞优化"
-    note: "裸 MAST 与 Seurat FindMarkers 默认 Wilcoxon 均以细胞为独立重复(伪重复未解决, 与 G1.1 L1 对齐, B5 裁决); 适用于探索性分析但需注意伪重复"
+    note: "裸 MAST 与 Seurat FindMarkers 默认 Wilcoxon 均以细胞为独立重复(伪重复未解决, 与 G1.1 L1 对齐, B5 裁决); 适用于探索性分析但需注意伪重复。wilcoxon 家族词表对齐（窗口 J1 裁决 2026-08-16）：wilcoxon_rank_sum/wilcoxon_sc/Seurat_FindMarkers/Seurat_wilcoxon_default 统一评 L1（以 G1.1 语义为准，与 D2 MAST 裁决同原则——细胞级 wilcoxon = 有风险 L1，L0 保留给 t-test 族）；修复 B 版黄金对照 L0 兜底机制（I1 报告 §8.2 发现①）"
   level_0:
     methods:
       - ttest_on_raw_counts
