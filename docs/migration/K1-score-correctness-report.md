@@ -271,8 +271,8 @@ golden）。校准证据（60 任务，B=2000，seed=42）：
 | capture-validate | PASS（0 错误 0 警告，34 类型 / 23 有签名） |
 | ruff | **40 = HEAD 基线 40，零新增**（新代码零错误；ontology/__init__.py E501 已修） |
 | R0 锚定（scrna_r0） | 确定性重生成与打包文件逐字节一致（脚本 meta 同步） |
-| **CI 云上**（教训 #5） | GitHub Actions 双矩阵（3.10/3.12）**全绿**（见完成报告） |
-| git（教训 #4） | commit + push 完成（见完成报告） |
+| **CI 云上**（教训 #5） | GitHub Actions 双矩阵（3.10/3.12）**全绿**（run 31943313204；3.10 4m8s / 3.12 4m10s，全部步骤通过；Pages build 31943312796 built + deploy success，关键页面 HTTP 200 实测含本报告页） |
+| git（教训 #4） | commit + push 完成（31cac28 代码/资产 + dcd6323 报告/文档 + 外部 docs f6bc1bf 完成标记） |
 
 ---
 
