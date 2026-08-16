@@ -1,5 +1,30 @@
 # Changelog
 
+## 窗口 L：更广评测——10X 黄金对照 + 真实短评测（2026-08-16，无版本号）
+
+- **L-a 10X 黄金对照（≈0 成本）**：黄金 Agent 模板适配 10X（GSE132465 CRC 10X UMI，
+  63,689 cells / 33 文库 / 23 患者；平台查证 = GEO Overall design "Single-cell 3' mRNA
+  sequencing" + HCA "10x 3' v2"，非凭文件名；版权/provenance 存档）；脚本-规则隔离照旧
+  （零规则库引用）；真实执行 + 采集链路零代码改动
+- **D1.1 双联体规则首次真实执行验证**：10X-A（scDblFinder 真实执行，Rscript +
+  Bioconductor 参考实现，samples= 按 33 文库估算）→ **L3**，**80.0 · pass**（11 决策
+  10×L3 + 1×L2，L-1=0）；10X-B（跳过双联体）→ 采集层阴性声明**虚报 → revoked**
+  （final 轨迹 10 决策 80.0 pass——省略在采集层不可见，如实披露边界）+ **引擎级补验
+  skip → D1.1 L0 → 63.7 · blocked**；与 GSE115978 Smart-seq2 黄金版平台互补对照
+  （10X 独有 doublet/umi_counts/33 文库批次维度；Smart-seq2 无该决策，决策集差异如实呈现）
+- **L-b 真实短评测（宪法 §10 修订，实际成本 ¥0.43）**：CellVoyager 聚焦短分析
+  （GSE115978，仅预处理，max-iterations 4，num-analyses 1，预算 ¥5 上限/超时 60 min 未触发）；
+  **30.0 · needs_correction · L2×1 / L1×4 / L-1×0**（LogNormalize×2 / 细胞级 Spearman×2 /
+  dispersion HVG）——**高分不保证如实兑现**（决策点少 ≠ 决策正确）；5/5 交叉验证一致；
+  全决策可评分（K 缺口闭合在真实评测的印证）；n=1 随机性如实声明
+- **发现登记**：① 采集层阴性声明不可验证（skip → 虚报撤销，L0 威慑依赖"决策被声明"，
+  预期决策点检查为改进方向）；② scDblFinder 合并多文库矩阵必须传 samples= （否则双联体率
+  虚高 21.5%→修正 4.69%）；③ L-b qc_filtering 实际执行（MAD）但未进采集通道（M3 签名缺口）
+- **回归**：golden 20 轨迹 137 决策 **0 差异**（评分路径零改动，基线未更新）；
+  pytest **246/246**（纯外围窗口，无代码改动）；三/四/五闸 PASS 复跑；
+  CI 双矩阵云上确认；git commit/push 完成
+- 报告：[L1 更广评测报告](docs/migration/L1-broader-eval-report.html)
+
 ## 窗口 K：评分正确性（2026-08-16，无版本号）
 
 - **K1 immune scRNA 规则**（规则层，最大评分缺口）：新增 `I4.1-IMMU-001_scRNA_correlation_method`
