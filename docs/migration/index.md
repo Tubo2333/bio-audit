@@ -40,6 +40,13 @@
 | [G-2 补充报告（重评 30.0）](agent-eval-report-g2.html) | declared 注入 + 规则放宽 + 真实运行重评 |
 | [G 主报告（旧版留档）](agent-eval-report.html) | 第一次真实 Agent 评测（分数 0.0 为修复前口径，见 G-2） |
 
+## 阳性对照与规则质量（窗口 I / J）
+
+| 报告 | 内容 |
+|---|---|
+| [I1 端到端阳性对照（黄金 Agent A/B/C）](I1-positive-control-report.html) | 80.0/63.0/66.7 三版梯度 + 逻辑链敏感性证据 + 3 项发现登记 |
+| [J1 规则质量修复（wilcoxon 对齐 + significance_threshold + L3 签名评估）](J1-rule-quality-report.html) | ruleset 1.4.0 + C4 漂移记录 + 连锁影响留档 + v0.2.1 Release |
+
 ---
 
 报告中的验收清单依据执行方案冻结（`docs/specs/2026-08-13-execution-plan-v1.md`，仓库外）；分数口径纪律见 [site-design §6.2](../site-design.html#62-数字口径纪律教训-2-单一事实源)。

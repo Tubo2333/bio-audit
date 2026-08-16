@@ -90,7 +90,7 @@ bio-audit ruleset-validate          # 规则集校验（清单/冲突/golden 回
 src/bioaudit/
 ├── engine/       # 匹配 / 评分 / 聚合（规则引擎核心）
 ├── ontology/     # 34 决策类型本体 + 校验器
-├── rules/        # 43 条规则 YAML（38 唯一）+ ruleset 版本快照
+├── rules/        # 44 条规则 YAML（39 唯一）+ ruleset 版本快照
 ├── capture/      # 采集：M1 hook / M3 解析 / 交叉验证 / verdict
 ├── benchmark/    # 任务集 / 难度 / IRR / 运行器 / 污染扫描
 ├── reward/       # level→reward 映射 / 配方 / 校准

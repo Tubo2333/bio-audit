@@ -18,8 +18,8 @@
 
 - 真实评测报告：[G-2 补充报告](https://tubo2333.github.io/bio-audit/docs/migration/agent-eval-report-g2.html)
   （总成本 ¥2.55、正式运行 10-12 分钟；[G 主报告留档](https://tubo2333.github.io/bio-audit/docs/migration/agent-eval-report.html)）
-- 工程现状：pytest **234/234** · CI 双矩阵全绿 · golden 20 轨迹 137 决策 **0 差异** ·
-  60 条任务集（IRR κ=0.8336）· ruleset 1.2.0 / engine 0.2.1
+- 工程现状：pytest **235/235** · CI 双矩阵全绿 · golden 20 轨迹 137 决策 **0 差异** ·
+  60 条任务集（IRR κ=0.8336）· ruleset 1.4.0 / engine 0.2.1
 - 数字口径纪律全文：[site-design §6.2](https://tubo2333.github.io/bio-audit/docs/site-design.html)
 
 ## 快速导航

@@ -8,7 +8,7 @@ Bio-Audit 的核心资产是**文献锚定的科学规则**。规则即代码，
 1. 修改 `src/bioaudit/rules/data/<范式>/<rule_id>.yaml`（或新增文件）
 2. **一条命令本地验证**：`bio-audit ruleset-validate`
    —— 三闸全绿才算通过（B5）：
-   - 闸 1 清单校验：ruleset.json semver + 43 文件内容哈希 + 38 唯一 rule_id + YAML→Rule schema
+   - 闸 1 清单校验：ruleset.json semver + 44 文件内容哈希 + 39 唯一 rule_id + YAML→Rule schema
    - 闸 2 冲突完整性：同规则集内 同 decision_type + choice 不同 level（D2，范式感知）
    - 闸 3 golden 重放：20 轨迹 137 决策与冻结基线 0 差异（分数漂移必须逐条解释，C4）
 3. **提升 semver 并重新生成清单**：`python -c "from bioaudit.rules.manifest import generate_manifest; generate_manifest(ruleset_version='x.y.z')"`

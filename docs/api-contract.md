@@ -81,10 +81,10 @@ run_audit(
     /* B5：C1 三元组快照（可复现性底线，P2）——ruleset_version 读自
        src/bioaudit/rules/ruleset.json（内容哈希 + semver），ontology_version
        读自本体 paradigms.yaml，engine_version = 包版本 */
-    "engine_version": "0.1.3",
-    "ruleset_version": "1.1.0",
-    "ontology_version": "0.1.0",
-    "snapshot": { "ruleset_version": "1.1.0", "ontology_version": "0.1.0", "engine_version": "0.1.3" },
+    "engine_version": "0.2.1",
+    "ruleset_version": "1.4.0",
+    "ontology_version": "0.1.1",
+    "snapshot": { "ruleset_version": "1.4.0", "ontology_version": "0.1.1", "engine_version": "0.2.1" },
     "n_decisions": 8,
     "n_rules_matched": 8,
     "trajectory_score": 85.0,
@@ -217,7 +217,7 @@ reward(
     "mask_reasons": {}, "n_l0": 0, "n_l1": 0,
     "has_l0_penalty_applied": false,
     "ceiling_reward": 0.85, "evidence_adjustment_enabled": false,
-    "snapshot": {"ruleset_version": "1.1.0", "ontology_version": "0.1.0", "engine_version": "0.1.3"}
+    "snapshot": {"ruleset_version": "1.4.0", "ontology_version": "0.1.1", "engine_version": "0.2.1"}
   }
 }
 ```

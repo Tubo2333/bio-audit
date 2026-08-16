@@ -17,7 +17,7 @@
 - **回归**：golden 20 轨迹 137 决策 0 差异；pytest 234/234；ruff 零新增；CI 双矩阵全绿；
   Pages 构建成功 + HTTP 200 + 导航可达 + 链接无 404
 
-## 0.2.1 — 2026-08-16（窗口 G-2：评测缺口修复）
+## 0.2.1 — 2026-08-16（窗口 G-2：评测缺口修复 + 窗口 J：规则质量修复）
 
 - **declared 四级可信源落地**（采集层）：call_arg > data_metadata > declared（评测者/数据事实声明）> unverified；
   Agent 上报键永远不进 declared（宪法 §4.1）；12 项测试（test_declared_eval.py）
@@ -27,9 +27,24 @@
   ruleset **1.1.1 → 1.2.0**
 - **重评（零成本，复用已有 WAL/notebook）**：真实运行有效分数 **30.0 needs_correction（L0=0/L1=7/L3=1/L-1=12）**，
   与 demo 轨迹 **29 分 5 L0** 口径严格区分（禁止混写，教训 #2）；golden **0 差异基线未更新**（纯加性放宽，C4 未触发）
-- **回归**：pytest **234/234**（+12）；CI 双矩阵全绿
+- **J1 wilcoxon 词表对齐**（规则层，窗口 J）：G1.3/G1.1 词表对齐（wilcoxon 家族 5 词条全 L1，
+  以 G1.1 语义为准，D2 MAST 同原则）；修复 I 窗口发现①（B 版 L0 来自 G1.3 词表缺口兜底）；
+  ruleset **1.2.0 → 1.3.0**；golden 基线 C4 更新 2 决策（L0→L1，轨迹分不变）；
+  **B 版黄金对照重评 63.0 blocked → 69.0 needs_correction**（I 报告 §11.5 预警应验）
+- **J2 significance_threshold 新规则**（窗口 J）：scRNA 范式新增 **G1.4-DEG-004**（文献锚定
+  Conesa 2016 PMID 26813401 等，词表与 M1.3 对齐）；本体扩 scRNA + padj_cutoff/logfc_cutoff 键
+  （ontology 0.1.1）；ruleset **1.3.0 → 1.4.0**（39 唯一规则）；三版黄金 Agent 重评
+  significance_threshold **L-1 → L3**（聚合分不变）；覆盖豁免登记（D5.12，批 3 补覆盖）
+- **J3 annotation L3 签名评估**（窗口 J）：SingleR 无成熟 Python 实现（仅 BiocPy singler 0.1.x
+  早期绑定）+ L3 需产物级一致性验证 → **如实声明不硬补签名**，A 版保持 80.0 天花板；backlog 登记
+- **连锁影响（J 窗口实测留档）**：benchmark 60 任务检出指标零变化（precision 0.745/recall 0.820/
+  F1 0.781）、mean 0.5528→0.5542、gap +0.046→+0.048（区间内，预注册口径解释见 J 报告 §5.2）；
+  reward 校准 ρ 0.6179→0.6008、分层差 +0.3614→+0.3434（p=0.000 保持显著）；golden 最终 0 差异
+- **回归**：pytest **235/235**；三闸/四闸/五闸/capture-validate/MCP selfcheck 全 PASS；
+  CI 双矩阵全绿；**v0.2.1 tag + release notes**（文档站链接见正文）
 - 报告：`docs/migration/agent-eval-report-g2.md`（主报告留档：`docs/migration/agent-eval-report.md`）；
-  审查报告：`docs/migration/G2b-platform-key-review.md`；宪法：`docs/protocols/agent-eval-protocol.md`（§4.1 修订）
+  审查报告：`docs/migration/G2b-platform-key-review.md`；宪法：`docs/protocols/agent-eval-protocol.md`（§4.1 修订）；
+  窗口 J 报告：`docs/migration/J1-rule-quality-report.md`
 
 ## 0.1.6 — 2026-08-16（窗口 F：批 2 任务集 30 → 60 + 校准更新）
 

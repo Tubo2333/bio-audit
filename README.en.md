@@ -87,7 +87,7 @@ Full walkthrough (install / commands / API & MCP integration / regression):
 **Current (v0.2.x, 2026-08)**: core system closed loop — stable engine + 34-type decision
 ontology + governed ruleset; real capture pipeline (M1/M3 cross-validation); 60-task benchmark;
 reward layer; real-agent evaluation pipeline live with first fix round (G-2). Engineering:
-pytest 234/234 · CI dual matrix (Python 3.10/3.12) green · golden regression 0 diff · reports
+pytest 235/235 · CI dual matrix (Python 3.10/3.12) green · golden regression 0 diff · reports
 carry a snapshot triple (engine/ruleset/ontology versions) so any score is reproducible.
 
 **Next**: L3/L4 conclusion- and consistency-level audits (general implementation), PRM
@@ -106,7 +106,7 @@ evaluations (multiple datasets/agents).
 src/bioaudit/
 ├── engine/       # matching / scoring / aggregation (rule engine core)
 ├── ontology/     # 34 decision-type ontology + validator
-├── rules/        # 43 rule YAMLs (38 unique) + ruleset version snapshot
+├── rules/        # 44 rule YAMLs (39 unique) + ruleset version snapshot
 ├── capture/      # capture: M1 hook / M3 parsing / cross-validation / verdict
 ├── benchmark/    # tasks / difficulty / IRR / runner / contamination scan
 ├── reward/       # level→reward mapping / recipes / calibration
