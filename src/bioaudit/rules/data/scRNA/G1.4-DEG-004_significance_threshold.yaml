@@ -1,0 +1,72 @@
+rule_id: "G1.4-DEG-004_significance_threshold"
+domain: "statistical_rigor.threshold"
+status: "active"
+version: 1
+title: "单细胞显著性阈值选择 / scRNA significance threshold"
+description: >
+  scRNA DEG 报告需同时满足统计显著性（多重检验校正后的 adjusted p-value）与生物学显著性
+  （fold change）两个阈值。多重检验校正（BH-FDR）与效应量阈值是 RNA-seq 最佳实践共识
+  （Conesa et al. 2016 PMID 26813401）；单细胞数据因检验数巨大（数千基因 × 聚类对比），
+  未校正 p 值或纯效应量筛选会急剧膨胀假阳性。窗口 J2（2026-08-16）新增：I 窗口三版黄金
+  Agent 的 significance_threshold 决策此前均为 L-1（覆盖缺口，I1 报告 §8.3 登记），
+  本规则补 scRNA 范式覆盖，level 词表与 DEG/pan 范式 M1.3-DEG-001 对齐（跨范式一致性：
+  同一阈值选择的评级不随范式改变——阈值科学本身是范式无关的）。
+condition:
+  decision_type: "significance_threshold"
+  # 匹配设计说明（窗口 J2）：scRNA 采集链路中 M3 签名对 significance_threshold 输出
+  # padj_cutoff/logfc_cutoff 事实 context（无 analysis_type/sequencing 键），而 M1 声明
+  # 侧键随范式上下文可变——故本规则以 decision_type 为唯一门（per-paradigm registry
+  # 已隔离 deg/pan 的 M1.3），阈值语义由 choice 词表编码（与 M1.3 词表一致）。
+  required_context: {}
+  forbidden_context: {}
+  context_constraints: []
+
+scoring:
+  level_4:
+    methods: []
+    description: "v0.2 — LLM rationale assessment considering biological context"
+  level_3:
+    methods:
+      - "padj <= 0.05, |logFC| >= 1.0"
+      - "FDR < 0.05, |logFC| >= 1.0"
+      - "padj <= 0.05, |logFC| >= 0.5"
+    description: "双阈值 (校正统计显著性 + 生物学效应量) — 标准做法。logFC 阈值可根据领域惯例在 0.5-2.0 之间调整（与 M1.3-DEG-001 对齐）"
+  level_2:
+    methods:
+      - "padj <= 0.1, |logFC| >= 0.5"
+    note: "宽松的统计阈值 → 需明确标注为探索性分析"
+  level_1:
+    methods:
+      - "p_raw <= 0.05"
+    note: "仅用 raw p 值（未做多重检验校正）+ 无效应量阈值 → 大量假阳性报告；scRNA 检验数巨大时尤其危险"
+  level_0:
+    methods:
+      - "no_threshold"
+      - "unfiltered"
+    note: "完全无约束 → 不可接受的假阳性率"
+
+evidence:
+  - source_type: "consensus_guideline"
+    pmid: "26813401"
+    title: "A survey of best practices for RNA-seq data analysis — Conesa et al. 2016, Nature Reviews Genetics"
+    confidence: "L-Consensus"
+    excerpt: "Differential expression results should be filtered by both adjusted p-value (multiple testing correction, e.g. BH-FDR) and effect size (log fold change); reporting raw p-values without correction inflates false positives."
+    supports_levels: ["level_3", "level_1"]
+  - source_type: "benchmark_paper"
+    pmid: "34433851"
+    title: "Confronting false discoveries in single-cell differential expression — Squair et al. 2021, Nature Communications"
+    confidence: "L-Confirmed"
+    excerpt: "FDR control is the central concern for scRNA-seq DEG; cell-level testing without proper correction can produce FPR up to 100% (pseudoreplication)."
+    supports_levels: ["level_3", "level_1"]
+  - source_type: "benchmark_paper"
+    pmid: "27022035"
+    title: "Schurch et al. (2016) RNA — n=48 yeast benchmark"
+    confidence: "L-Consensus"
+    excerpt: "At n=3, sensitivity is low across methods. |logFC| threshold helps reduce false positives, but n>=6 is the primary requirement for reliability."
+  - source_type: "consensus_guideline"
+    pmid: "31841116"
+    title: "Current best practices in single-cell RNA-seq analysis — Luecken & Theis 2019, Nature Reviews Genetics"
+    confidence: "L-Consensus"
+    excerpt: "scRNA-seq analysis best practices recommend reporting adjusted p-values with effect-size thresholds for differential expression."
+    supports_levels: ["level_3"]
+conflicts_with: []

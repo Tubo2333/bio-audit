@@ -1,11 +1,11 @@
 {
- "ruleset_version": "1.3.0",
+ "ruleset_version": "1.4.0",
  "engine_version": "0.2.1",
- "ontology_version": "0.1.0",
+ "ontology_version": "0.1.1",
  "generated_at": "2026-08-16",
- "n_rule_files": 43,
- "n_unique_rule_ids": 38,
- "note": "J1 窗口（2026-08-16）：wilcoxon 家族词表对齐——G1.3 L1 补 wilcoxon_rank_sum/wilcoxon_sc/Seurat_FindMarkers，G1.1 L1 补 Seurat_wilcoxon_default（以 G1.1 语义为准，D2 MAST 同原则；细胞级 wilcoxon = L1 有风险）。评分变化：wilcoxon 决策 L0→L1（golden 2 决策 + benchmark 4 任务），C4 基线更新",
+ "n_rule_files": 44,
+ "n_unique_rule_ids": 39,
+ "note": "J2 窗口（2026-08-16）：scRNA 范式新增 significance_threshold 规则（G1.4-DEG-004，文献锚定 Conesa 2016 PMID 26813401 等；level 词表与 M1.3 对齐）；本体 significance_threshold 扩至 scRNA + context_schema 增 padj_cutoff/logfc_cutoff（ontology 0.1.1）。golden 0 差异（无 scRNA 轨迹含该类型决策）",
  "files": [
   {
    "path": "DEG/D1.2-DEG-001_filtering.yaml",
@@ -176,6 +176,11 @@
    "path": "scRNA/G1.3-DEG-003_method.yaml",
    "sha256": "dfc1ce77865002b711cb029ca4009944f5d00968a21a3e16e953b9d02aafd438",
    "size": 3226
+  },
+  {
+   "path": "scRNA/G1.4-DEG-004_significance_threshold.yaml",
+   "sha256": "8a53643ac9f2d7a43a4bbae12642392f3fc10c1d067cd40f85eee683352203a5",
+   "size": 4035
   },
   {
    "path": "scRNA/H1.1-HVG-001_selection.yaml",

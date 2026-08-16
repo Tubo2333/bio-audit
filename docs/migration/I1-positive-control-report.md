@@ -291,6 +291,7 @@ A 版证明 LogNormalize 不是唯一可选归一化）。**口径纪律**：黄
 - `significance_threshold`：scRNA 范式**无规则**（M1.3 仅在 DEG/pan 范式），
   三版该决策均 L-1（与 G 窗口 immune_correlation ×12 同类缺口）；本体
   34 类型含此类型，规则库按本体 backlog 生长（G2 同类处理，不过度修）。
+  **（已修复——窗口 J2，2026-08-16：新增 G1.4-DEG-004，三版重评 L-1 → L3，见 §12.3。）**
 - `qc_mito_threshold` 的 MAD 通道、`clustering_resolution` 的多分辨率通道：
   同上（规则有、签名无 → 采集层缺口，§8.2）。
 
@@ -390,6 +391,29 @@ A 版证明 LogNormalize 不是唯一可选归一化）。**口径纪律**：黄
 | benchmark 60 任务 | mean 0.5528 / recall 0.820 / F1 0.781 / gap +0.046 | mean **0.5542** / 检出指标**不变** / gap **+0.048**（区间内，无告警）；bmd_scrna_005 67.7→70.0、bmd_scrna_014 68.0→74.0（→needs_correction） |
 | reward 校准 | ρ 0.6179 / τ_b 0.5033 / 分层差 +0.3614（p=0.000） | ρ **0.6008** / τ_b **0.4884** / 分层差 **+0.3434**（p=0.000 保持显著） |
 | pytest | 235/235 | 235/235（评分路径零代码改动，仅规则数据 + 基线） |
+
+### 12.3 J2 追加：significance_threshold 覆盖缺口修复后重评（2026-08-16，ruleset 1.3.0 → 1.4.0）
+
+> 本窗口登记发现③（§8.3：scRNA 范式无 significance_threshold 规则，三版均 L-1）已由
+> 窗口 J2 修复：新增 `G1.4-DEG-004_significance_threshold`（文献锚定 Conesa 2016
+> PMID 26813401 等；level 词表与 DEG/pan 范式 M1.3-DEG-001 对齐——阈值科学范式无关）；
+> 本体 significance_threshold 扩至 scRNA + context_schema 增 padj_cutoff/logfc_cutoff 键
+> （ontology 0.1.0 → 0.1.1）。golden 0 差异（无 scRNA 轨迹含该类型决策，C4 未触发）；
+> benchmark 60 任务 0 变化（无任务含该类型）；新规则覆盖豁免登记（D5.12）。
+
+| 版本 | J1 重评（ruleset 1.3.0） | **J2 重评（ruleset 1.4.0）** | significance_threshold 决策 |
+|---|---|---|---|
+| **A 黄金版** | 80.0 · pass（L-1×1） | **80.0 · pass（L-1×0）** | L-1 → **L3**（padj<=0.05, \|logFC\|>=1.0，G1.4 命中） |
+| **B 逻辑断裂** | 69.0 · needs_correction（L-1×1） | **69.0 · needs_correction（L-1×0）** | L-1 → **L3**（同 A） |
+| **C 微妙错误** | 66.7 · needs_correction（L-1×1） | **66.7 · needs_correction（L-1×0）** | L-1 → **L3**（同 A） |
+
+- **维度分如实呈现**：三版 statistical_rigor 维度均 0.85（BH L3 与 significance L3
+  均值），**聚合分无变化**（80.0/69.0/66.7）——覆盖缺口闭合（L-1 → L3）不改变
+  A 版 80.0 天花板结论（天花板仍来自 annotation L2 签名表缺口，§6/§8.2）。
+- golden/benchmark/reward 全链路 0 变化（无既有资产含 scRNA significance_threshold
+  决策）；pytest 235/235；规则集 1.4.0（39 唯一规则）。
+
+详细报告：`bio-audit-v2/docs/migration/J1-rule-quality-report.md`（窗口 J）。
 
 详细报告：`bio-audit-v2/docs/migration/J1-rule-quality-report.md`（窗口 J）。
 

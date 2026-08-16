@@ -12,7 +12,7 @@
   * 内部异常统一包装为 BioAuditError 或写入 state["error_code"]，不裸抛；
   * 错误码体系与契约文档：docs/api-contract.md（B3 验收项 4/5）。
 - 支持按范式（act）加载规则集：deg / pan / scrna（与 golden 复算口径一致）；
-  不传 act 则加载全量规则（C2 去重后 38 唯一规则）
+  不传 act 则加载全量规则（C2 去重后 39 唯一规则）
 
 返回 dict（与旧 run_audit state 兼容）：
 session_id / parsed_steps / matched_rules / step_scores / conflicts /
@@ -58,7 +58,7 @@ def _append_event(event_store: EventStore, state: dict, event: AuditEvent) -> No
 
 
 def _registry_for(act: str | None = None) -> RuleRegistry:
-    """按范式建 registry；None → 全量规则（38 唯一）。act 已由契约层校验。"""
+    """按范式建 registry；None → 全量规则（39 唯一）。act 已由契约层校验。"""
     registry = RuleRegistry(rules_dir_for(act))
     registry.load_all()
     return registry
@@ -115,7 +115,7 @@ def run_audit(
         （step_id / decision_type / choice 必填；rationale / context /
         tool_call / code_snippet 可选；未知字段报错，A15）。
     act : str | None
-        范式规则集："deg" | "pan" | "scrna"；None = 全量规则（38 唯一）。
+        范式规则集："deg" | "pan" | "scrna"；None = 全量规则（39 唯一）。
         非合法范式 → ``paradigm-not-found``（不再静默回退）。
     human_overrides : dict[str, int] | None
         {step_id: level} 人工覆写；level 必须为 int 且 -1..4（A7），

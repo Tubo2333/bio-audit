@@ -160,7 +160,7 @@ def verify_manifest(
             errors.append({"kind": "invalid_rule_yaml", "path": rel,
                            "detail": str(exc)})
 
-    # 5. 唯一 rule_id（C2：38 唯一；5 对 DEG/pancancer 同名副本为预期）
+    # 5. 唯一 rule_id（C2：39 唯一；5 对 DEG/pancancer 同名副本为预期）
     id_files = _rule_ids_from_files(disk_files)
     dup_ids = {rid: fs for rid, fs in id_files.items() if len(fs) > 1}
     for rid, fs in sorted(dup_ids.items()):

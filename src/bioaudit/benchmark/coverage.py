@@ -1,12 +1,12 @@
 """规则覆盖审计（refactor-plan-v1.1 E5；execution-plan D5.12）。
 
-任务集准入：覆盖全部 34 决策类型 + 38 唯一规则；零触发规则 = 0 或显式豁免
+任务集准入：覆盖全部 34 决策类型 + 39 唯一规则；零触发规则 = 0 或显式豁免
 清单（附理由）。本模块是 benchmark-validate 的覆盖闸。
 
 实现：
 - 类型覆盖：任务 decisions 的 decision_type 并集 vs 本体 34 类型；
 - 规则覆盖：对每条任务跑 RuleMatcher（与评分同路径的匹配层），收集命中的
-  rule_id 并集 vs ruleset.json 的 38 唯一规则；
+  rule_id 并集 vs ruleset.json 的 39 唯一规则；
 - 零触发清单：未命中类型/规则 + 豁免理由字段（由审计者显式填写）。
 
 golden 不变量：本模块只读匹配（不评分、不聚合），不改任何评分路径。
@@ -25,6 +25,17 @@ from bioaudit.storage.rule_registry import RuleRegistry
 
 #: 本体 34 类型（决策类型定义文件）
 ONTOLOGY_TYPES = sorted(p.stem for p in (ONTOLOGY_DIR / "decision_types").glob("*.yaml"))
+
+#: 零触发规则显式豁免清单（D5.12：零触发 = 0 或显式豁免附理由）。
+#: 仅用于"任务集冻结后新增的规则"过渡期——下一批任务集扩展时必须补覆盖并移除豁免。
+DEFAULT_EXEMPTIONS: dict[str, str] = {
+    "G1.4-DEG-004_significance_threshold": (
+        "窗口 J2（2026-08-16）新增 scRNA significance_threshold 规则；60 条任务集"
+        "（taskset 1.1.0）冻结后加入，无任务含 scRNA significance_threshold 决策"
+        "（该类型在 deg/pan 由 M1.3-DEG-001 覆盖，I 窗口黄金 Agent 真实执行覆盖 scRNA 侧）。"
+        "批 3 任务集扩展时补充覆盖并移除本豁免。"
+    ),
+}
 
 
 def collect_task_types(tasks: list[dict]) -> dict[str, int]:
@@ -71,18 +82,21 @@ def audit(
     """覆盖审计主入口 → 结构化报告。
 
     exemptions: {rule_id 或 decision_type: 豁免理由}——零触发规则的显式豁免
-    清单（D5.12：零触发 = 0 或显式豁免附理由）。
+    清单（D5.12：零触发 = 0 或显式豁免附理由）。默认叠加 DEFAULT_EXEMPTIONS
+    （任务集冻结后新增规则的过渡期豁免，见模块常量）。
     """
     from bioaudit.benchmark.paths import TASKS_DIR
 
     td = Path(tasks_dir) if tasks_dir else TASKS_DIR
     tasks = load_tasks(td)
-    exemptions = exemptions or {}
+    # 默认豁免（D5.12 显式豁免清单）+ 调用方附加豁免
+    exemptions = dict(DEFAULT_EXEMPTIONS)
+    exemptions.update(exemptions or {})
 
     type_counts = collect_task_types(tasks)
     matched = collect_matched_rules(tasks)
 
-    # 38 唯一规则（从规则文件读取 rule_id，跨范式副本去重）
+    # 39 唯一规则（从规则文件读取 rule_id，跨范式副本去重）
     import yaml as _yaml
 
     rd = Path(__file__).resolve().parent.parent / "rules" / "data"
@@ -114,8 +128,11 @@ def audit(
         "remaining_missing_rules": remaining_missing_rules,
         "type_counts": dict(sorted(type_counts.items())),
         "rule_counts": {r: m["n_decisions"] for r, m in sorted(matched.items())},
-        "note": "覆盖审计：34 类型 + 38 规则；零触发 = 0 或显式豁免（附理由，D5.12）",
+        "note": "覆盖审计：34 类型 + 全部规则；零触发 = 0 或显式豁免（附理由，D5.12）",
     }
 
 
-__all__ = ["ONTOLOGY_TYPES", "collect_task_types", "collect_matched_rules", "audit"]
+__all__ = [
+    "ONTOLOGY_TYPES", "DEFAULT_EXEMPTIONS", "collect_task_types",
+    "collect_matched_rules", "audit",
+]

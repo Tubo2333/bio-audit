@@ -401,7 +401,7 @@ def cmd_benchmark_validate(args: argparse.Namespace) -> int:
     if not prompt_cont["ok"]:
         errors.append({"kind": "generator_prompt_contamination", "detail": "E6 违规"})
 
-    # 闸 3：覆盖审计（E5：34 类型 + 38 规则；零触发 = 0 或显式豁免）
+    # 闸 3：覆盖审计（E5：34 类型 + 39 规则；零触发 = 0 或显式豁免）
     cov = coverage_audit(args.tasks_dir, exemptions={})
     gates["coverage"] = cov
     if not cov["ok"]:

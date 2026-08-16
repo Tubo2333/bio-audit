@@ -37,7 +37,7 @@ ACT_RULE_SUBDIRS = {
 
 
 def rules_dir_for(act: str) -> Path:
-    """按范式取规则目录；未知范式回退到全量规则目录（C2 去重后 38 唯一规则）。"""
+    """按范式取规则目录；未知范式回退到全量规则目录（C2 去重后 39 唯一规则）。"""
     sub = ACT_RULE_SUBDIRS.get(act)
     return RULES_DIR / sub if sub else RULES_DIR
 

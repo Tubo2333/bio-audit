@@ -209,12 +209,13 @@ def test_generator_specs_rule_id_free():
 
 
 def test_coverage_all_types_and_rules():
-    """任务集准入：34 决策类型 + 38 唯一规则全覆盖（D5.12）。"""
+    """任务集准入：34 决策类型 + 规则全覆盖（D5.12，零触发 = 0 或显式豁免）。"""
     cov = coverage_audit(TASKS_DIR)
     assert cov["ok"], cov["missing_types"] or cov["remaining_missing_rules"]
     assert cov["n_types_covered"] == 34
-    assert cov["n_rules_matched"] == 38
-    assert cov["missing_rules"] == []
+    assert cov["n_rules_matched"] == 38  # G1.4（J2 新增）由 DEFAULT_EXEMPTIONS 豁免
+    assert cov["missing_rules"] == ["G1.4-DEG-004_significance_threshold"]
+    assert cov["remaining_missing_rules"] == []
 
 
 # ── D4：运行器 + 功效分析 ────────────────────────────────────────────────────

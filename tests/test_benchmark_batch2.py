@@ -154,12 +154,12 @@ def test_rubric_v11_six_clarifications_present():
 
 
 def test_coverage_60_tasks_still_34_38():
-    """60 条仍覆盖 34/34 类型 + 38/38 规则（零触发 = 0，F3.7）。"""
+    """60 条仍覆盖 34/34 类型 + 38/38 规则（零触发 = 0 或显式豁免，F3.7）。"""
     cov = coverage_audit(TASKS_DIR)
     assert cov["ok"], cov["missing_types"] or cov["remaining_missing_rules"]
     assert cov["n_types_covered"] == 34
-    assert cov["n_rules_matched"] == 38
-    assert cov["missing_rules"] == []
+    assert cov["n_rules_matched"] == 38  # G1.4（J2 新增）由 DEFAULT_EXEMPTIONS 豁免
+    assert cov["remaining_missing_rules"] == []
 
 
 def test_difficulty_all_paradigm_cells_nonempty():

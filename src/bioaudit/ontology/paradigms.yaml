@@ -1,6 +1,8 @@
 # 分析范式（第 1 层）— ontology-design-v1 §一/§二.4
 # 范式 = 配置（一组决策类型定义），不是硬编码；新增范式 = 新增 YAML 段落。
-ontology_version: 0.1.0
+# 0.1.1（2026-08-16 窗口 J2）：significance_threshold 决策类型扩至 scRNA 范式 +
+# context_schema 增 padj_cutoff/logfc_cutoff 键（与 M3 签名对齐）。
+ontology_version: 0.1.1
 paradigms:
   bulk-DEG:
     display:

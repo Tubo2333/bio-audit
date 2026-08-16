@@ -7,7 +7,7 @@
 保留修正：
 - A4: _eval_constraint 解析失败 fail-closed
 - A6: forbidden_context 值防非 list
-- C2: 同 rule_id 跨文件重复 → WARNING + 保留先加载者（去重后 38 唯一规则）
+- C2: 同 rule_id 跨文件重复 → WARNING + 保留先加载者（去重后 39 唯一规则）
 """
 
 import re

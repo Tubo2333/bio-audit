@@ -40,11 +40,11 @@ def test_deg_error_blocked():
     assert any(s["level"] == 0 for s in result["step_scores"])
 
 
-def test_c2_dedup_all_rules_38_unique():
+def test_c2_dedup_all_rules_39_unique():
     reg = RuleRegistry()  # 全量规则目录（含 DEG 与 pancancer 双副本）
     n = reg.load_all()
-    assert n == 38, f"C2 去重后应 38 唯一规则，实际 {n}"
-    assert reg.rule_count == 38
+    assert n == 39, f"C2 去重后应 39 唯一规则（J2 新增 G1.4），实际 {n}"
+    assert reg.rule_count == 39
 
 
 def test_deg_bloodline_unified():

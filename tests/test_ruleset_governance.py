@@ -34,15 +34,15 @@ def test_ruleset_version_reads_from_manifest():
     assert RULESET_VERSION.count(".") == 2  # semver 形状
     # 清单三元组元数据完整
     assert manifest["engine_version"] == bioaudit.ENGINE_VERSION == bioaudit.__version__
-    assert manifest["ontology_version"] == bioaudit.ONTOLOGY_VERSION == "0.1.0"
+    assert manifest["ontology_version"] == bioaudit.ONTOLOGY_VERSION == "0.1.1"
 
 
 def test_verify_manifest_all_green():
     report = verify_manifest()
     assert report["ok"] is True, report["errors"]
     assert report["errors"] == []
-    assert report["n_rule_files"] == 43
-    assert report["n_unique_rule_ids"] == 38
+    assert report["n_rule_files"] == 44
+    assert report["n_unique_rule_ids"] == 39
     assert report["duplicate_copies"] == 5  # DEG/pancancer 同名副本（C2 预期）
     # 每个清单条目都有内容哈希
     manifest = load_ruleset()
@@ -92,7 +92,7 @@ def test_report_snapshot_triple_complete():
     # 三元组不再为 None（B5 验收项 1/2）；版本从清单/本体读取，不硬编码
     from bioaudit.rules.manifest import load_ruleset
     assert report["ruleset_version"] == load_ruleset()["ruleset_version"]
-    assert report["ontology_version"] == "0.1.0"
+    assert report["ontology_version"] == "0.1.1"
     assert report["engine_version"] == bioaudit.__version__
     # 完整快照字典（C1/P2）
     snap = report["snapshot"]
@@ -142,8 +142,8 @@ def test_generate_manifest_roundtrip(tmp_path):
         rules_dir=RULES_DIR, manifest_path=tmp_path / "ruleset.json",
         ruleset_version="1.1.0", engine_version="0.1.1", ontology_version="0.1.0",
     )
-    assert manifest["n_rule_files"] == 43
-    assert manifest["n_unique_rule_ids"] == 38
+    assert manifest["n_rule_files"] == 44
+    assert manifest["n_unique_rule_ids"] == 39
     # 生成后清单可被 verify_manifest 接受（用同一规则目录）
     check = verify_manifest(rules_dir=RULES_DIR, manifest_path=tmp_path / "ruleset.json")
     assert check["ok"] is True

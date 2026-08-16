@@ -5,7 +5,7 @@
     bio-audit ruleset-validate [--json] [--baseline PATH]
 
 三道闸：
-1. **清单校验**：ruleset.json semver / 43 文件内容哈希 / 38 唯一 rule_id /
+1. **清单校验**：ruleset.json semver / 44 文件内容哈希 / 39 唯一 rule_id /
    YAML→Rule schema（bioaudit.rules.manifest.verify_manifest）
 2. **冲突完整性**：同规则集内 同 decision_type + choice 不同 level（D2，
    范式感知；B5 裁决后预期 0 冲突——bioaudit.ontology.validator）
