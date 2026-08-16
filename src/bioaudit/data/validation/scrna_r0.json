@@ -3,7 +3,7 @@
     "label": "scRNA 真值锚定 / scRNA Ground Truth Anchor",
     "key_metric": "Spearman ρ = 0.9747",
     "status": "PASS",
-    "detail": "numpy neg-binom + zero-inflation simulation (1000 genes × 2000 cells, 100 true DEGs, 30% dropout). 5 method combinations with signal-detection DEG model: audit scores 52–85, F1 0.039–0.639. Spearman ρ = 0.9747, Kendall τ_b = 0.9487. Monotonic ranking: True.",
+    "detail": "numpy neg-binom + zero-inflation simulation (1000 genes × 2000 cells, 100 true DEGs, 30% dropout). 5 method combinations with signal-detection DEG model: audit scores 55–85, F1 0.039–0.639. Spearman ρ = 0.9747, Kendall τ_b = 0.9487. Monotonic ranking: True.",
     "limit": "n=5 combinations (small n, correlation directionally meaningful but p-values unreliable). Signal-detection model (not actual tool execution — splatter unavailable due to Bioconductor GFW block). Model parameters grounded in benchmark literature (Hafemeister 2019, Squair 2021, Tran 2020, Xi 2021). Directional validation: audit scores track analysis quality. Honest limitation: modeled F1 rather than empirical F1 from tool execution.",
     "spearman_rho": 0.9747,
     "spearman_p": 0.0048,
@@ -535,11 +535,11 @@
       "f1": 0.0388,
       "ground_truth_n_deg": 100,
       "n_called_deg": 209,
-      "audit_score": 52.1,
+      "audit_score": 54.6,
       "n_decisions": 12,
       "n_rules_matched": 14,
-      "danger_decisions": 4,
-      "risk_decisions": 1,
+      "danger_decisions": 3,
+      "risk_decisions": 2,
       "step_scores": [
         {
           "step_id": "S1",
@@ -636,8 +636,8 @@
           "step_id": "S10",
           "decision_type": "deg_method",
           "choice": "ttest_on_cells",
-          "level": 0,
-          "numeric_score": 0.0,
+          "level": 1,
+          "numeric_score": 0.3,
           "matched_rules": [
             "G1.1-DEG-001_pseudobulk",
             "G1.3-DEG-003_method"
@@ -819,13 +819,13 @@
     }
   ],
   "meta": {
-    "generated_at": "2026-08-16 (J2 重算: ruleset 1.4.0 / 23 scRNA 规则)",
+    "generated_at": "2026-08-16 (K 重算: ruleset 1.6.0 / 24 scRNA 规则)",
     "original_generated_at": "2026-08-10",
-    "engine_state": "bio-audit-v2 当前引擎（D5 无条件提升已移除 + J1 wilcoxon 词表对齐 + J2 significance_threshold 规则，ruleset 1.4.0）— 旧版 scrna_r0.json 为 D5 bug 状态产物，备份于 scrna_r0_pre_d5fix.json",
+    "engine_state": "bio-audit-v2 当前引擎（D5 无条件提升已移除 + J1 wilcoxon 词表对齐 + J2 significance_threshold 规则 + K1 immune scRNA 规则 + K2 未知方法→-1 + K3 ttest 家族对齐，ruleset 1.6.0）— 旧版 scrna_r0.json 为 D5 bug 状态产物，备份于 scrna_r0_pre_d5fix.json",
     "phase": "Phase 3 — scRNA R0 validation",
     "design_doc": "docs/specs/2026-08-08-deepening-design.md §3",
-    "rule_count": 23,
-    "rule_version": "bio-audit-v2 ruleset 1.4.0 (23 rules)",
-    "honest_note": "Directional validation — modeled F1 (not empirical). Small-n limitation acknowledged. 模拟数据 seed=42 固定，F1 与引擎无关；audit_score 随引擎修复变化。"
+    "rule_count": 24,
+    "rule_version": "bio-audit-v2 ruleset 1.6.0 (24 rules)",
+    "honest_note": "Directional validation — modeled F1 (not empirical). Small-n limitation acknowledged. 模拟数据 seed=42 固定，F1 与引擎无关；audit_score 随引擎修复变化。K3 变化（2026-08-16）：combo_4 S10 ttest_on_cells 由 L0 改为 L1（t-test 族与 wilcoxon 族同等待遇裁决），audit_score 相应变化。"
   }
 }

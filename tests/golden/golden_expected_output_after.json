@@ -1791,9 +1791,7 @@
      "explanation": "危险 — 方法选择将导致错误结论",
      "evidence_citations": [
       "[L-Confirmed] A benchmark of batch-effect correction methods for single-cell RNA sequencing data — Tran et al. 2020, Genome Biology — **[PMID: 32033589](https://pubmed.ncbi.nlm.nih.gov/32033589/)**",
-      "[L-Confirmed] Fast, sensitive and accurate integration of single-cell data with Harmony — Korsunsky et al. 2019, Nature Methods — **[PMID: 31740819](https://pubmed.ncbi.nlm.nih.gov/31740819/)**",
-      "[L-Confirmed] A benchmark of batch-effect correction methods for single-cell RNA sequencing data — Tran et al. 2020, Genome Biology — **[PMID: 32033589](https://pubmed.ncbi.nlm.nih.gov/32033589/)**",
-      "[L-Evidenced] K-nearest neighbor batch effect estimation (kBET) — Büttner et al. 2019, Nature Methods — **[PMID: 31024591](https://pubmed.ncbi.nlm.nih.gov/31024591/)**"
+      "[L-Confirmed] Fast, sensitive and accurate integration of single-cell data with Harmony — Korsunsky et al. 2019, Nature Methods — **[PMID: 31740819](https://pubmed.ncbi.nlm.nih.gov/31740819/)**"
      ],
      "alternatives": [
       "Harmony",
@@ -2163,9 +2161,7 @@
      "explanation": "危险 — 方法选择将导致错误结论",
      "evidence_citations": [
       "[L-Confirmed] A benchmark of batch-effect correction methods for single-cell RNA sequencing data — Tran et al. 2020, Genome Biology — **[PMID: 32033589](https://pubmed.ncbi.nlm.nih.gov/32033589/)**",
-      "[L-Confirmed] Fast, sensitive and accurate integration of single-cell data with Harmony — Korsunsky et al. 2019, Nature Methods — **[PMID: 31740819](https://pubmed.ncbi.nlm.nih.gov/31740819/)**",
-      "[L-Confirmed] A benchmark of batch-effect correction methods for single-cell RNA sequencing data — Tran et al. 2020, Genome Biology — **[PMID: 32033589](https://pubmed.ncbi.nlm.nih.gov/32033589/)**",
-      "[L-Evidenced] K-nearest neighbor batch effect estimation (kBET) — Büttner et al. 2019, Nature Methods — **[PMID: 31024591](https://pubmed.ncbi.nlm.nih.gov/31024591/)**"
+      "[L-Confirmed] Fast, sensitive and accurate integration of single-cell data with Harmony — Korsunsky et al. 2019, Nature Methods — **[PMID: 31740819](https://pubmed.ncbi.nlm.nih.gov/31740819/)**"
      ],
      "alternatives": [
       "Harmony",
@@ -2321,7 +2317,7 @@
    "verdict": "blocked",
    "dimension_scores": {
     "data_handling": 0.29,
-    "method_selection": 0.4071
+    "method_selection": 0.63
    },
    "step_scores": [
     {
@@ -2444,9 +2440,7 @@
      "explanation": "危险 — 方法选择将导致错误结论",
      "evidence_citations": [
       "[L-Confirmed] A benchmark of batch-effect correction methods for single-cell RNA sequencing data — Tran et al. 2020, Genome Biology — **[PMID: 32033589](https://pubmed.ncbi.nlm.nih.gov/32033589/)**",
-      "[L-Confirmed] Fast, sensitive and accurate integration of single-cell data with Harmony — Korsunsky et al. 2019, Nature Methods — **[PMID: 31740819](https://pubmed.ncbi.nlm.nih.gov/31740819/)**",
-      "[L-Confirmed] A benchmark of batch-effect correction methods for single-cell RNA sequencing data — Tran et al. 2020, Genome Biology — **[PMID: 32033589](https://pubmed.ncbi.nlm.nih.gov/32033589/)**",
-      "[L-Evidenced] K-nearest neighbor batch effect estimation (kBET) — Büttner et al. 2019, Nature Methods — **[PMID: 31024591](https://pubmed.ncbi.nlm.nih.gov/31024591/)**"
+      "[L-Confirmed] Fast, sensitive and accurate integration of single-cell data with Harmony — Korsunsky et al. 2019, Nature Methods — **[PMID: 31740819](https://pubmed.ncbi.nlm.nih.gov/31740819/)**"
      ],
      "alternatives": [
       "Harmony",
@@ -2465,21 +2459,12 @@
      "matched_rules": [
       "D2.1-DIMR-001_reduction"
      ],
-     "level": 0,
-     "numeric_score": 0.0,
-     "explanation": "危险 — 方法选择将导致错误结论",
-     "evidence_citations": [
-      "[L-Confirmed] Current best practices in single-cell RNA-seq analysis — Luecken & Theis 2019, Mol Syst Biol — **[PMID: 31841116](https://pubmed.ncbi.nlm.nih.gov/31841116/)**",
-      "[L-Evidenced] A comparison of single-cell trajectory inference methods — Saelens et al. 2019, Nature Biotechnology — **[PMID: 30643263](https://pubmed.ncbi.nlm.nih.gov/30643263/)**"
-     ],
-     "alternatives": [
-      "PCA_elbow_selection",
-      "PCA_JackStraw",
-      "PCA_heatmap_selection",
-      "PCA_default_30",
-      "PCA_fixed_50"
-     ],
-     "reward_signal": 0.0
+     "level": -1,
+     "numeric_score": 0.5,
+     "explanation": "无法评估 — 匹配规则未覆盖该 choice（规则级跳过：该规则不适用；未知方法 ≠ 错误，K2 裁决 2026-08-16）。此分数为占位值，不可作为质量判断依据。",
+     "evidence_citations": [],
+     "alternatives": [],
+     "reward_signal": 0.5
     },
     {
      "step_id": "S8",
@@ -2533,9 +2518,9 @@
       "G1.1-DEG-001_pseudobulk",
       "G1.3-DEG-003_method"
      ],
-     "level": 0,
-     "numeric_score": 0.0,
-     "explanation": "危险 — 方法选择将导致错误结论",
+     "level": 1,
+     "numeric_score": 0.3,
+     "explanation": "有风险 — 方法选择值得商榷",
      "evidence_citations": [
       "[L-Confirmed] Confronting false discoveries in single-cell differential expression — Squair et al. 2021, Nature Communications — **[PMID: 34433851](https://pubmed.ncbi.nlm.nih.gov/34433851/)**",
       "[L-Confirmed] Confronting false discoveries in single-cell differential expression — Squair et al. 2021, Nature Communications — **[PMID: 34433851](https://pubmed.ncbi.nlm.nih.gov/34433851/)**",
@@ -2550,7 +2535,7 @@
       "NEBULA",
       "scVI_LDEE"
      ],
-     "reward_signal": 0.0
+     "reward_signal": 0.3
     },
     {
      "step_id": "S11",
@@ -2560,21 +2545,12 @@
      "matched_rules": [
       "T1.1-TRAJ-001_inference"
      ],
-     "level": 0,
-     "numeric_score": 0.0,
-     "explanation": "危险 — 方法选择将导致错误结论",
-     "evidence_citations": [
-      "[L-Confirmed] A comparison of single-cell trajectory inference methods — Saelens et al. 2019, Nature Biotechnology — **[PMID: 30643263](https://pubmed.ncbi.nlm.nih.gov/30643263/)**",
-      "[L-Evidenced] The dynamics and regulators of cell fate decisions are revealed by pseudotemporal ordering of single cells — Trapnell et al. 2014, Nature Biotechnology — **[PMID: 30834587](https://pubmed.ncbi.nlm.nih.gov/30834587/)**"
-     ],
-     "alternatives": [
-      "monocle3",
-      "slingshot_with_topology_check",
-      "PAGA",
-      "scVelo",
-      "diffusion_map"
-     ],
-     "reward_signal": 0.0
+     "level": -1,
+     "numeric_score": 0.5,
+     "explanation": "无法评估 — 匹配规则未覆盖该 choice（规则级跳过：该规则不适用；未知方法 ≠ 错误，K2 裁决 2026-08-16）。此分数为占位值，不可作为质量判断依据。",
+     "evidence_citations": [],
+     "alternatives": [],
+     "reward_signal": 0.5
     },
     {
      "step_id": "S12",

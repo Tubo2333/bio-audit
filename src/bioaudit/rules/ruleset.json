@@ -1,11 +1,11 @@
 {
- "ruleset_version": "1.4.0",
+ "ruleset_version": "1.6.0",
  "engine_version": "0.2.1",
- "ontology_version": "0.1.1",
+ "ontology_version": "0.1.2",
  "generated_at": "2026-08-16",
- "n_rule_files": 44,
- "n_unique_rule_ids": 39,
- "note": "J2 窗口（2026-08-16）：scRNA 范式新增 significance_threshold 规则（G1.4-DEG-004，文献锚定 Conesa 2016 PMID 26813401 等；level 词表与 M1.3 对齐）；本体 significance_threshold 扩至 scRNA + context_schema 增 padj_cutoff/logfc_cutoff（ontology 0.1.1）。golden 0 差异（无 scRNA 轨迹含该类型决策）",
+ "n_rule_files": 45,
+ "n_unique_rule_ids": 40,
+ "note": "K 窗口：K1 scRNA immune 规则（1.5.0）+ K2 未知方法→-1 规则级跳过 + K3 ttest 家族词表对齐（G1.1/G1.3 双向补齐，审计中枢 2026-08-16 确认）",
  "files": [
   {
    "path": "DEG/D1.2-DEG-001_filtering.yaml",
@@ -164,8 +164,8 @@
   },
   {
    "path": "scRNA/G1.1-DEG-001_pseudobulk.yaml",
-   "sha256": "43a1b7d8feedd7a3e26b25f8a6f5b1ad526d0d3710f5fb46659ed8b09de60792",
-   "size": 2821
+   "sha256": "c208254390cacefe0fd73e340369cc89b1f67b8bdfc9c7d66ea7e1554f2a5b66",
+   "size": 3482
   },
   {
    "path": "scRNA/G1.2-DEG-002_multiple_testing.yaml",
@@ -174,8 +174,8 @@
   },
   {
    "path": "scRNA/G1.3-DEG-003_method.yaml",
-   "sha256": "dfc1ce77865002b711cb029ca4009944f5d00968a21a3e16e953b9d02aafd438",
-   "size": 3226
+   "sha256": "287cb5588d88c68b918c325eacab7b93ecdfe1b5d983fc3906f9ff8eec573bf7",
+   "size": 3951
   },
   {
    "path": "scRNA/G1.4-DEG-004_significance_threshold.yaml",
@@ -186,6 +186,11 @@
    "path": "scRNA/H1.1-HVG-001_selection.yaml",
    "sha256": "fd7e287d2c03cae83ff60db14ac2e9a0910e076648d1f2fa667af525454701c4",
    "size": 2219
+  },
+  {
+   "path": "scRNA/I4.1-IMMU-001_scRNA_correlation_method.yaml",
+   "sha256": "e7b096d381675d50a732609f0b7e863fe4cc0f2460986d17ed3e386a1ec7c273",
+   "size": 4344
   },
   {
    "path": "scRNA/N1.1-NORM-001_normalization.yaml",

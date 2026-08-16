@@ -213,8 +213,11 @@ def test_coverage_all_types_and_rules():
     cov = coverage_audit(TASKS_DIR)
     assert cov["ok"], cov["missing_types"] or cov["remaining_missing_rules"]
     assert cov["n_types_covered"] == 34
-    assert cov["n_rules_matched"] == 38  # G1.4（J2 新增）由 DEFAULT_EXEMPTIONS 豁免
-    assert cov["missing_rules"] == ["G1.4-DEG-004_significance_threshold"]
+    assert cov["n_rules_matched"] == 38  # G1.4（J2）+ I4.1 scRNA（K1）由 DEFAULT_EXEMPTIONS 豁免
+    assert cov["missing_rules"] == [
+        "G1.4-DEG-004_significance_threshold",
+        "I4.1-IMMU-001_scRNA_correlation_method",
+    ]
     assert cov["remaining_missing_rules"] == []
 
 

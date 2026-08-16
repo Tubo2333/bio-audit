@@ -39,13 +39,17 @@ scoring:
       - Seurat_FindMarkers
       - Seurat_wilcoxon_default
       - ttest_on_normalized
+      - ttest_equal_variance
+      - ttest_on_cells
+      - Kruskal_Wallis_cell_level
     description: "MAST(细胞级,无重复校正)/Wilcoxon/t-test — 经典但未针对单细胞优化"
-    note: "裸 MAST 与 Seurat FindMarkers 默认 Wilcoxon 均以细胞为独立重复(伪重复未解决, 与 G1.1 L1 对齐, B5 裁决); 适用于探索性分析但需注意伪重复。wilcoxon 家族词表对齐（窗口 J1 裁决 2026-08-16）：wilcoxon_rank_sum/wilcoxon_sc/Seurat_FindMarkers/Seurat_wilcoxon_default 统一评 L1（以 G1.1 语义为准，与 D2 MAST 裁决同原则——细胞级 wilcoxon = 有风险 L1，L0 保留给 t-test 族）；修复 B 版黄金对照 L0 兜底机制（I1 报告 §8.2 发现①）"
+    note: "裸 MAST 与 Seurat FindMarkers 默认 Wilcoxon 均以细胞为独立重复(伪重复未解决, 与 G1.1 L1 对齐, B5 裁决); 适用于探索性分析但需注意伪重复。wilcoxon 家族词表对齐（窗口 J1 裁决 2026-08-16）：wilcoxon_rank_sum/wilcoxon_sc/Seurat_FindMarkers/Seurat_wilcoxon_default 统一评 L1（以 G1.1 语义为准，与 D2 MAST 裁决同原则——细胞级 wilcoxon = 有风险 L1，L0 保留给 raw-counts t-test）；修复 B 版黄金对照 L0 兜底机制（I1 报告 §8.2 发现①）。t-test 家族对齐（窗口 K3 裁决 2026-08-16，审计中枢确认）：ttest_equal_variance/ttest_on_cells 评 L1（与 wilcoxon 族同等待遇——细胞级 = L1 有风险，Squair 2021；无独立于伪重复的额外风险论证，Svensson 2020 弱化零膨胀论证）；Kruskal_Wallis_cell_level 同原则补 L1；raw-counts 直用（ttest_on_raw_counts/anova_on_cells）保留 L0（独立分布违背）"
   level_0:
     methods:
       - ttest_on_raw_counts
       - anova_on_cells
-    description: "t-test/ANOVA直接用于原始counts — 不满足任何假设"
+    description: "t-test/ANOVA直接用于原始counts — 不满足任何假设（独立于伪重复）"
+    note: "窗口 K3 裁决（2026-08-16，审计中枢确认）：raw counts 直用保留 L0——离散 count 的均值-方差关系在任何单位下都违背 t-test 连续正态假设"
   override_n2: {}
 
 evidence:

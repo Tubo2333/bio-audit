@@ -100,9 +100,10 @@ def test_paradigm_disambiguation_same_choice_different_scores():
     deg = audit_decision(VALID_DECISION, paradigm="deg")
     scrna = audit_decision(SCRNA_DECISION, paradigm="scrna")
 
-    # deg_method/DESeq2：bulk 规则 M1.1 → L3；scRNA 规则（要求 pseudobulk 形式）→ L0
+    # deg_method/DESeq2：bulk 规则 M1.1 → L3；scRNA 规则词表仅收 pseudobulk_* 形式，
+    # 裸 DESeq2 未识别 → 规则级跳过 → -1（K2 语义：未知方法 ≠ 错误，不再兜底 L0）
     assert deg["level"] == 3
-    assert scrna["level"] == 0
+    assert scrna["level"] == -1
     assert deg["level"] != scrna["level"]  # paradigm 真正改变评分
     assert "M1.1-DEG-001" in deg["matched_rules"]
     assert "M1.1-DEG-001" not in scrna["matched_rules"]

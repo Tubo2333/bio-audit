@@ -36,14 +36,18 @@ scoring:
       - wilcoxon_sc
       - Seurat_FindMarkers
       - Seurat_wilcoxon_default
-    description: "细胞级别 DEG — 伪重复问题未解决, FPR膨胀"
-    note: "Seurat FindMarkers 默认将细胞视为独立重复, n=细胞数会导致虚假的小p值。wilcoxon 家族词表对齐（窗口 J1 裁决 2026-08-16）：补 Seurat_wilcoxon_default（G1.3 既有命名）评 L1，与 G1.3 词表对称（I1 报告 §8.2 发现①）"
-  level_0:
-    methods:
+      - Kruskal_Wallis_cell_level
+      - ttest_on_normalized
       - ttest_equal_variance
       - ttest_on_cells
-    description: "t-test 用于单细胞级别 — 分布假设不满足 + 伪重复双重问题"
-    rationale: "单细胞数据非正态、存在大量零值, t-test假设完全不成立"
+    description: "细胞级别 DEG — 伪重复问题未解决, FPR膨胀"
+    note: "Seurat FindMarkers 默认将细胞视为独立重复, n=细胞数会导致虚假的小p值。wilcoxon 家族词表对齐（窗口 J1 裁决 2026-08-16）：补 Seurat_wilcoxon_default（G1.3 既有命名）评 L1，与 G1.3 词表对称（I1 报告 §8.2 发现①）。t-test 家族对齐（窗口 K3 裁决 2026-08-16，审计中枢确认）：t-test 族与 wilcoxon 族同等待遇——细胞级 = L1 有风险（Squair 2021；伪重复对两族同等成立，无独立于伪重复的额外风险论证；Svensson 2020 弱化零膨胀论证）；Kruskal_Wallis_cell_level 同原则（秩检验细胞级 = 伪重复 L1）"
+  level_0:
+    methods:
+      - ttest_on_raw_counts
+      - anova_on_cells
+    description: "t-test/ANOVA 直接用于原始 counts — 分布假设完全违背（独立于伪重复）"
+    rationale: "原始 counts 为离散、非负、均值-方差相关数据，t-test 的连续正态假设在任何单位（含样本级）下都不成立；标准做法为 log/CPM 变换或负二项模型（窗口 K3 裁决 2026-08-16：raw-counts 直用保留 L0）"
   override_n2:
     condition: "n_patients <= 2"
 

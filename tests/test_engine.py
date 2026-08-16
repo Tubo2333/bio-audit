@@ -2,8 +2,9 @@
 
 覆盖：
 - deg_correct 全链路 → 85.0 / pass（golden 摘要一致）
-- C2：全库加载去重后 38 唯一规则；DEG 血统统一（DEG/ 与 pancancer/ 同名同哈希）
-- 未知决策类型 → -1（无法评估，A2 方向；当前引擎对未知方法仍 L0，见诚实局限）
+- C2：全库加载去重后 39 唯一规则；DEG 血统统一（DEG/ 与 pancancer/ 同名同哈希）
+- 未知决策类型 → -1（无法评估）；未识别 choice → 规则级跳过 → -1（K2，
+  A2 修复 2026-08-16：不再兜底 L0"危险"——详见 tests/test_k2_minus_one.py）
 - mappings 加载（B8：别名归一化生效）
 """
 
@@ -40,11 +41,11 @@ def test_deg_error_blocked():
     assert any(s["level"] == 0 for s in result["step_scores"])
 
 
-def test_c2_dedup_all_rules_39_unique():
+def test_c2_dedup_all_rules_40_unique():
     reg = RuleRegistry()  # 全量规则目录（含 DEG 与 pancancer 双副本）
     n = reg.load_all()
-    assert n == 39, f"C2 去重后应 39 唯一规则（J2 新增 G1.4），实际 {n}"
-    assert reg.rule_count == 39
+    assert n == 40, f"C2 去重后应 40 唯一规则（J2 新增 G1.4 + K1 新增 I4.1 scRNA 版），实际 {n}"
+    assert reg.rule_count == 40
 
 
 def test_deg_bloodline_unified():

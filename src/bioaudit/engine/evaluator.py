@@ -41,32 +41,48 @@ class RuleEvaluator:
         # A3 FIX: start at best possible, take LOWEST (strictest)
         best_level = 4
         all_rule_ids = []
+        applicable = []  # K2: 识别了 choice 的规则（未识别的规则级跳过，不参与）
 
         for rule in rules:
+            # K2: condition 命中的规则全部记录（含规则级跳过的——溯源"被考虑但未适用"）
+            all_rule_ids.append(rule.rule_id)
+
             # D4: check overrides first (e.g., n=2)
             override_level = self._check_overrides(rule, parsed)
             if override_level is not None:
                 level = override_level
             else:
                 level = self._check_level(rule, parsed)
+                if level is None:
+                    # K2（2026-08-16 窗口 K2，A2 修复）：规则级跳过——
+                    # choice 未命中该规则任何 level 词表 → 该规则不适用
+                    # （未知方法 ≠ 错误，不再兜底 L0"危险"）；不贡献评级/证据
+                    continue
 
-            all_rule_ids.append(rule.rule_id)
+            applicable.append(rule)
             # A3 FIX: < not > (take lowest/strictest)
             if level < best_level:
                 best_level = level
 
+        if not applicable:
+            # K2: 全部匹配规则均未识别 choice（或全部未匹配）→ 决策 -1 无法评估
+            return self._build_unrecognized(parsed, [r.rule_id for r in rules])
+
         # D5: check if conditions_when_acceptable could lift the score
         best_level = self._check_conditional_acceptability(rules, parsed, best_level)
 
-        return self._build_score(parsed, all_rule_ids, rules, best_level)
+        return self._build_score(parsed, all_rule_ids, applicable, best_level)
 
-    def _check_level(self, rule: Rule, parsed: ParsedStep) -> int:
+    def _check_level(self, rule: Rule, parsed: ParsedStep) -> int | None:
         """Check which scoring level the agent's choice falls into.
 
         B6 FIX: normalize choices for fuzzy matching.
         D3 FIX: Level 3 and Level 4 are merged for MVP.
             Only check methods in Level 3. Level 4 reserved for
             LLM-based rationale assessment (v0.2).
+        K2 FIX（2026-08-16 窗口 K2，A2 修复）: choice 未命中任何 level 词表
+        → 返回 None（规则级跳过：该规则不适用），由 evaluate() 汇总——
+        全部规则跳过 → 决策 -1；不再兜底 L0"危险"。
         """
         choice = self._normalize_choice(parsed.original.choice)
 
@@ -90,13 +106,13 @@ class RuleEvaluator:
         if choice in methods_0:
             return 0
 
-        # If not matched anywhere, check Level 4 as well (for future use)
+        # Check Level 4 as well (for future use)
         methods_4 = [self._normalize_choice(m) for m in rule.scoring.level_4.methods]
         if choice in methods_4:
             return 4
 
-        # Completely unrecognized → Level 0 (dangerous — unknown method)
-        return 0
+        # K2: Completely unrecognized → rule-level skip (None), NOT Level 0
+        return None
 
     def _check_overrides(self, rule: Rule, parsed: ParsedStep) -> int | None:
         """D4: Check special override conditions (e.g., n=2).
@@ -164,6 +180,16 @@ class RuleEvaluator:
             "ttest": "ttest_equal_variance",
             "t_test": "ttest_equal_variance",
             "student_t": "ttest_equal_variance",
+            # K2（2026-08-16）：t-test 家族拼写别名补齐（B6 归一化语义）——
+            # Student's t-test 的常见拼写变体归一到词表命名，避免误落
+            # "未识别"（pan_error D3 'Student_t_test' 语义 = M1.1 L0 t-test 家族）
+            "student_t_test": "ttest_equal_variance",
+            "students_t_test": "ttest_equal_variance",
+            "student_s_t_test": "ttest_equal_variance",
+            "student's_t_test": "ttest_equal_variance",
+            "welch_t_test": "ttest_unequal_variance",
+            "welch_s_t_test": "ttest_unequal_variance",
+            "welch's_t_test": "ttest_unequal_variance",
         }
         return aliases.get(c, c)
 
@@ -244,6 +270,34 @@ class RuleEvaluator:
             reward_signal=0.5,
         )
 
+    def _build_unrecognized(
+        self, parsed: ParsedStep, rule_ids: list[str]
+    ) -> DecisionScore:
+        """K2（2026-08-16 窗口 K2，A2 修复）: 全部匹配规则均未识别 choice。
+
+        规则级跳过语义：匹配规则存在（condition 命中）但 choice 未命中任何
+        level 词表 → 该规则不适用；全部规则不适用 → 决策 **-1 无法评估**
+        （未知方法 ≠ 错误，不再兜底 L0"危险"）。matched_rules 保留规则 id
+        供溯源（规则被考虑但未适用），-1 不参与聚合/检出/reward（mask）。
+        """
+        return DecisionScore(
+            step_id=parsed.step_id,
+            decision_type=parsed.decision_type,
+            agent_choice=parsed.original.choice,
+            agent_rationale=parsed.original.rationale,
+            matched_rules=rule_ids,
+            level=-1,
+            numeric_score=LEVEL_TO_SCORE[-1],
+            explanation=(
+                "无法评估 — 匹配规则未覆盖该 choice（规则级跳过：该规则不适用；"
+                "未知方法 ≠ 错误，K2 裁决 2026-08-16）。此分数为占位值，"
+                "不可作为质量判断依据。"
+            ),
+            evidence_citations=[],
+            alternatives=[],
+            reward_signal=LEVEL_TO_SCORE[-1],
+        )
+
     def evaluate_all_rules(
         self, parsed: ParsedStep, rules: list[Rule]
     ) -> dict[str, int]:
@@ -251,8 +305,12 @@ class RuleEvaluator:
         Returns {rule_id: level} for conflict detection.
         Unlike evaluate(), this does NOT take the strictest — it returns
         each rule's independent evaluation.
+        K2: 未识别 choice 的规则（_check_level → None）**跳过**（不参与冲突
+        检测——该规则不适用，无评级可冲突）。
         """
         result = {}
         for rule in rules:
-            result[rule.rule_id] = self._check_level(rule, parsed)
+            level = self._check_level(rule, parsed)
+            if level is not None:
+                result[rule.rule_id] = level
         return result

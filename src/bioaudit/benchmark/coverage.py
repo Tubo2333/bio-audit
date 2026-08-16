@@ -35,6 +35,12 @@ DEFAULT_EXEMPTIONS: dict[str, str] = {
         "（该类型在 deg/pan 由 M1.3-DEG-001 覆盖，I 窗口黄金 Agent 真实执行覆盖 scRNA 侧）。"
         "批 3 任务集扩展时补充覆盖并移除本豁免。"
     ),
+    "I4.1-IMMU-001_scRNA_correlation_method": (
+        "窗口 K1（2026-08-16）新增 scRNA 版免疫相关性规则；60 条任务集（taskset 1.1.0）"
+        "冻结后加入，无任务含 scRNA 范式 immune_correlation_method 决策"
+        "（该类型在 pan 由 I4.1-IMMU-001 覆盖；G 窗口真实评测 GSE115978 的 12 条 immune"
+        "决策已实际覆盖 scRNA 侧）。批 3 任务集扩展时补充覆盖并移除本豁免。"
+    ),
 }
 
 

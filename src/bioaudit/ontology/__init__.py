@@ -21,4 +21,5 @@ G4 confound / G5 when_not_applicable / P1 校验器三职责）。
 - validate（validator.py）：P1 校验器三职责（覆盖报告 / 语义边界 / 冲突完整性）
 """
 
-ONTOLOGY_VERSION = "0.1.1"  # B2 落地；C1 快照三元组之 ontology 版本（0.1.1 = J2）
+# B2 落地；C1 快照三元组之 ontology 版本（0.1.2 = K1：immune 决策类型扩 scRNA）
+ONTOLOGY_VERSION = "0.1.2"
