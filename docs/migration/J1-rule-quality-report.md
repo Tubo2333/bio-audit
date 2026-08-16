@@ -86,6 +86,11 @@ demo 时代 scrna_crc_error/scrna_error 按"wilcoxon = 错误"设计，但其规
   判 L0），需单独裁决，不在 J1 范围内（J1 按审计中枢批准的 wilcoxon 方案执行）。**已登记**
   fix-tracking 视角：建议下一规则评审窗口裁决（L1 或 L0 二选一并双向对齐词表）。
   当前无轨迹/任务使用该 choice（golden/benchmark 均无），评分零影响。
+  **→ K3 收尾（2026-08-16，窗口 K，审计中枢确认）**：t-test 族与 wilcoxon 族同等待遇
+  （归一化后数据细胞级 = L1 有风险——Squair 2021 伪重复两族同等；Svensson 2020 弱化零膨胀
+  论证，无独立于伪重复的额外风险）；raw counts 直用（ttest_on_raw_counts/anova_on_cells）
+  保留 L0（独立分布违背）；G1.1/G1.3 词表双向补齐 + Kruskal_Wallis_cell_level 补 L1，
+  ruleset 1.5.0→1.6.0（详见 K1-score-correctness-report.md §4）。
 
 ---
 
@@ -265,6 +270,8 @@ demo 时代 scrna_crc_error/scrna_error 按"wilcoxon = 错误"设计，但其规
 
 1. **J1 遗留观察**：ttest 家族词表不一致（`ttest_on_normalized` G1.3 L1 vs G1.1 兜底 L0）——
    需单独裁决（L1 或 L0），当前无轨迹/任务使用，评分零影响（§2.4）。
+   **→ 已由窗口 K3 收尾（2026-08-16）**：审计中枢确认 t-test 族与 wilcoxon 族同等待遇
+   （归一化后数据细胞级 = L1），raw counts 保留 L0；G1.1/G1.3 双向补齐（ruleset 1.6.0）。
 2. **J3 依赖生态**：L3 注释通道签名依赖成熟 Python SingleR（现仅 BiocPy singler 0.1.x 早期
    绑定）+ 采集层产物一致性验证能力；已登记 backlog，不硬补。
 3. **覆盖豁免**：G1.4 在 60 条任务集零触发（D5.12 豁免登记附理由）；批 3 任务集扩展时

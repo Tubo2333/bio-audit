@@ -111,7 +111,8 @@ docs/
 | 口径 | 数值 | 出处 |
 |---|---|---|
 | **demo 轨迹**（2026-08-13 D5 修复后引擎重跑） | 29 分 · 5 × L0 | 20 条 legacy 轨迹之一 |
-| **G-2 真实运行重评**（2026-08-16，GSE115978，declared 注入 + 规则平台键放宽后） | **30.0 needs_correction · L0=0 / L1×7 / L3×1 / L-1×12** | `docs/migration/agent-eval-report-g2.md` |
+| **G-2 真实运行重评**（2026-08-16，GSE115978，declared 注入 + 规则平台键放宽后） | 30.0 needs_correction · L0=0 / L1×7 / L3×1 / L-1×12 | `docs/migration/agent-eval-report-g2.md` |
+| **K1 重评**（2026-08-16，GSE115978，immune scRNA 规则落地后，ruleset 1.5.0） | **30.0 needs_correction（不变）** · L0=0 / L1×19 / L3×1 / L-1×0 | `docs/migration/K1-score-correctness-report.md`（§6）/ agent-eval-report-g2.md §8 |
 
 - 禁止用旧口径冒充新结果、禁止把 demo 的 5×L0 叙述安到真实运行头上（真实运行 L0=0）；
 - 首页/README 涉及 CellVoyager 分数处必须给出上表口径标注。

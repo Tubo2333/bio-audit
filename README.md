@@ -44,8 +44,9 @@ AI Agent 做生信分析已经相当熟练：代码能跑、输出像样、总�
 |---|---|
 | demo 轨迹（2026-08-13 D5 修复后重跑，12 步分析） | **29 分 · Blocked · 5 × L0** |
 | **G-2 真实运行重评**（GSE115978 · declared 注入 + 规则平台键放宽后） | **30.0 · needs_correction · L0=0 / L1×7 / L3×1 / L-1×12** |
+| **K1 重评**（2026-08-16 · immune scRNA 规则落地后，ruleset 1.5.0） | **30.0 · needs_correction（不变）· L0=0 / L1×19 / L3×1 / L-1×0** |
 
-两个口径对象不同、机制不同，**严格区分、禁止混写**（口径纪律见 [site-design §6.2](https://tubo2333.github.io/bio-audit/docs/site-design.html#62-数字口径纪律教训-2-单一事实源)）。报告：[G-2 补充报告](https://tubo2333.github.io/bio-audit/docs/migration/agent-eval-report-g2.html) · [G 主报告（旧版留档）](https://tubo2333.github.io/bio-audit/docs/migration/agent-eval-report.html)。
+两个口径对象不同、机制不同，**严格区分、禁止混写**（口径纪律见 [site-design §6.2](https://tubo2333.github.io/bio-audit/docs/site-design.html#62-数字口径纪律教训-2-单一事实源)）。K1 重评分数不变（30.0）但构成变化：12 条免疫相关决策从"无法评估（L-1）"变为"有风险（L1，细胞级相关性检验 = 伪重复）"——覆盖缺口闭合；分数未提升是因为 data_handling 维（QC/归一化 6 条 L1）仍是瓶颈维，如实呈现。报告：[K1 评分正确性报告](https://tubo2333.github.io/bio-audit/docs/migration/K1-score-correctness-report.html) · [G-2 补充报告](https://tubo2333.github.io/bio-audit/docs/migration/agent-eval-report-g2.html) · [G 主报告（旧版留档）](https://tubo2333.github.io/bio-audit/docs/migration/agent-eval-report.html)。
 
 **高分阳性对照（窗口 I，2026-08）**：为了让"链路能抓错"的证据闭环，我们还用**确定性脚本**（按公开最佳实践编写的"黄金 Agent"，**非 LLM**）在同一个数据集上真实执行、走同一条采集链路——教科书式执行得到 **80.0 · pass**，与 CellVoyager 真实运行 **30.0 · needs_correction** 形成对比度：
 

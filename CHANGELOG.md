@@ -1,5 +1,36 @@
 # Changelog
 
+## 窗口 K：评分正确性（2026-08-16，无版本号）
+
+- **K1 immune scRNA 规则**（规则层，最大评分缺口）：新增 `I4.1-IMMU-001_scRNA_correlation_method`
+  （文献锚定：Squair 2021 PMID 34433851 / Hollander & Wolfe 1999 / Kowalski 1972；两轴设计——
+  方法选择轴 Spearman vs Pearson + 单位轴细胞级相关性 = 伪重复 = L1，与 G1.1 同原则；
+  范式隔离各自锚定）；本体 immune_correlation_method paradigms 扩至 [pan-cancer, scRNA]
+  （ontology 0.1.1→0.1.2）；ruleset **1.4.0 → 1.5.0**（40 唯一规则）；
+  **G 窗口真实评测 12 条 immune 决策 L-1 → L1**（细胞级 Spearman），CellVoyager
+  **30.0 → 30.0**（分数不变：data_handling 维主导；构成 L-1×12 → L1×12 如实呈现，不夸大）；
+  agent-eval-report-g2 §8 追加 + README/首页/站点口径同步（site-design §6.2）
+- **K2 未知方法 → -1**（A2 修复，评分语义正确化）：evaluator 对未识别 choice **规则级跳过**
+  （该规则不适用），全部未识别/未匹配 → 决策 **-1 无法评估**，不再兜底 L0"危险"；
+  一条命中 + 一条未识别 → 取命中评级不被拉低；-1 不参与聚合/检出（检出定义 level∈{0,1}
+  不变，预注册口径）/reward（mask）；t-test 拼写别名补齐（Student_t_test 语义保持 M1.1 L0）；
+  新增 tests/test_k2_minus_one.py 11 项；golden C4 漂移 7 处逐条归因（S7/S11 L0→-1、
+  S10 L0→L1、S6 evidence 语义、method_selection 维 0.4071→0.63；轨迹分不变）
+- **K3 ttest 家族裁决**（J 遗留收尾）：方案先交审计中枢确认再落地（实际走确认，吸取 J1 教训）；
+  查证（Squair 2021 伪重复两族同等 / Svensson 2020 PMID 31937974 弱化零膨胀 / Soneson &
+  Robinson 2018 两族问题同源）→ t-test 族与 wilcoxon 族同等待遇（归一化后数据细胞级 = L1）；
+  raw counts 直用保留 L0（独立于伪重复的分布论证）；Kruskal_Wallis_cell_level 补 L1；
+  G1.1/G1.3 词表双向补齐；ruleset **1.5.0 → 1.6.0**
+- **连锁影响（K 窗口实测留档）**：benchmark 60 任务复跑——mean 0.5542 不变、**recall 0.820
+  不变**（无 gold=error 决策依赖兜底，预注册"或下降"未发生）、precision 0.7455→0.7736
+  （bmd_scrna_007/020 误报消除）、F1 0.7810→0.7961、edge 检出 0.6667→0.6458（词表外不再
+  硬检出）、gap +0.048 不变；reward-validate 五闸 PASS（ρ 0.61 / τ_b 0.4953 / 分层差
+  +0.3435 p=0.000，-1 mask 生效）；R0 锚定 ρ=0.9747 不变（combo_4 52.1→54.6）；
+  黄金对照 A/B/C 80.0/69.0/66.7 零影响
+- **回归**：pytest **246/246**；三闸/四闸/五闸 + validate-ontology + capture-validate 全 PASS；
+  ruff 40 = 基线零新增；CI 双矩阵全绿；golden 基线 C4 更新（双副本，SHA256 4c4d1b3d…）
+- 报告：[K1 评分正确性报告](docs/migration/K1-score-correctness-report.html)
+
 ## 文档站化（窗口 H — 2026-08-16，无版本号）
 
 - **站点规范**：`docs/site-design.md`（导航结构 / 目录组织 / 双语策略 / Release 衔接 / 链接与数字口径纪律）

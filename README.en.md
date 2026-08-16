@@ -58,10 +58,15 @@ was re-scored:
 |---|---|
 | Demo trajectory (re-run after D5 fix, 2026-08-13, 12-step analysis) | **29 / Blocked / 5 × L0** |
 | **G-2 real-run re-score** (GSE115978 · declared injection + platform-key relaxation) | **30.0 / needs_correction / L0=0 · L1×7 · L3×1 · L-1×12** |
+| **K1 re-score** (2026-08-16 · immune scRNA rule landed, ruleset 1.5.0) | **30.0 / needs_correction (unchanged) / L0=0 · L1×19 · L3×1 · L-1×0** |
 
 The two calibers are different objects and must **never be mixed** (see
 [site-design §6.2](https://tubo2333.github.io/bio-audit/docs/site-design.html#62-数字口径纪律教训-2-单一事实源)).
-Reports: [G-2 report](https://tubo2333.github.io/bio-audit/docs/migration/agent-eval-report-g2.html) ·
+The K1 re-score is unchanged (30.0) but its composition changed: the 12 immune-correlation
+decisions went from "unevaluable (L-1)" to "at-risk (L1 — cell-level correlation is
+pseudoreplication)"; the score did not rise because the data-handling dimension (6 × L1) still
+dominates. Reports: [K1 score-correctness report](https://tubo2333.github.io/bio-audit/docs/migration/K1-score-correctness-report.html) ·
+[G-2 report](https://tubo2333.github.io/bio-audit/docs/migration/agent-eval-report-g2.html) ·
 [G main report (archived)](https://tubo2333.github.io/bio-audit/docs/migration/agent-eval-report.html).
 
 The engine's own reliability is independently validated (R0–R3): on simulated ground-truth

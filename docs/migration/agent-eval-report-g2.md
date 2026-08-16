@@ -161,3 +161,40 @@ ontology-design §二.1）；declared 齐全也无法评分。**非 context 缺�
 3. **declared 边界靠流程保证**：本窗口以评测者署名声明文件 + 宪法修订落地；
    未来运行需运行配置显式注入，避免任何 Agent 侧回填路径。
 4. **双联体/批次/DEG 环节未在本运行覆盖**：与 demo 的对比受决策范围限制（§4 解读 5）。
+
+---
+
+## 8. 窗口 K1 重评追加（2026-08-16，immune 覆盖缺口闭合）
+
+**窗口 K1（execution-plan §六.十五）落地 scRNA 版免疫相关性规则
+`I4.1-IMMU-001_scRNA_correlation_method`（ruleset 1.4.0 → **1.5.0**；本体
+immune_correlation_method paradigms 扩至 [pan-cancer, scRNA]，ontology 0.1.1 → **0.1.2**）
+后，对既有 final 轨迹（`final_trajectory_v2.json`，未改动，重评前已备份
+`final_trajectory_v2_pre_K1.json`，SHA256 58A48116…）**仅重跑本地审计引擎**：
+12 条 immune 决策从 **L-1 → L1**（细胞级 Spearman 相关性检验 = 伪重复，与 G1.1
+同原则；文献锚定：Squair 2021 PMID 34433851 / Hollander & Wolfe 1999 / Kowalski 1972）。
+
+**结果（报告：`cellvoyager-outputs/reports/windowK1_reeval.json`，ruleset 1.5.0 / ontology 0.1.2）**：
+
+| 指标 | G-2 重评（ruleset 1.2.0） | **K1 重评（ruleset 1.5.0）** |
+|---|---|---|
+| trajectory_score | **30.0** | **30.0（不变）** |
+| eval_verdict | needs_correction | needs_correction（不变） |
+| L3/L2/L1/L0/-1 | 1/0/7/0/**12** | **1/0/19/0/0**（L-1 清零） |
+| 维度分 | data_handling 0.300 / method_selection 0.575 | data_handling 0.300（不变）/ method_selection **0.339** |
+| critical_issues | 7 | **19**（+12 条 L1） |
+
+**如实呈现（不夸大）**：
+1. **分数不变（30.0 → 30.0）**：最低维主导聚合下 data_handling 0.300 仍是瓶颈维
+   （hard_threshold ×4 + LogNormalize ×2 全 L1），immune 12 条 L1 落在
+   method_selection 维（0.575 → 0.339）——**覆盖缺口闭合 ≠ 分数提升**，
+   免疫相关 12 步从"无法评估"变为"有风险（细胞级伪重复）"，构成如实变化。
+2. **L1 而非 L3 的归因**：本运行 Spearman 为**细胞级**相关性（Step 4/5：
+   1,787 个肿瘤细胞为观察单位，与 T 细胞邻近 exhaustion 评分相关）——
+   按 K1 规则细胞级 = 伪重复 = L1 有风险（与 G1.1 对细胞级 wilcoxon 同原则）；
+   Spearman 本身作为方法选择是对的（L3 通道保留给样本/患者级秩相关）。
+3. **跨窗口一致性**：agent-eval-report-g2 §7 局限 1 已消除（immune 不再 L-1），
+   其余局限（n=1、declared 边界、覆盖范围）不变。
+4. **K2/K3 连锁（窗口 K-b，ruleset 1.6.0）对本运行零影响**：本轨迹 20 决策
+   choice 全部命中词表（无兜底 L0），不涉及 t-test 族——重评数字在 K 窗口
+   最终状态下保持（见 K1-score-correctness-report.md §6）。

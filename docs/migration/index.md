@@ -47,6 +47,12 @@
 | [I1 端到端阳性对照（黄金 Agent A/B/C）](I1-positive-control-report.html) | 80.0/63.0/66.7 三版梯度 + 逻辑链敏感性证据 + 3 项发现登记 |
 | [J1 规则质量修复（wilcoxon 对齐 + significance_threshold + L3 签名评估）](J1-rule-quality-report.html) | ruleset 1.4.0 + C4 漂移记录 + 连锁影响留档 + v0.2.1 Release |
 
+## 评分正确性（窗口 K）
+
+| 报告 | 内容 |
+|---|---|
+| [K1 评分正确性（immune 规则 + 未知方法→-1 + ttest 裁决）](K1-score-correctness-report.html) | ruleset 1.6.0 + G 窗口重评（immune 12 条 L-1→L1）+ A2 修复 + C4 漂移记录 + benchmark/reward 连锁留档 |
+
 ---
 
 报告中的验收清单依据执行方案冻结（`docs/specs/2026-08-13-execution-plan-v1.md`，仓库外）；分数口径纪律见 [site-design §6.2](../site-design.html#62-数字口径纪律教训-2-单一事实源)。

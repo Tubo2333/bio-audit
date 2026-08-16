@@ -43,6 +43,7 @@ Bio-Audit 文档站目录（站点规范见 [site-design](site-design.html)）�
 | 口径 | 数值 |
 |---|---|
 | demo 轨迹（D5 修复后引擎重跑） | 29 分 · 5 × L0 |
-| G-2 真实运行重评（GSE115978，declared + 规则放宽后） | **30.0 needs_correction** · L0=0 / L1×7 / L3×1 / L-1×12 |
+| G-2 真实运行重评（GSE115978，declared + 规则放宽后） | 30.0 needs_correction · L0=0 / L1×7 / L3×1 / L-1×12 |
+| **K1 重评（2026-08-16，immune scRNA 规则落地后，ruleset 1.5.0）** | **30.0 needs_correction（不变）** · L0=0 / L1×19 / L3×1 / L-1×0（12 条 immune 从"无法评估"变为"有风险·细胞级伪重复"；分数不变因 data_handling 维仍主导，见 [K1 报告](migration/K1-score-correctness-report.html)） |
 
 完整口径规则见 [site-design §6.2](site-design.html#62-数字口径纪律教训-2-单一事实源)。
