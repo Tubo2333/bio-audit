@@ -380,15 +380,16 @@ output = {
     "combinations": [{k: v for k, v in r.items() if k not in ("audit_min", "audit_max")}
                      for r in results],
     "meta": {
-        "generated_at": "2026-08-13 (A6-2 重算: D5 修复后引擎)",
+        "generated_at": "2026-08-16 (J2 重算: ruleset 1.4.0 / 23 scRNA 规则)",
         "original_generated_at": "2026-08-10",
-        "engine_state": ("fullflow-demo 当前引擎（D5 无条件提升已移除）— 旧版 "
+        "engine_state": ("bio-audit-v2 当前引擎（D5 无条件提升已移除 + J1 wilcoxon 词表对齐 + "
+                         "J2 significance_threshold 规则，ruleset 1.4.0）— 旧版 "
                          "scrna_r0.json 为 D5 bug 状态产物，备份于 "
                          "scrna_r0_pre_d5fix.json"),
         "phase": "Phase 3 — scRNA R0 validation",
         "design_doc": "docs/specs/2026-08-08-deepening-design.md §3",
         "rule_count": n_rules,
-        "rule_version": "scRNA-audit v1.0 (22 rules)",
+        "rule_version": "bio-audit-v2 ruleset 1.4.0 (23 rules)",
         "honest_note": ("Directional validation — modeled F1 (not empirical). "
                         "Small-n limitation acknowledged. 模拟数据 seed=42 固定，"
                         "F1 与引擎无关；audit_score 随引擎修复变化。")

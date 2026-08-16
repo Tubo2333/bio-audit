@@ -190,7 +190,7 @@ demo 时代 scrna_crc_error/scrna_error 按"wilcoxon = 错误"设计，但其规
 | reward-validate 五闸 | mapping / determinism / spike-in / ablation / calibration 全 PASS + golden PASS |
 | capture-validate | PASS（0 错误 0 警告） |
 | MCP selfcheck | PASS |
-| R0 锚定（scrna_r0） | 确定性重生成逐字节一致（16f31ff4…） |
+| R0 锚定（scrna_r0） | 确定性重生成逐字节一致（**J2 后 meta 重算**：规则数 22→23，评分内容不变；旧 16f31ff4 → 新 665ef6d5，asset_manifest change_log 记录） |
 
 ### 5.2 benchmark-run 60 任务集复跑（J1 → J2 全程留档）
 
