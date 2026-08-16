@@ -37,8 +37,9 @@ scoring:
     methods:
       - no_validation
       - wrong_topology
-    description: "未验证轨迹拓扑结构与生物学预期的一致性"
-    rationale: "如果生物学过程是连续的(EMT), 强行拟合分叉模型会产生虚假分支点"
+      - no_trajectory
+    description: "未验证轨迹拓扑结构与生物学预期的一致性 / 该做没做（跳过轨迹推断）"
+    rationale: "如果生物学过程是连续的(EMT), 强行拟合分叉模型会产生虚假分支点。no_trajectory（研究需轨迹推断时跳过）= 该做没做，结论缺失时间维度证据——B7 合理省略豁免（when_not_applicable=study_not_trajectory_focused 满足）在 expected_types 评测配置层判定，引擎无研究范围证据时保守评 L0（窗口 M 词表补齐 2026-08-16，K 遗留①收尾 + B7 联动）"
   override_n2: {}
 
 evidence:

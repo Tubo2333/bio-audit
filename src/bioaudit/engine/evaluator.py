@@ -24,6 +24,9 @@ LEVEL_LABELS = {
     1: "有风险 — 方法选择值得商榷",
     0: "危险 — 方法选择将导致错误结论",
     -1: "无法评估 — 没有适用的规则",
+    # M2.4（窗口 M，2026-08-16）：missing 三档运行时强制——fail-closed 键缺失
+    # 且被候选规则引用 → 决策"未验证"（评估前提不成立；与 -1 区分并在报告呈现）
+    -2: "未验证 — 关键上下文缺失，无法评估（missing 三档强制，窗口 M）",
 }
 
 
@@ -117,15 +120,52 @@ class RuleEvaluator:
     def _check_overrides(self, rule: Rule, parsed: ParsedStep) -> int | None:
         """D4: Check special override conditions (e.g., n=2).
 
+        M2.5（窗口 M，2026-08-16）：**键映射修复**——不再硬编码
+        ``n_replicates``：override 条件文本（``"n_patients <= 2"`` 等）解析出
+        键名，按规则配置取键（G1.1 用 n_patients / M1.1 用 n_replicates，
+        各规则自声明）；**n=0 falsy 漏判修复**（fix-tracking A3）：显式
+        ``key in ctx`` 判定 + 数值强转比较，0 正确触发；键缺失 → 不触发
+        （若该键 fail-closed 且被引用，已由 context_guard 未验证层拦截）。
+
         Returns override level or None if no override applies.
         """
         override = rule.scoring.override_n2
         if override and "condition" in override:
             cond = override["condition"]
-            ctx = parsed.normalized_context
-            if ctx.get("n_replicates") and ctx["n_replicates"] <= 2:
-                return 0  # All methods → Level 0 for n<=2
+            m = re.match(r"(\w+)\s*(<=|<)\s*(\d+\.?\d*)", str(cond).strip())
+            if m:
+                key, op, val_str = m.groups()
+                ctx = parsed.normalized_context
+                if key in ctx and ctx[key] is not None:
+                    try:
+                        actual = float(ctx[key])
+                    except (TypeError, ValueError):
+                        return None  # 非数值 → 不触发（类型问题由 context_guard 处理）
+                    limit = float(val_str)
+                    if (op == "<=" and actual <= limit) or (op == "<" and actual < limit):
+                        return 0  # All methods → Level 0 for n<=2
         return None
+
+    def build_override_score(
+        self, parsed: ParsedStep, override_level: int, rules: list[Rule]
+    ) -> DecisionScore:
+        """M2.5（窗口 M）：候选级 override 命中（如 n<=2 → 所有方法 L0）。
+
+        由 context_guard.score_decision 调用（D4 override 在约束门外独立生效）；
+        保留 matched_rules 溯源（已匹配规则）+ 证据引用（与 _build_score 同款），
+        explanation 注明 override 语义。
+        """
+        score = self._build_score(
+            parsed,
+            [r.rule_id for r in rules],
+            rules,
+            override_level,
+        )
+        score.explanation += (
+            " — override 条件命中（n 过小，D4/M2.5：无法可靠估计生物学变异，"
+            "降级为仅报告 fold change，不做统计推断）"
+        )
+        return score
 
     def _check_conditional_acceptability(
         self, rules: list[Rule], parsed: ParsedStep, current_level: int

@@ -63,7 +63,7 @@ AI Agent 做生信分析已经相当熟练：代码能跑、输出像样、总�
 | 黄金 Agent（10X 平台，GSE132465） | 分数 · verdict | 双联体决策（D1.1） |
 |---|---|---|
 | **10X-A 黄金版**（MAD QC → **scDblFinder 双联体** → SCTransform → VST HVG → PCA-elbow → Harmony（33 文库）→ Leiden → CellTypist → pseudobulk DESeq2 → BH） | **80.0 · pass**（11 决策，10×L3 + 1×L2） | **scDblFinder 真实执行 → L3**（2,783/59,399 双联体 = 4.69% 去除） |
-| **10X-B 变体版**（同管线**跳过双联体检测**） | 采集层 80.0 · pass（省略不可见）→ **引擎级补验 63.7 · blocked** | **跳过 → L0**（10X 下双联体污染真实存在；采集层对"阴性声明"判虚报撤销，如实披露边界） |
+| **10X-B 变体版**（同管线**跳过双联体检测**） | 采集层 80.0 · pass（省略不可见）→ **窗口 M 闭环：expected_types 强制预期决策点 → 补入 provenance=expected → 63.7 · blocked 直接出自采集链路** | **跳过 → L0**（10X 下双联体污染真实存在；标准管线预期决策点不可静默跳过，D1.1 L0；原"引擎级补验"路径已被采集链路取代，L 报告 §4.3.1） |
 
 **真实短评测（窗口 L-b，2026-08，实际成本 ¥0.43）**：CellVoyager 在 GSE115978 上跑**聚焦短分析**（仅预处理，max-iterations 4）——**30.0 · needs_correction · L2×1 / L1×4 / L-1×0**（LogNormalize×2、细胞级 Spearman×2、dispersion HVG）。**高分不保证如实兑现**：决策点少 ≠ 决策正确，真实 LLM 短任务的方法学选择仍以"有风险"为主；全决策可评分（L-1=0，K 窗口评分缺口闭合在真实评测中的印证）。报告：[窗口 L 报告](https://tubo2333.github.io/bio-audit/docs/migration/L1-broader-eval-report.html)。（口径分列：10X 黄金 = 确定性脚本对照；L-b = 真实 LLM 运行；与 demo/G/CellVoyager 30.0 各口径严格区分，见 [site-design §6.2](https://tubo2333.github.io/bio-audit/docs/site-design.html#62-数字口径纪律教训-2-单一事实源)。）
 
@@ -83,7 +83,7 @@ bio-audit ruleset-validate          # 规则集校验（清单/冲突/golden 回
 
 ## 项目状态与路线图
 
-**当前（v0.2.x，2026-08）**：核心体系已闭环——稳定引擎 + 34 类型决策本体 + 规则治理门禁、真实采集链路（M1/M3 交叉验证）、60 条评测任务集、reward 信号层；真实 Agent 评测链路打通并完成首轮修复（G-2），端到端阳性对照（黄金 Agent A/B/C）补齐"链路能认对"证据（窗口 I），10X 平台对照与真实短评测扩展评测覆盖（窗口 L）。工程质量：pytest 246/246 · CI 双矩阵（Python 3.10/3.12）全绿 · golden 回归 0 差异 · 报告带三元组快照（engine/ruleset/ontology 版本），任何分数可复现。
+**当前（v0.3.x，2026-08）**：核心体系已闭环——稳定引擎 + 34 类型决策本体 + 规则治理门禁、真实采集链路（M1/M3 交叉验证）、60 条评测任务集、reward 信号层；真实 Agent 评测链路打通并完成首轮修复（G-2），端到端阳性对照（黄金 Agent A/B/C）补齐"链路能认对"证据（窗口 I），10X 平台对照与真实短评测扩展评测覆盖（窗口 L），采集完整性闭环（窗口 M：expected_types 强制预期决策点 + missing 三档运行时强制 + 未验证状态）。工程质量：pytest 269/269 · CI 双矩阵（Python 3.10/3.12）全绿 · golden 回归 0 差异 · 报告带三元组快照（engine/ruleset/ontology 版本），任何分数可复现。
 
 **接下来**：L3/L4 结论级与一致性级审计（通用实现）、PRM（过程奖励模型）、任务集扩展（批 3，跨模型标注对照）、更多真实 Agent 评测（多数据集/多 Agent）。
 

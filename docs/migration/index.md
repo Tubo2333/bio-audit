@@ -59,6 +59,13 @@
 |---|---|
 | [L1 更广评测（10X 黄金对照 + 真实短评测）](L1-broader-eval-report.html) | GSE132465 10X 黄金对照（D1.1 双联体规则首次真实执行验证：做→L3 / 跳过→L0）+ 平台互补对照 + CellVoyager 聚焦短评测（30.0 · L-1=0，实际成本 ¥0.43） |
 
+## 采集完整性（窗口 M）
+
+| 报告 | 内容 |
+|---|---|
+| [M1 采集完整性（expected_types + missing 三档强制 + override/词表）](M1-capture-integrity-report.html) | 10X-B 闭环（63.7 blocked 走采集链路，不再引擎级补验）+ 未验证状态（level=-2）+ override_n2 键映射修复 + PCA_arbitrary/no_trajectory 词表补齐（ruleset 1.7.0）+ C4 漂移记录 + benchmark/reward 连锁留档 |
+| [M 设计提案（确认记录）](M1-design-proposal.html) | expected_types 语义 / Option B 规则引用驱动 / B7 判定与词表评级——经项目负责人在线确认（2026-08-16） |
+
 ---
 
 报告中的验收清单依据执行方案冻结（`docs/specs/2026-08-13-execution-plan-v1.md`，仓库外）；分数口径纪律见 [site-design §6.2](../site-design.html#62-数字口径纪律教训-2-单一事实源)。

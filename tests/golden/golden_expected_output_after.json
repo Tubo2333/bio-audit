@@ -130,7 +130,7 @@
      ],
      "level": 0,
      "numeric_score": 0.0,
-     "explanation": "危险 — 方法选择将导致错误结论",
+     "explanation": "危险 — 方法选择将导致错误结论 — override 条件命中（n 过小，D4/M2.5：无法可靠估计生物学变异，降级为仅报告 fold change，不做统计推断）",
      "evidence_citations": [
       "[L-Confirmed] Love et al. (2014) DESeq2, Genome Biology — **[PMID: 25516281](https://pubmed.ncbi.nlm.nih.gov/25516281/)**",
       "[L-Consensus] Conesa et al. (2016) Genome Biology — RNA-seq best practices survey — **[PMID: 26813401](https://pubmed.ncbi.nlm.nih.gov/26813401/)**",
@@ -2317,7 +2317,7 @@
    "verdict": "blocked",
    "dimension_scores": {
     "data_handling": 0.29,
-    "method_selection": 0.63
+    "method_selection": 0.4929
    },
    "step_scores": [
     {
@@ -2459,12 +2459,21 @@
      "matched_rules": [
       "D2.1-DIMR-001_reduction"
      ],
-     "level": -1,
-     "numeric_score": 0.5,
-     "explanation": "无法评估 — 匹配规则未覆盖该 choice（规则级跳过：该规则不适用；未知方法 ≠ 错误，K2 裁决 2026-08-16）。此分数为占位值，不可作为质量判断依据。",
-     "evidence_citations": [],
-     "alternatives": [],
-     "reward_signal": 0.5
+     "level": 1,
+     "numeric_score": 0.3,
+     "explanation": "有风险 — 方法选择值得商榷",
+     "evidence_citations": [
+      "[L-Confirmed] Current best practices in single-cell RNA-seq analysis — Luecken & Theis 2019, Mol Syst Biol — **[PMID: 31841116](https://pubmed.ncbi.nlm.nih.gov/31841116/)**",
+      "[L-Evidenced] A comparison of single-cell trajectory inference methods — Saelens et al. 2019, Nature Biotechnology — **[PMID: 30643263](https://pubmed.ncbi.nlm.nih.gov/30643263/)**"
+     ],
+     "alternatives": [
+      "PCA_elbow_selection",
+      "PCA_JackStraw",
+      "PCA_heatmap_selection",
+      "PCA_default_30",
+      "PCA_fixed_50"
+     ],
+     "reward_signal": 0.3
     },
     {
      "step_id": "S8",
@@ -2545,12 +2554,21 @@
      "matched_rules": [
       "T1.1-TRAJ-001_inference"
      ],
-     "level": -1,
-     "numeric_score": 0.5,
-     "explanation": "无法评估 — 匹配规则未覆盖该 choice（规则级跳过：该规则不适用；未知方法 ≠ 错误，K2 裁决 2026-08-16）。此分数为占位值，不可作为质量判断依据。",
-     "evidence_citations": [],
-     "alternatives": [],
-     "reward_signal": 0.5
+     "level": 0,
+     "numeric_score": 0.0,
+     "explanation": "危险 — 方法选择将导致错误结论",
+     "evidence_citations": [
+      "[L-Confirmed] A comparison of single-cell trajectory inference methods — Saelens et al. 2019, Nature Biotechnology — **[PMID: 30643263](https://pubmed.ncbi.nlm.nih.gov/30643263/)**",
+      "[L-Evidenced] The dynamics and regulators of cell fate decisions are revealed by pseudotemporal ordering of single cells — Trapnell et al. 2014, Nature Biotechnology — **[PMID: 30834587](https://pubmed.ncbi.nlm.nih.gov/30834587/)**"
+     ],
+     "alternatives": [
+      "monocle3",
+      "slingshot_with_topology_check",
+      "PAGA",
+      "scVelo",
+      "diffusion_map"
+     ],
+     "reward_signal": 0.0
     },
     {
      "step_id": "S12",

@@ -110,11 +110,11 @@ docs/
 
 | 口径 | 数值 | 出处 |
 |---|---|---|
-| **demo 轨迹**（2026-08-13 D5 修复后引擎重跑） | 29 分 · 5 × L0 | 20 条 legacy 轨迹之一 |
+| **demo 轨迹**（2026-08-13 D5 修复后引擎重跑；**2026-08-16 窗口 M 词表补齐后**） | 29 分 · blocked · **L0×3 / L1×5 / L-1×0**（M 前 L0×2 / L1×4 / L-1×2：S7 PCA_arbitrary → L1、S11 no_trajectory → L0，K 遗留①收尾） | 20 条 legacy 轨迹之一；`docs/migration/M1-capture-integrity-report.md`（§5.1） |
 | **G-2 真实运行重评**（2026-08-16，GSE115978，declared 注入 + 规则平台键放宽后） | 30.0 needs_correction · L0=0 / L1×7 / L3×1 / L-1×12 | `docs/migration/agent-eval-report-g2.md` |
 | **K1 重评**（2026-08-16，GSE115978，immune scRNA 规则落地后，ruleset 1.5.0） | **30.0 needs_correction（不变）** · L0=0 / L1×19 / L3×1 / L-1×0 | `docs/migration/K1-score-correctness-report.md`（§6）/ agent-eval-report-g2.md §8 |
 | **10X 黄金对照 A 版**（2026-08-16，窗口 L，GSE132465 CRC 10X，确定性脚本非 LLM，ruleset 1.6.0） | **80.0 pass** · L0=0 / L1=0 / L-1=0 · 11 决策（doublet_detection scDblFinder → **L3**，D1.1 首次真实执行验证） | `docs/migration/L1-broader-eval-report.md`（§4） |
-| **10X 变体 B 版引擎级补验**（2026-08-16，窗口 L，同数据跳过双联体） | **63.7 blocked** · doublet_detection skip → **L0**（采集层阴性声明 revoked 不可见，补验透明标注） | 同上（§4.3/§6.2） |
+| **10X 变体 B 版采集链路闭环**（2026-08-16，窗口 M，expected_types 强制预期决策点，ruleset 1.7.0） | **63.7 blocked** · doublet_detection 补入（provenance=expected）→ D1.1 **L0** 直接出自采集链路（原"引擎级补验"路径已取代） | `docs/migration/M1-capture-integrity-report.md`（§3.2）/ L1 报告 §4.3.1 |
 | **L-b 真实短评测**（2026-08-16，GSE115978 聚焦短分析，真实 LLM deepseek-chat，¥0.43） | **30.0 needs_correction** · L0=0 / L1×4 / L2×1 / L-1×0（5 决策全可评分） | 同上（§7） |
 
 - 禁止用旧口径冒充新结果、禁止把 demo 的 5×L0 叙述安到真实运行头上（真实运行 L0=0）；

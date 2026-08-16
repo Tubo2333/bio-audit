@@ -11,8 +11,11 @@ aliases: []
 depends_on: []
 context_schema:
   - key: data_source
-    type: enum
-    values: [GEO, cBioPortal, GDSC2, SRA, ArrayExpress]
+    # 窗口 M（2026-08-16）：enum → string——原枚举为"来源类别"，但实测
+    # 语境（benchmark 任务）存放具体数据集 ID（GSE115978 等），枚举过度
+    # 约束会触发 A3 枚举外值 → 误标 unverified（21 处任务决策实测）。
+    # 类型校验仍生效（string），A2 罚分规则引用约束不变。
+    type: string
     required: true
     # A2：被罚分规则（A1.1-API）引用 → 禁止 fail-open
     missing: fail-closed

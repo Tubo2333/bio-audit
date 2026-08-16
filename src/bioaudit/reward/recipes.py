@@ -28,6 +28,7 @@ from pydantic import BaseModel
 from bioaudit.reward.mapping import (
     HARD_PENALTY_GAMMA,
     MASK_REASON_LEVEL_MINUS_ONE,
+    MASK_REASON_LEVEL_UNVERIFIED,
     MASKED_LEVEL,
     PRM_WEIGHT_DEFAULT,
     SOURCE_DECLARED,
@@ -104,7 +105,12 @@ def build_step_rewards(
         reward = level_reward(level)
         masked, reason = False, None
         if reward is None:
-            masked, reason = True, MASK_REASON_LEVEL_MINUS_ONE
+            # M2.4（窗口 M）：-2 未验证（关键上下文缺失）与 -1 无法评估同掩码、
+            # 原因区分（mask_reasons 可审计）
+            if level == -2:
+                masked, reason = True, MASK_REASON_LEVEL_UNVERIFIED
+            else:
+                masked, reason = True, MASK_REASON_LEVEL_MINUS_ONE
         elif verdict_map is not None:
             rec = verdict_map.get(step_id)
             if rec is None:

@@ -43,7 +43,8 @@ class ScoreAggregator:
         # 1. Group scores by dimension (C2: 3 dims only)
         dim_scores: dict[str, list[float]] = {}
         for score in step_scores:
-            if score.level == -1:
+            # M2.4（窗口 M）：未验证（-2）与无法评估（-1）同掩码——不进维度分
+            if score.level in (-1, -2):
                 continue
             # B2: 本体读 dimension；未知类型 → None → 跳过（与旧硬编码行为一致）
             dim = self.ontology.dimension(score.decision_type)

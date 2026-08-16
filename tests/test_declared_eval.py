@@ -48,14 +48,19 @@ def test_declared_sequencing_matches_q1_1():
 
 
 def test_q1_1_without_sequencing_still_unevaluable():
-    """回归守卫：declared 未注入时缺键仍 fail-closed → L-1（行为不变）。"""
+    """回归守卫：declared 未注入时缺键仍 fail-closed。
+
+    M2.4（窗口 M）：missing 三档运行时强制后，fail-closed 键（sequencing）缺失
+    且被候选规则（Q1.1 required_context）引用 → **未验证（-2）**——从 G2 时代
+    的 -1（规则不匹配）升级为显式"评估前提不成立"状态（与 -1 区分并在报告呈现）。"""
     d = audit_decision({
         "step_id": "s1",
         "decision_type": "qc_filtering",
         "choice": "hard_threshold",
         "context": {"min_genes": 1000},
     }, paradigm="scrna")
-    assert d["level"] == -1
+    assert d["level"] == -2  # 未验证（关键上下文缺失）
+    assert "sequencing" in d["missing_keys"]
     assert d["matched_rules"] == []
 
 

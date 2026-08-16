@@ -77,6 +77,10 @@ class RuleRegistry:
                 matched.append(rule)
         return matched
 
+    def rules_for_type(self, decision_type: str) -> list[Rule]:
+        """该决策类型的全部候选规则（M2.4：missing 三档强制的引用键判定先于匹配）。"""
+        return [self._rules[rid] for rid in self._by_type.get(decision_type, [])]
+
     def match_with_details(self, decision_type: str, context: dict) -> list[dict]:
         """透明匹配: 返回每条候选规则的逐条条件评估明细.
 

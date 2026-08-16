@@ -136,16 +136,29 @@ def test_evaluate_all_rules_skips_unrecognized():
 
 
 def test_override_n2_still_applies_for_unrecognized_choice():
-    """override_n2（D4，n_replicates≤2 → 全部方法 L0）仍生效，即使 choice 未识别。"""
+    """override_n2（D4，n≤2 → 全部方法 L0）仍生效，即使 choice 未识别。
+
+    M2.5（窗口 M）：键映射修复——scrna G1.1 override 键为 **n_patients**
+    （旧实现硬编码 n_replicates：该场景下 n_replicates=2 会误触发，n_patients=5
+    本不应触发）。"""
     d = audit_decision({
         "step_id": "s1",
         "decision_type": "deg_method",
         "choice": "magic_rank_test_9000",
         "rationale": "unknown",
-        "context": {"sequencing": "10X_scRNA_seq", "n_patients": 5,
-                    "n_replicates": 2},
+        "context": {"sequencing": "10X_scRNA_seq", "n_patients": 2},
     }, paradigm="scrna")
-    assert d["level"] == 0  # override_n2（D4）：n≤2 全部方法 L0
+    assert d["level"] == 0  # override_n2（D4）：n≤2 全部方法 L0（choice 未识别也生效）
+    # 键映射修复：n_patients=5（不满足）→ override 不触发 → 未知方法 -1
+    d2 = audit_decision({
+        "step_id": "s1",
+        "decision_type": "deg_method",
+        "choice": "magic_rank_test_9000",
+        "rationale": "unknown",
+        "context": {"sequencing": "10X_scRNA_seq", "n_patients": 5,
+                    "n_replicates": 2},  # 旧实现误读 n_replicates 的现场
+    }, paradigm="scrna")
+    assert d2["level"] == -1
 
 
 # ── 7. t-test 家族拼写别名（K2 附带归一化补齐）──
@@ -176,11 +189,15 @@ def test_student_t_test_normalize_mapping():
 
 
 def test_golden_fallback_decisions_now_minus_one():
-    """demo 轨迹 3 条兜底 L0 决策在 K2 后为 -1（C4 漂移记录的对象）。"""
+    """demo 轨迹兜底决策的 K2→M 演变（C4 漂移记录的对象）。
+
+    K2：兜底 L0 → -1（词表缺口）；M2.6（窗口 M）：词表补齐——
+    PCA_arbitrary → L1、no_trajectory → L0（B7 豁免在评测配置层判定，
+    引擎无研究范围证据时保守"该做没做"）。"""
     result = run_audit(_load("scrna_melanoma_cellvoyager"), act="scrna")
     by_id = {s["step_id"]: s for s in result["step_scores"]}
-    assert by_id["S7"]["level"] == -1      # PCA_arbitrary（D2.1 词表无此条目）
-    assert by_id["S11"]["level"] == -1     # no_trajectory（T1.1 词表无此条目）
+    assert by_id["S7"]["level"] == 1       # PCA_arbitrary（M 窗口词表补齐 → L1）
+    assert by_id["S11"]["level"] == 0      # no_trajectory（M 窗口词表补齐 → L0）
     # S10 Kruskal_Wallis_cell_level：词表补齐后为 L1（K3 裁决），未补齐前为 -1
     assert by_id["S10"]["level"] in (-1, 1)
     # 词表内 L0 决策保持 L0（不被 K2 误伤）

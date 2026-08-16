@@ -21,6 +21,9 @@ TRAJECTORIES_DIR = PKG_DIR / "data" / "trajectories" / "v2"   # ★ 20 条 v2 �
 TRAJECTORIES_LEGACY_DIR = PKG_DIR / "data" / "trajectories"   # v1 原文件（备份，只读）
 MAPPINGS_DIR = PKG_DIR / "data" / "mappings"    # 遗留映射（B2 后由本体取代：aliases→ontology/、dep_graph→depends_on、type_to_dim→dimension）
 VALIDATION_DIR = PKG_DIR / "data" / "validation"  # 验证数据（full_audit_results 等）
+# M1.1（窗口 M，2026-08-16）：expected_types 评测配置（per 范式×平台预期决策点
+# 清单，放评测配置不放引擎硬编码；缺失预期决策补入 provenance=expected）
+EXPECTED_TYPES_PATH = PKG_DIR / "data" / "expected_types.yaml"
 REPORT_DATA_DIR = PKG_DIR / "data" / "report"   # 报告数据（ai_error_patterns.md）
 
 # ── 本体锚点（B2：决策类型本体，单一事实源）──

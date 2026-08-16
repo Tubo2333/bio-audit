@@ -1,5 +1,42 @@
 # Changelog
 
+## 窗口 M：采集完整性（2026-08-16，engine 0.3.0 / ruleset 1.7.0 / ontology 0.1.3）
+
+- **M-a expected_types 强制预期决策点**（M1.1 设计经项目负责人在线确认后落地）：
+  预期清单放评测配置 `src/bioaudit/data/expected_types.yaml`（per 范式×平台：10X 11 决策 /
+  Smart-seq2 10 决策，L 窗口 A 版实证；非引擎硬编码）；缺失预期决策补入
+  `provenance=expected`（choice 优先取 M1 已撤销声明，无则 not_performed）→ 参与评分；
+  仅显式 optional 且 when_not_applicable 谓词满足才豁免（B7/G5 保守原则，谓词注册表
+  11 个）；CLI `cross-validate --expected` 支持 YAML 配置
+- **10X-B 闭环**：B 版带 expected_types 重跑（复用 windowL 产物，零新执行成本）→
+  doublet_detection 补入（skip_doublet 取 Agent 声明）→ D1.1 **L0** → **63.7 · blocked
+  直接出自采集链路**（L 报告 §4.3.1 追加；原"引擎级补验"路径取代，不再标注）；采集层
+  "静默跳过不可见"边界闭环（L 发现①）
+- **M-b missing 三档运行时强制**（Option B 规则引用驱动，项目负责人确认）：
+  `engine/context_guard.py`——fail-closed 键缺失且被候选规则引用（required_context ∪
+  约束 ∪ override 键）→ 决策 **未验证（level=-2，新状态，与 -1 区分）**，报告列缺失键；
+  skip 档跳过依赖规则（溯源）；fail-open 视为满足 + **A2 运行时断言**（警告留痕）；
+  A5/A3 类型/枚举校验（api_data_integrity data_source enum→string 本体修复）；
+  -2 与 -1 同掩码（聚合/reward，mask 原因区分）；golden **0 漂移**（C4 未触发）、
+  任务 13 决策（pca_dimension 缺 n_genes）受影响
+- **override_n2 键映射修复**（fix-tracking A3）：读规则 override 配置键
+  （G1.1 → n_patients，原硬编码 n_replicates）；n=0 falsy 修复；**候选级 override**
+  （D4 意图落地：约束门不再使 override 成死代码）
+- **B7/G5 合理省略 + 词表补齐**（fix-tracking B7 / K 遗留①收尾）：判定入口 =
+  评测配置层（引擎不猜研究范围）；`PCA_arbitrary` → D2.1 **L1**、`no_trajectory` →
+  T1.1 **L0**（ruleset 1.6.0 → 1.7.0，B5 三闸 PASS）
+- **C4 漂移（4 处全归因）**：scrna_melanoma_cellvoyager S7 -1→L1、S11 -1→L0、
+  method_selection 0.63→0.4929（轨迹分 29.0/verdict 不变）；deg_edge_n2 E1 文案增强
+  （评分零变化）；基线双副本更新（4c4d1b3d → b88e919e）+ asset_manifest change_log +2 条
+- **回归连锁**：pytest **269/269**（+23：expected_types 9 / missing-override-词表 14）；
+  golden 0 差异；三/四/五闸 + validate-ontology + capture-validate + MCP PASS；
+  ruff **38 < 40 基线**；benchmark 60 任务复跑（mean 0.5542→0.5572、recall 0.820 不变、
+  precision 0.7736→0.7455（FP+2 预注册解释：S11 no_trajectory 保守 L0 vs 标注合理省略）、
+  F1 0.7961→0.7810、edge 检出 0.6458→0.6146、gap +0.048→+0.0449 区间内）；
+  reward-validate 五闸 PASS（-2 mask 语义纳入）；CI 双矩阵云上确认；git commit/push 完成
+- 报告：[M1 采集完整性报告](docs/migration/M1-capture-integrity-report.html) ·
+  [M 设计提案（确认记录）](docs/migration/M1-design-proposal.html)
+
 ## 窗口 L：更广评测——10X 黄金对照 + 真实短评测（2026-08-16，无版本号）
 
 - **L-a 10X 黄金对照（≈0 成本）**：黄金 Agent 模板适配 10X（GSE132465 CRC 10X UMI，

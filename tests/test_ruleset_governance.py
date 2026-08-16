@@ -34,7 +34,7 @@ def test_ruleset_version_reads_from_manifest():
     assert RULESET_VERSION.count(".") == 2  # semver 形状
     # 清单三元组元数据完整
     assert manifest["engine_version"] == bioaudit.ENGINE_VERSION == bioaudit.__version__
-    assert manifest["ontology_version"] == bioaudit.ONTOLOGY_VERSION == "0.1.2"
+    assert manifest["ontology_version"] == bioaudit.ONTOLOGY_VERSION == "0.1.3"
 
 
 def test_verify_manifest_all_green():
@@ -92,7 +92,7 @@ def test_report_snapshot_triple_complete():
     # 三元组不再为 None（B5 验收项 1/2）；版本从清单/本体读取，不硬编码
     from bioaudit.rules.manifest import load_ruleset
     assert report["ruleset_version"] == load_ruleset()["ruleset_version"]
-    assert report["ontology_version"] == "0.1.2"
+    assert report["ontology_version"] == "0.1.3"
     assert report["engine_version"] == bioaudit.__version__
     # 完整快照字典（C1/P2）
     snap = report["snapshot"]

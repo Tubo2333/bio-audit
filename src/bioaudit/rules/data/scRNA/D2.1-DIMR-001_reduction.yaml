@@ -32,8 +32,9 @@ scoring:
     methods:
       - PCA_fixed_10
       - PCA_fixed_15
-    description: "PCA维度过低 — 可能丢失稀有细胞类型的信号"
-    note: "仅用10个PC可能捕获不到占比<5%的稀有细胞群体的变异"
+      - PCA_arbitrary
+    description: "PCA维度过低或任意选维 — 可能丢失稀有细胞类型的信号"
+    note: "仅用10个PC可能捕获不到占比<5%的稀有细胞群体的变异。PCA_arbitrary（任意选维，无 elbow/JackStraw/方差解释依据）= 主观固定维度，与 PCA_fixed_10/15 同原则评 L1（窗口 M 词表补齐 2026-08-16，K 遗留①收尾；G 窗口 S7 实测 50 PCs 无依据）"
   level_0:
     methods:
       - tSNE_directly_for_clustering

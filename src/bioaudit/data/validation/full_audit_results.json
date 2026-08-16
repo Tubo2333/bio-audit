@@ -1,11 +1,11 @@
 {
  "audit_date": "2026-08-16",
- "engine": "bio-audit-v2 当前引擎（D5 修复后 + J1 wilcoxon 词表对齐 + J2 significance_threshold + K1 immune scRNA 规则 + K2 未知方法→-1 + K3 ttest 家族对齐，ruleset 1.6.0）；原 2026-08-13 版本为 D5 修复后引擎生成",
+ "engine": "bio-audit-v2 当前引擎（D5 修复后 + J1 wilcoxon 词表对齐 + J2 significance_threshold + K1 immune scRNA 规则 + K2 未知方法→-1 + K3 ttest 家族对齐 + M missing 三档强制/override 键映射/词表补齐，ruleset 1.7.0 / engine 0.3.0）；原 2026-08-13 版本为 D5 修复后引擎生成",
  "total_trajectories": 20,
  "total_decisions": 137,
  "score_definition": {
-  "trajectory_score": "最低维度平均分 x100（UI/报告口径，primary；-1 无法评估不参与聚合）",
-  "avg_score": "可评分决策 numeric_score 平均 x100（辅助口径；-1 不参与）"
+  "trajectory_score": "最低维度平均分 x100（UI/报告口径，primary；-1 无法评估/-2 未验证不参与聚合）",
+  "avg_score": "全部可评决策 numeric_score 平均 x100（辅助口径；-1/-2 不参与）"
  },
  "trajectories": {
   "deg_correct": {
@@ -232,14 +232,14 @@
   "scrna_melanoma_cellvoyager": {
    "n_decisions": 12,
    "trajectory_score": 29.0,
-   "avg_score": 46.0,
+   "avg_score": 40.8,
    "verdict": "blocked",
    "level_dist": {
-    "danger": 2,
-    "risk": 4,
+    "danger": 3,
+    "risk": 5,
     "acceptable": 0,
     "correct": 4,
-    "unevaluable": 2
+    "unevaluable": 0
    }
   },
   "scrna_melanoma_correct": {
@@ -383,7 +383,7 @@
   "dim_reduction": {
    "total": 7,
    "danger": 0,
-   "risk": 1
+   "risk": 2
   },
   "clustering_method": {
    "total": 7,
@@ -397,7 +397,7 @@
   },
   "trajectory_inference": {
    "total": 7,
-   "danger": 0,
+   "danger": 1,
    "risk": 0
   },
   "cluster_annotation_consistency": {

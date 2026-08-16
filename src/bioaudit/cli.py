@@ -259,7 +259,16 @@ def cmd_cross_validate(args: argparse.Namespace) -> int:
 
         expected = None
         if args.expected:
-            expected = json.loads(Path(args.expected).read_text(encoding="utf-8"))
+            expected_path = Path(args.expected)
+            if expected_path.suffix.lower() in (".yaml", ".yml"):
+                # M1.1（窗口 M）：expected_types 评测配置（per 范式×平台，B7 豁免）
+                from bioaudit.capture.expected_types import expected_types_for
+
+                expected = expected_types_for(
+                    args.act or "scrna", facts=declared or {},
+                )
+            else:
+                expected = json.loads(expected_path.read_text(encoding="utf-8"))
 
         store = None
         if not args.no_verdicts:
@@ -559,7 +568,9 @@ def main(argv: list[str] | None = None) -> int:
     p_cv.add_argument("--metadata", default=None, help="数据元数据 JSON（M3 解析用）")
     p_cv.add_argument("--declared", default=None,
                       help="评测者/数据事实声明 JSON（三级可信源；与 Agent 自证严格区分）")
-    p_cv.add_argument("--expected", default=None, help="预期决策类型 JSON 数组")
+    p_cv.add_argument("--expected", default=None,
+                      help="预期决策类型（JSON 数组文件，或 expected_types 评测配置 YAML——"
+                           "按范式×平台解析 + B7 豁免；窗口 M M1.1）")
     p_cv.add_argument("--session", default=None, help="会话 id（默认 crossval）")
     p_cv.add_argument("--no-verdicts", action="store_true", help="不联动 verdict store")
     p_cv.set_defaults(func=cmd_cross_validate)

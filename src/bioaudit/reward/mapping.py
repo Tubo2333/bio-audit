@@ -35,6 +35,9 @@ REWARD_SCHEMA_VERSION = "reward.v1"
 
 #: 全部合法 level（-1 为无法评估，单独列出）
 LEVELS: tuple[int, ...] = (0, 1, 2, 3, 4)
+# M2.4（窗口 M，2026-08-16）：未验证（-2，关键上下文缺失）与 -1 同掩码——
+# 两者都不携带好坏信息，给固定值会注入虚假信号（与 F1 -1 mask 同原则）
+MASKED_LEVELS: frozenset[int] = frozenset({-1, -2})
 MASKED_LEVEL = -1
 
 #: **Level→reward 映射表（定稿，E1.2）**：非线性（严重性凸），见模块 docstring。
@@ -61,6 +64,7 @@ PRM_WEIGHT_DEFAULT = 1.0
 
 #: mask 原因常量（meta.mask_reasons 计数键 / StepReward.mask_reason）
 MASK_REASON_LEVEL_MINUS_ONE = "level_minus_one"     # level = -1（无法评估，F1）
+MASK_REASON_LEVEL_UNVERIFIED = "level_unverified"   # level = -2（未验证，关键上下文缺失，M2.4）
 MASK_REASON_REVOKED = "revoked"                     # B4：revoked 步骤 reward 置 mask
 MASK_REASON_PROVISIONAL = "provisional_not_final"   # B4：非 final 不消费
 MASK_REASON_NO_VERDICT = "no_verdict_record"        # B4：有 verdict 会话但无记录
@@ -75,37 +79,39 @@ EVIDENCE_ADJUSTMENT_HOOK = None
 
 
 def level_reward(level: int) -> Optional[float]:
-    """level → reward；-1（无法评估）→ **None（mask，不参与聚合）**。
+    """level → reward；-1/-2（无法评估/未验证）→ **None（mask，不参与聚合）**。
 
     Parameters
     ----------
     level : int
-        -1（mask）或 0..4（映射表）。
+        -1（mask）/ -2（mask，未验证，M2.4）或 0..4（映射表）。
 
     Returns
     -------
     float | None
         None 表示该步骤被 mask（调用方必须跳过，不得参与任何聚合）。
     """
-    if level == MASKED_LEVEL:
+    if level in MASKED_LEVELS:
         return None
     return REWARD_BY_LEVEL.get(level)
 
 
 def is_masked_level(level: int) -> bool:
-    """level 是否应被 mask（-1 无法评估）。"""
-    return level == MASKED_LEVEL
+    """level 是否应被 mask（-1 无法评估 / -2 未验证）。"""
+    return level in MASKED_LEVELS
 
 
 __all__ = [
     "REWARD_SCHEMA_VERSION",
     "LEVELS",
     "MASKED_LEVEL",
+    "MASKED_LEVELS",
     "REWARD_BY_LEVEL",
     "CEILING_REWARD",
     "HARD_PENALTY_GAMMA",
     "PRM_WEIGHT_DEFAULT",
     "MASK_REASON_LEVEL_MINUS_ONE",
+    "MASK_REASON_LEVEL_UNVERIFIED",
     "MASK_REASON_REVOKED",
     "MASK_REASON_PROVISIONAL",
     "MASK_REASON_NO_VERDICT",

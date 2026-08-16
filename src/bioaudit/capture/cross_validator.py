@@ -24,6 +24,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 from bioaudit.capture.models import (
+    PROVENANCE_SOURCE_EXPECTED,
     PROVENANCE_SOURCE_M1,
     PROVENANCE_SOURCE_M3,
     CapturedDecision,
@@ -43,6 +44,10 @@ ALIGNMENT_STATUSES = frozenset({
     STATUS_CONSISTENT, STATUS_FALSE_POSITIVE, STATUS_FALSE_NEGATIVE, STATUS_UNVERIFIED,
 })
 
+#: M1.1（窗口 M，2026-08-16）：预期决策缺失补入统计键（stats 独立计数，
+#: 与四类判定并列——补入决策的对齐状态仍为 unverified，但补入行为单独可数）
+STATUS_EXPECTED_ADDED = "expected_added"
+
 
 class AlignmentRecord(BaseModel):
     """单条决策点对齐记录（M1 vs M3）。"""
@@ -54,6 +59,10 @@ class AlignmentRecord(BaseModel):
     instances: list[dict] = Field(default_factory=list)  # M3 同类型多实例（B5）
     detail: str = ""
     auto_added: bool = False  # 漏报 → 自动补入
+    # M1.1（窗口 M）：预期决策点缺失 → 补入 provenance=expected（该做没做）。
+    # 与虚报撤销/未验证并存于同一对齐记录（不新增行），补入行为经
+    # ``added_decisions``（verdict final，来源 expected）落最终轨迹。
+    expected_added: bool = False
 
 
 class CrossValidationResult(BaseModel):
@@ -110,6 +119,7 @@ class CrossValidator:
         *,
         session_id: str = "crossval",
         expected_types: Optional[list[str]] = None,
+        expected_context: Optional[dict] = None,
         verdict_store: Optional[VerdictStore] = None,
     ) -> CrossValidationResult:
         """执行交叉验证。
@@ -121,9 +131,15 @@ class CrossValidator:
         m3 : ParseResult | list
             M3 解析产物（notebook → ParseResult；或候选列表）。
         expected_types : list[str] | None
-            预期决策点（如 scRNA 管线全阶段）；双方都无 → 未验证。
+            预期决策点（M1.1：评测配置 per 范式×平台；调用方先应用 B7 豁免）。
+            双方都无证据 → 未验证 + **补入 provenance=expected 参与评分**
+            （该做没做；choice 优先取 M1 已撤销声明，无声明 → not_performed）。
+        expected_context : dict | None
+            补入决策的会话事实（declared + 数据元数据并集）；M1 声明存在时
+            以其 context 优先（Agent 声明的事实，不伪造）。
         verdict_store : VerdictStore | None
-            提供时联动 verdict 状态位（一致→final、虚报→revoked、漏报→新建 final）。
+            提供时联动 verdict 状态位（一致→final、虚报→revoked、漏报→新建 final、
+            预期补入→新建 final（来源 expected））。
         """
         m1_list = [_to_captured(d, PROVENANCE_SOURCE_M1) for d in m1_declarations]
         if isinstance(m3, ParseResult):
@@ -151,9 +167,58 @@ class CrossValidator:
         added: list[dict] = []
         updates: list[dict] = []
         expected = list(expected_types or [])
+        expected_set = set(expected)
+        expected_added_count = {"n": 0}
+        expected_done: set[str] = set()
+
+        def _add_expected(tid: str, decls: list[CapturedDecision]) -> None:
+            """预期决策缺失补入（M1.1：该做没做；choice 优先取 M1 已撤销声明）。
+
+            只落 ``added_decisions``（verdict final，来源 expected）——对齐记录
+            由调用处标记 ``expected_added=True``，不新增对齐行。
+            """
+            if tid in expected_done:
+                return
+            expected_done.add(tid)
+            expected_added_count["n"] += 1
+            declared = decls[-1] if decls else None
+            choice = declared.choice if declared else "not_performed"
+            ctx = dict(declared.context) if declared else dict(expected_context or {})
+            decision = {
+                "step_id": declared.step_id if declared else f"expected_{tid}",
+                "decision_type": tid,
+                "choice": choice,
+                "rationale": (
+                    declared.rationale
+                    if declared
+                    else "预期决策缺失补入（expected_types；该做没做，B7 未豁免）"
+                ),
+                "context": ctx,
+            }
+            if verdict_store is not None:
+                verdict = verdict_store.create(
+                    session_id=session_id,
+                    step_id=decision["step_id"],
+                    decision_type=tid,
+                    choice=choice,
+                    paradigm=self.act or "scrna",
+                    provenance_source=PROVENANCE_SOURCE_EXPECTED,
+                    score_snapshot={
+                        "context": ctx,
+                        "explanation": decision["rationale"],
+                    },
+                    status=VerdictStatus.FINAL,
+                    reason="预期决策缺失补入（expected_types）",
+                )
+                decision["verdict_id"] = verdict.verdict_id
+                updates.append({
+                    "verdict_id": verdict.verdict_id, "status": "final",
+                    "decision_type": tid, "reason": "预期决策缺失补入",
+                })
+            added.append(decision)
 
         all_types = sorted(
-            set(m1_by_type) | set(m3_by_type) | set(uncertain_by_type) | set(expected)
+            set(m1_by_type) | set(m3_by_type) | set(uncertain_by_type) | expected_set
         )
         for tid in all_types:
             m1s = m1_by_type.get(tid, [])
@@ -192,13 +257,19 @@ class CrossValidator:
                     detail=detail, auto_added=True,
                 ))
 
-            # ── 未验证：预期决策点双方都无（不伪造）──
+            # ── 未验证 / 预期补入：预期决策点双方都无（不伪造）──
             if not m1s and not m3s:
-                if tid in expected:
+                if tid in expected_set:
+                    # M1.1：预期决策点缺失 → 补入 provenance=expected（该做没做）
                     alignments.append(AlignmentRecord(
                         decision_type=tid, status=STATUS_UNVERIFIED,
-                        detail="预期决策点双方都无证据 → 未验证（绝不伪造）",
+                        detail=(
+                            "预期决策点双方都无证据 → 未验证 + 补入 "
+                            "provenance=expected（该做没做）"
+                        ),
+                        expected_added=True,
                     ))
+                    _add_expected(tid, [])
                 continue
 
             # ── 虚报 / 一致：逐条 M1 声明 vs M3 事实 ──
@@ -223,10 +294,19 @@ class CrossValidator:
                             "verdict_id": verdict_id, "status": "revoked",
                             "decision_type": tid, "reason": "虚报（声明未执行）",
                         })
-                    alignments.append(AlignmentRecord(
+                    alignment = AlignmentRecord(
                         decision_type=tid, status=STATUS_FALSE_POSITIVE,
                         m1=decl.model_dump(mode="json"), instances=instances, detail=detail,
-                    ))
+                    )
+                    # M1.1：该类型为预期决策点且 M3 无执行证据 → 虚报撤销之外，
+                    # 按"该做没做"补入 provenance=expected（choice 取 Agent 声明）
+                    if tid in expected_set:
+                        alignment.expected_added = True
+                        alignment.detail += (
+                            "；预期决策点缺失 → 补入 provenance=expected（该做没做）"
+                        )
+                        _add_expected(tid, m1s)
+                    alignments.append(alignment)
                     continue
 
                 matched = next((c for c in m3s if c.choice == decl.choice), None)
@@ -278,6 +358,7 @@ class CrossValidator:
                     instances=instances, detail=detail,
                 ))
 
+        n_expected = expected_added_count["n"]
         result = CrossValidationResult(
             session_id=session_id,
             act=self.act,
@@ -297,6 +378,7 @@ class CrossValidator:
                 STATUS_UNVERIFIED: sum(
                     1 for a in alignments if a.status == STATUS_UNVERIFIED
                 ),
+                STATUS_EXPECTED_ADDED: n_expected,
             },
         )
         return result
@@ -369,6 +451,7 @@ __all__ = [
     "STATUS_FALSE_POSITIVE",
     "STATUS_FALSE_NEGATIVE",
     "STATUS_UNVERIFIED",
+    "STATUS_EXPECTED_ADDED",
     "ALIGNMENT_STATUSES",
     "AlignmentRecord",
     "CrossValidationResult",

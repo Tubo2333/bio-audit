@@ -31,6 +31,8 @@ def replay_all() -> dict:
 
     evaluator = RuleEvaluator()
     aggregator = ScoreAggregator()
+    # M2.4（窗口 M）：missing 三档强制（fail-closed 缺失 → 未验证）
+    from bioaudit.engine.context_guard import score_decision
 
     trajectories = []
     total_decisions = 0
@@ -46,8 +48,11 @@ def replay_all() -> dict:
         for item in decisions:
             d = Decision(**item)
             parsed, rules = matcher.match(d)
-            sc = evaluator.evaluate(parsed, rules)
-            scores.append(sc.model_dump())
+            candidate_rules = registries[act].rules_for_type(parsed.decision_type)
+            sc = score_decision(parsed, rules, candidate_rules, evaluator)
+            # M2.4（窗口 M）：missing_keys 为 -2 的伴随字段——golden 比较载荷排除
+            # （语义变化由 level/explanation 捕获；避免 137 条空数组机械漂移）
+            scores.append(sc.model_dump(exclude={"missing_keys"}))
             total_decisions += 1
         result = aggregator.aggregate([DecisionScore(**s) for s in scores])
         trajectories.append({

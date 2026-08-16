@@ -11,6 +11,7 @@ import pytest
 
 from bioaudit.capture.cross_validator import (
     STATUS_CONSISTENT,
+    STATUS_EXPECTED_ADDED,
     STATUS_FALSE_NEGATIVE,
     STATUS_FALSE_POSITIVE,
     STATUS_UNVERIFIED,
@@ -60,11 +61,19 @@ def test_four_categories():
     )
     by_type = {a.decision_type: a for a in result.alignments}
     assert by_type["qc_filtering"].status == STATUS_CONSISTENT
+    # M1.1（窗口 M）：dim_reduction/clustering_method 为预期决策点且无 M3 执行
+    # 证据 → 虚报/未验证 + 补入 provenance=expected（该做没做）
     assert by_type["dim_reduction"].status == STATUS_FALSE_POSITIVE
-    assert by_type["clustering_method"].status == STATUS_UNVERIFIED  # 双方都无
+    assert by_type["dim_reduction"].expected_added is True
+    assert by_type["clustering_method"].status == STATUS_UNVERIFIED
+    assert by_type["clustering_method"].expected_added is True
+    added = {d["decision_type"]: d for d in result.added_decisions}
+    assert added["dim_reduction"]["choice"] == "PCA_elbow_selection"  # Agent 声明值
+    assert added["clustering_method"]["choice"] == "not_performed"
     assert result.stats == {
         STATUS_CONSISTENT: 1, STATUS_FALSE_POSITIVE: 1,
         STATUS_FALSE_NEGATIVE: 0, STATUS_UNVERIFIED: 1,
+        STATUS_EXPECTED_ADDED: 2,
     }
 
 

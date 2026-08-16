@@ -27,6 +27,9 @@ from pydantic import BaseModel, Field
 # ── 来源常量（provenance，设计 §四/§七）──
 PROVENANCE_SOURCE_M1 = "M1声明"     # Agent 主动上报（self-declared）
 PROVENANCE_SOURCE_M3 = "M3解析"     # 产物解析（artifact trace）
+# M1.1（窗口 M，2026-08-16）：预期决策缺失补入（expected_types 强制检查；
+# choice 优先取 Agent 已声明值（如 skip_doublet），无声明 → not_performed）
+PROVENANCE_SOURCE_EXPECTED = "expected"
 PROVENANCE_SOURCE_UNKNOWN = "unknown"
 
 # ── 上下文可信源（设计 §四 + G-2 定稿：四级，declared 仅评测者/数据事实）──
@@ -124,6 +127,7 @@ class ParseResult(BaseModel):
 __all__ = [
     "PROVENANCE_SOURCE_M1",
     "PROVENANCE_SOURCE_M3",
+    "PROVENANCE_SOURCE_EXPECTED",
     "PROVENANCE_SOURCE_UNKNOWN",
     "TRUST_CALL_ARG",
     "TRUST_DATA_METADATA",

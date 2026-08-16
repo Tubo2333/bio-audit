@@ -95,7 +95,7 @@ Act 2 危险决策密度最高（30.6% L0 占比），Top 4 危险类型: `indep
 | scrna_edge_nodoublet | Act 3 | 1 | 0.0 | 边缘: 不做双联体 |
 | scrna_edge_default | Act 3 | 1 | 30.0 | 边缘: 默认分辨率 |
 | scrna_edge_singleanno | Act 3 | 1 | 60.0 | 边缘: 单方法注释 |
-| scrna_melanoma_cellvoyager | Act 3 | 12 | 29.0 | 真实 CellVoyager 运行 (5 L0) |
+| scrna_melanoma_cellvoyager | Act 3 | 12 | 29.0 | 真实 CellVoyager 运行 (3 L0，M 后；K 后 2) |
 
 > 2026-08-13 A4 同步：以上分数为 D5 修复后引擎实测（trajectory_score = 最低维度分）。修复前旧值：deg_error 46.0、pan_error 28.7、scrna_error 47.9、scrna_crc_error 50.4、scrna_edge_singleanno 85.0、cellvoyager 41.0/48.3。
 
@@ -103,15 +103,15 @@ Act 2 危险决策密度最高（30.6% L0 占比），Top 4 危险类型: `indep
 
 ## 2. 总体统计 / Overall Statistics
 
-### 2.1 Level 分布 / Level Distribution（2026-08-16 K 后重算；原 2026-08-13 A4 重算，D5 修复后）
+### 2.1 Level 分布 / Level Distribution（2026-08-16 M 后重算；原 2026-08-13 A4 重算，D5 修复后）
 
 | Level | Act 1 (DEG) | Act 2 (PanCancer) | Act 3 (scRNA) | Total |
 |-------|-------------|-------------------|---------------|-------|
-| **L0 (危险)** | 3 (21.4%) | 11 (30.6%) | 9 (10.3%) | **23 (16.8%)** |
-| **L1 (有风险)** | 4 (28.6%) | 5 (13.9%) | 13 (14.9%) | **22 (16.1%)** |
+| **L0 (危险)** | 3 (21.4%) | 11 (30.6%) | 10 (11.5%) | **24 (17.5%)** |
+| **L1 (有风险)** | 4 (28.6%) | 5 (13.9%) | 14 (16.1%) | **23 (16.8%)** |
 | **L2 (可接受)** | 1 (7.1%) | 1 (2.8%) | 2 (2.3%) | **4 (2.9%)** |
 | **L3+ (正确)** | 6 (42.9%) | 19 (52.8%) | 61 (70.1%) | **86 (62.8%)** |
-| **L-1 (无法评估)** | 0 | 0 | 2 (2.3%) | **2 (1.5%)** |
+| **L-1 (无法评估)** | 0 | 0 | 0 | **0** |
 
 > J1 变化（2026-08-16，ruleset 1.2.0→1.3.0）：wilcoxon 词表对齐使 scrna_crc_error/scrna_error 的
 > S10（wilcoxon_rank_sum）由 L0 改为 L1 → scRNA L0 14→12、L1 10→12；轨迹分与 verdict 不变（其他 L0 主导）。
@@ -121,6 +121,12 @@ Act 2 危险决策密度最高（30.6% L0 占比），Top 4 危险类型: `indep
 > （Kruskal_Wallis_cell_level）由兜底 L0 改为 L1（细胞级秩检验 = 伪重复 = 有风险）→
 > scRNA L0 12→9、L1 12→13、L-1 0→2；pan_error D3（Student_t_test）经 K2 拼写别名
 > 归一保持 L0（M1.1 t-test 家族词表命中，非兜底）。轨迹分与 verdict 均不变。
+> **M 变化（2026-08-16，ruleset 1.6.0→1.7.0 / engine 0.3.0）**：M2.6 词表补齐使
+> scrna_melanoma_cellvoyager S7（PCA_arbitrary）L-1→**L1**（任意选维 = 有风险，
+> 与 PCA_fixed_10/15 同原则）、S11（no_trajectory）L-1→**L0**（该做没做；B7 合理
+> 省略豁免在 expected_types 评测配置层判定，引擎无研究范围证据时保守评级）→
+> scRNA L0 9→10、L1 13→14、L-1 2→0；轨迹分 29.0 与 verdict blocked 不变
+> （S3/S6 词表内 L0 仍主导 data_handling 维）。
 
 **发现**: Act 3 (scRNA) 的正确率最高 (70.1%)，因为 scRNA 规则库 (22条) 覆盖最完整，且方法学共识最强。Act 2 (PanCancer) 的危险决策比例最高 (30.6%)，因为生存分析和跨模块一致性检查是更复杂、更易出错的领域。
 
@@ -288,11 +294,11 @@ CellVoyager 成功运行在 GSE115978 (Melanoma, 7K cells) 并生成了完整的
 | Metric | Hand-crafted | Real CellVoyager |
 |--------|-------------|------------------|
 | **Audit Score** | **85.0** (PASS) | **29.0** (BLOCKED) |
-| **L0 (危险)** | 0 | **2**（K 后；原 5） |
-| **L1 (有风险)** | 0 | 4（K 后；原 3） |
+| **L0 (危险)** | 0 | **3**（M 后；K 后 2，原 5） |
+| **L1 (有风险)** | 0 | 5（M 后；K 后 4） |
 | **L2 (可接受)** | 0 | 0 |
 | **L3+ (正确)** | 12 | 4 |
-| **L-1 (无法评估)** | 0 | **2**（K 后新增） |
+| **L-1 (无法评估)** | 0 | **0**（M 词表补齐后） |
 
 > 2026-08-13 A4 同步：29.0 为 D5 修复后引擎实测。旧值 48.3 是旧词表时代 + D5 无条件提升时代的计算；48.3 之谜（S7 PCA_arbitrary 按 L2 计）详见审计报告执行摘要附注。
 > K 更新（2026-08-16，ruleset 1.6.0）：K2 未知方法→-1（A2 修复）后，S7/S11 的词表外 choice
@@ -301,18 +307,22 @@ CellVoyager 成功运行在 GSE115978 (Melanoma, 7K cells) 并生成了完整的
 > verdict blocked 不变（S3/S6 词表内 L0 仍主导）。**注意：本节表格为 legacy 报告口径
 > （demo 12 决策轨迹），与 G 窗口真实运行重评（30.0，20 决策）严格区分，禁止混写**
 > （site-design §6.2）。
+> **M 更新（2026-08-16，ruleset 1.7.0 / engine 0.3.0）**：M2.6 词表补齐（K 遗留①收尾）——
+> S7 PCA_arbitrary L-1→**L1**（任意选维无客观依据）、S11 no_trajectory L-1→**L0**
+> （该做没做；B7 合理省略豁免在评测配置层判定）；轨迹分 29.0 与 verdict 不变
+> （S3/S6 的 L0 仍主导 data_handling 维；method_selection 维 0.63→0.4929 如实）。
 
-**危险/无法评估决策明细（K 后）**:
+**危险/无法评估决策明细（M 后）**:
 
 | Step | Decision | CellVoyager Choice | Level | Why Dangerous |
 |------|----------|-------------------|-------|---------------|
 | S3 | doublet_detection | no_doublet_detection | L0 | 7K cells without doublet removal — risks spurious co-expression |
 | S6 | batch_correction | no_integration | L0 | 12 patients without batch correction — patient effects may confound biology |
-| S7 | dim_reduction | PCA_arbitrary (50 PCs) | **L-1** | 词表无 PCA_arbitrary 条目 → 无法评估（K2 不再兜底 L0；词表缺口登记） |
+| S7 | dim_reduction | PCA_arbitrary (50 PCs) | **L1** | 任意选维无客观依据（无 elbow/JackStraw）— 可能丢失稀有群体信号（M 词表补齐，与 PCA_fixed_10/15 同原则） |
 | S10 | deg_method | Kruskal_Wallis_cell_level | **L1** | Cell-level test without pseudobulk — pseudoreplication inflates significance（K3 词表补齐：秩检验细胞级 = 有风险） |
-| S11 | trajectory_inference | no_trajectory | **L-1** | 词表无 no_trajectory 条目 → 无法评估（K2 不再兜底 L0；"跳过可选模块"语义归 missing 三档批次，A1-A5 排期） |
+| S11 | trajectory_inference | no_trajectory | **L0** | 该做没做：跳过轨迹推断 → 结论缺失时间维度证据（M 词表补齐；B7 合理省略豁免在 expected_types 评测配置层判定，引擎无研究范围证据时保守评 L0） |
 
-**关键发现 / Key Insight**: 真实的 AI Agent (CellVoyager) 在自动化单细胞分析中做出了多个方法学次优选择。这些不是"选错方法"的初级错误（如 ttest vs DESeq2），而是更隐蔽的"跳过了这个步骤"类型的遗漏——不做双联体检测、不做批次校正、不使用伪重复校正。审计引擎成功检测到了所有这些遗漏（K 后口径：词表内 2 条 L0 检出 + S10 按 G1.1 伪重复原则评 L1；S7/S11 属词表外，如实登记为无法评估而非误判"危险"）。
+**关键发现 / Key Insight**: 真实的 AI Agent (CellVoyager) 在自动化单细胞分析中做出了多个方法学次优选择。这些不是"选错方法"的初级错误（如 ttest vs DESeq2），而是更隐蔽的"跳过了这个步骤"类型的遗漏——不做双联体检测、不做批次校正、不使用伪重复校正。审计引擎成功检测到了所有这些遗漏（M 后口径：词表内 3 条 L0 检出 + S7/S10 按伪重复/选维原则评 L1；词表缺口清零——M 窗口补齐 PCA_arbitrary/no_trajectory 后 L-1=0）。
 
 **CellVoyager 分析质量评估**: 尽管有 5 个危险标记，CellVoyager 的分析在生物学上仍然是合理的——它正确地识别了原始 counts 数据、应用了适当的归一化、使用 HVG 选择、并通过 cell-cycle 分析发现了 MHC-I 基因在增殖性肿瘤细胞中下调的有趣模式。审计引擎的 29.0 分反映了方法论的不完整，而非生物学结论的错误。
 

@@ -218,7 +218,7 @@ def run_audit(
         logger.exception("match 阶段失败")
         return state
 
-    # ── Step 3: Evaluate decisions ──
+    # ── Step 3: Evaluate decisions（M2.4：missing 三档强制先定决策状态再求值，A5）──
     try:
         step_scores = []
         for step_dict in state["parsed_steps"]:
@@ -236,9 +236,15 @@ def run_audit(
                     )
                 rules.append(rule)
 
+            # M2.4（窗口 M）：先按最严档位定决策状态（fail-closed 键缺失且被
+            # 候选规则引用 → 未验证 level=-2），再规则求值；skip 档剔除依赖键的规则
+            from bioaudit.engine.context_guard import score_decision
+
+            candidate_rules = registry.rules_for_type(parsed.decision_type)
+
             override = overrides.get(parsed.step_id)
             if override is not None:
-                score = evaluator.evaluate(parsed, rules)
+                score = score_decision(parsed, rules, candidate_rules, evaluator)
                 score.level = override
                 score.numeric_score = LEVEL_TO_SCORE.get(override, 0.5)
                 score.explanation += f" [human override: Lvl -> {override}]"
@@ -247,7 +253,7 @@ def run_audit(
                     payload={"step_id": parsed.step_id, "new_level": override},
                 ))
             else:
-                score = evaluator.evaluate(parsed, rules)
+                score = score_decision(parsed, rules, candidate_rules, evaluator)
 
             step_scores.append(score.model_dump())
             _append_event(event_store, state, AuditEvent(
@@ -432,7 +438,11 @@ def audit_decision(
         matcher = RuleMatcher(registry, mappings_dir)
         evaluator = RuleEvaluator()
         parsed, rules = matcher.match(request.decision)
-        score = evaluator.evaluate(parsed, rules)
+        # M2.4（窗口 M）：missing 三档强制（fail-closed 缺失 → 未验证 level=-2）
+        from bioaudit.engine.context_guard import score_decision
+
+        candidate_rules = registry.rules_for_type(parsed.decision_type)
+        score = score_decision(parsed, rules, candidate_rules, evaluator)
         if event_store is not None:
             _append_event(event_store, state_trace, AuditEvent(
                 event_type="decision_scored", node="evaluate",

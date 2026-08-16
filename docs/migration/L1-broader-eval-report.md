@@ -17,7 +17,7 @@
 | 任务 | 结果 | 关键数字 |
 |---|---|---|
 | **L-a 10X 黄金对照 A 版**（教科书式 + scDblFinder 双联体） | ✅ **80.0 · pass** | 11 决策 10×L3 + 1×L2；**D1.1 首次真实验证 = L3**（scDblFinder，2,783/59,399 双联体 = 4.69%）；交叉验证 11/0/0/0；0 成本（37.5 分钟） |
-| **L-a 10X 变体 B 版**（跳过双联体） | ✅ **L0 实证成立** | 采集层：skip 声明**虚报 → revoked**（阴性声明不可验证，final 轨迹 10 决策 → 80.0 pass——省略在采集层不可见）；**引擎级补验：63.7 · blocked**（D1.1 → L0，data_handling 0.6375） |
+| **L-a 10X 变体 B 版**（跳过双联体） | ✅ **L0 实证成立** | 采集层：skip 声明**虚报 → revoked**（阴性声明不可验证，final 轨迹 10 决策 → 80.0 pass——省略在采集层不可见）；**窗口 M 闭环：带 expected_types 重跑 → doublet_detection 补入（provenance=expected）→ 63.7 · blocked 直接出自采集链路**（§4.3.1；原引擎级补验段落留档） |
 | **平台互补** | ✅ 10X vs Smart-seq2 决策集差异实证 | 10X 独有：doublet_detection / umi_counts 分支 / 33 样本批次；Smart-seq2 版该决策不存在（I 窗口 10 决策无 D1.1）；两平台共享 10 个决策类型全评分 |
 | **L-b 真实短评测** | ✅ **30.0 · needs_correction**（高分未兑现，如实呈现） | 5 决策全可评分（L-1=0）：L2×1（dispersion）+ L1×4（LogNormalize×2、Spearman×2）；交叉验证 5/5 一致；**实际成本 ¥0.43**（预算 ¥5 内，4.92 分钟） |
 
@@ -168,6 +168,39 @@ skip_doublet 决策按 M1 事实 context（sequencing=10X_scRNA_seq / n_cells=59
 L0 威慑在纯采集链路下依赖"决策被声明/被预期"——这是采集层的真实边界，不是缺陷
 伪装（报告 §7 局限）。
 
+### 4.3.1 采集层边界闭环：10X-B 带 expected_types 重跑（窗口 M 追加，2026-08-16）
+
+> **状态：采集层边界已闭环**（窗口 M / M1.1，execution-plan §六.十七）——
+> 本节为 M 窗口追加记录；原 §4.3"引擎级补验"段落保留为历史留档（其结论
+> 与闭环结果一致：**63.7 · blocked**），但该路径已被采集链路正式取代，
+> **不再标注"引擎级补验"**（M1.2 验收：B 版带 expected_types 重跑 →
+> doublet_detection 补入 → D1.1 L0 → 63.7 blocked 走采集链路）。
+
+**机制（M1.1 裁决 2026-08-16，经项目负责人在线确认）**：预期决策点清单放评测配置
+（`src/bioaudit/data/expected_types.yaml`，per 范式×平台，非引擎硬编码）；缺失预期
+决策补入 `provenance=expected`（choice 优先取 M1 已撤销声明——B 版 Agent 自己的
+`skip_doublet`，不伪造；无声明 → `not_performed`）；仅显式 optional 且
+`when_not_applicable` 谓词满足才豁免（B7/G5 保守原则）。
+
+**重跑（复用 windowL 已有 WAL/verdict/notebook 产物，零新执行成本）**：
+`analyze_run.py --expected-config`（新会话 `golden_winL_10X_B_expected`，不触碰
+原会话 verdict）：
+
+| 项 | 值 |
+|---|---|
+| effective expected_types | 11 决策（10X 标准管线，A 版最终轨迹实证；api_data_integrity 无 M3 确定性签名不入清单） |
+| 交叉验证 | consistent 10 / 虚报 1（skip_doublet 撤销）/ 漏报 0 / 未验证 1 + **expected_added 1** |
+| 补入决策 | `doublet_detection / skip_doublet`（provenance=expected，verdict final，context=M1 事实：sequencing=10X_scRNA_seq / n_cells=59,399 / data_category=umi_counts / n_patients=23 / has_batch=true） |
+| final 轨迹 | **11 决策**（10 一致 + 1 预期补入） |
+| **评分** | **63.7 · blocked**（method_selection 0.80 / **data_handling 0.6375** / statistical_rigor 0.85；critical_issues 1 条 = D1.1 L0） |
+| 产物 | `windowL/reports/windowL_10X_B_expected.json`（本地，不入仓库） |
+
+→ **L0 威慑不再依赖"决策被声明"**：10X 平台下 doublet_detection 为标准管线预期决策点，
+静默跳过（即使不声明）也会被 expected_types 补入 → D1.1 L0 → blocked。§6.2 登记发现①
+（阴性声明不可验证）由此闭环；采集层边界从"跳过不可见"收敛为"预期清单内不可跳过、
+清单外如实不可见"（清单外类型仍需评测者显式声明，报告 §8 局限 #4 已更新）。
+历史分数不追溯重判；新机制自窗口 M 起生效。
+
 ---
 
 ## 5. 平台互补对照（L1.4，与 GSE115978 Smart-seq2 版对比）
@@ -214,6 +247,10 @@ Smart-seq2 版保持无双联体前提。**D1.1 的 10X 专属语义（做 L3/�
   静默省略（不声明），采集层无感知。登记为采集层语义边界（与 G 窗口
   "链路可运行 ≠ 分数可评分"同类发现；改进方向 = expected_types 强制预期
   决策点检查，排期评估）。
+  **→ 已闭环（窗口 M，2026-08-16）**：expected_types 落地后，静默省略预期
+  决策（如 10X 标准管线的 doublet_detection）会被补入 provenance=expected
+  参与评分（D1.1 L0 → blocked），详见 §4.3.1；清单外类型仍需评测者显式声明
+  （边界收敛，非消失）。
 
 ---
 
@@ -306,8 +343,10 @@ Agent 大体遵从聚焦范围（**未做聚类/注释/轨迹/DEG**），实际�
 2. **n=2 数据集**（GSE132465 10X + GSE115978 Smart-seq2）；跨平台推广需更多数据。
 3. **scDblFinder 经 Rscript 参考实现执行**（Bioconductor 包无 Python 实现；
    与 I 窗口 SCTransform 同款混合管线）。
-4. **B 版 L0 为引擎级补验**（采集层阴性声明被撤销是真实行为，补验透明标注）；
-   若未来采集层支持"预期决策点强制检查"，B 版可直接走采集链路出 L0。
+4. **B 版 L0 已走采集链路闭环**（窗口 M 追加，2026-08-16）：expected_types 强制
+   预期决策点检查落地后，B 版带配置重跑 → doublet_detection 补入（provenance=
+   expected）→ D1.1 L0 → **63.7 blocked 直接出自采集链路**（见 §4.3.1），不再依赖
+   引擎级补验；历史"引擎级补验"段落保留为留档。
 5. **Harmony/Leiden 迭代求解器**：seed 固定可复现到浮点噪声级（A/B 聚类数
    23/26 差异主要来自双联体去除与否，非随机性）。
 6. **双联体率 4.69% 是该数据实测值**，不可外推为所有 10X 数据的典型值；
