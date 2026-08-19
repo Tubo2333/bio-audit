@@ -42,7 +42,7 @@ AI Agent 做生信分析已经相当熟练：代码能跑、输出像样、总�
 
 | 口径 | 结果 |
 |---|---|
-| demo 轨迹（2026-08-13 D5 修复后重跑，12 步分析） | **29 分 · Blocked · 5 × L0** |
+| demo 轨迹（2026-08-13 D5 修复后重跑，12 步分析；当前 golden 实测） | **29 分 · Blocked · L0×3 / L1×5 / L3×4（12 决策全可评，L-1 无法评估 ×0）** |
 | **G-2 真实运行重评**（GSE115978 · declared 注入 + 规则平台键放宽后） | **30.0 · needs_correction · L0=0 / L1×7 / L3×1 / L-1×12** |
 | **K1 重评**（2026-08-16 · immune scRNA 规则落地后，ruleset 1.5.0） | **30.0 · needs_correction（不变）· L0=0 / L1×19 / L3×1 / L-1×0** |
 
@@ -77,13 +77,22 @@ pip install -e ".[dev,ui]"          # Python >= 3.10
 bio-audit run src/bioaudit/data/trajectories/v2/deg_correct.json   # 审计一条轨迹
 bio-audit golden                    # golden 回归（20 轨迹 137 决策，必须 0 差异）
 bio-audit ruleset-validate          # 规则集校验（清单/冲突/golden 回归）
+
+# 启动交互式演示（深色审计台 · 四页：审计工坊 / 采集演示 / 评测与奖励 / 关于）
+pip install -e ".[demo]"            # demo extra：streamlit>=1.33,<2
+streamlit run demo/app.py           # 冷启动 ≤10s 到可交互（演示前先启动预热一次）
 ```
+
+演示界面静态预览（image-to-code 复刻四屏关键界面，含真实数据；完整交互与其余 tab 见运行应用）：
+**[demo-preview.html](https://tubo2333.github.io/bio-audit/docs/demo-preview.html)**。
+`ui/` 薄壳与 `demo/` 并存：薄壳为轻量 API 演示（`streamlit run ui/app.py`），
+`demo/` 为对外演示主入口；去留留待后续决策（N 窗口已留档）。
 
 完整上手（安装 / 常用命令 / API·MCP 接入 / 测试回归）：**[快速开始](https://tubo2333.github.io/bio-audit/docs/quickstart.html)**（[English](https://tubo2333.github.io/bio-audit/docs/quickstart.en.html)）
 
 ## 项目状态与路线图
 
-**当前（v0.3.x，2026-08）**：核心体系已闭环——稳定引擎 + 34 类型决策本体 + 规则治理门禁、真实采集链路（M1/M3 交叉验证）、60 条评测任务集、reward 信号层；真实 Agent 评测链路打通并完成首轮修复（G-2），端到端阳性对照（黄金 Agent A/B/C）补齐"链路能认对"证据（窗口 I），10X 平台对照与真实短评测扩展评测覆盖（窗口 L），采集完整性闭环（窗口 M：expected_types 强制预期决策点 + missing 三档运行时强制 + 未验证状态）。工程质量：pytest 269/269 · CI 双矩阵（Python 3.10/3.12）全绿 · golden 回归 0 差异 · 报告带三元组快照（engine/ruleset/ontology 版本），任何分数可复现。
+**当前（v0.3.x，2026-08）**：核心体系已闭环——稳定引擎 + 34 类型决策本体 + 规则治理门禁、真实采集链路（M1/M3 交叉验证）、60 条评测任务集、reward 信号层；真实 Agent 评测链路打通并完成首轮修复（G-2），端到端阳性对照（黄金 Agent A/B/C）补齐"链路能认对"证据（窗口 I），10X 平台对照与真实短评测扩展评测覆盖（窗口 L），采集完整性闭环（窗口 M：expected_types 强制预期决策点 + missing 三档运行时强制 + 未验证状态），交互式演示重建完成（窗口 N）。工程质量：pytest 274/274（含 demo 冒烟 5 项）· CI 双矩阵（Python 3.10/3.12）全绿 · golden 回归 0 差异 · 报告带三元组快照（engine/ruleset/ontology 版本），任何分数可复现。**当前快照三元组：engine 0.3.0 · ruleset 1.7.0 · ontology 0.1.3**（与 demo 每页徽章一致，防对照失配）。
 
 **接下来**：L3/L4 结论级与一致性级审计（通用实现）、PRM（过程奖励模型）、任务集扩展（批 3，跨模型标注对照）、更多真实 Agent 评测（多数据集/多 Agent）。
 
@@ -91,7 +100,7 @@ bio-audit ruleset-validate          # 规则集校验（清单/冲突/golden 回
 
 - [文档中心](https://tubo2333.github.io/bio-audit/docs/) · [快速开始](https://tubo2333.github.io/bio-audit/docs/quickstart.html)
 - [API 契约](https://tubo2333.github.io/bio-audit/docs/api-contract.html) · [MCP 契约](https://tubo2333.github.io/bio-audit/docs/mcp-contract.html)
-- [规则贡献指南](CONTRIBUTING.md) · [窗口报告索引](https://tubo2333.github.io/bio-audit/docs/migration/) · [Release](https://github.com/Tubo2333/bio-audit/releases)
+- [Demo 静态预览](https://tubo2333.github.io/bio-audit/docs/demo-preview.html) · [规则贡献指南](CONTRIBUTING.md) · [窗口报告索引](https://tubo2333.github.io/bio-audit/docs/migration/) · [Release](https://github.com/Tubo2333/bio-audit/releases)
 - 设计依据（本体/采集/执行方案）：`docs/specs/`（仓库外审计内存，不进 Pages）
 
 ## 仓库结构
@@ -106,6 +115,9 @@ src/bioaudit/
 ├── reward/       # level→reward 映射 / 配方 / 校准
 ├── api/          # 三入口契约（pydantic + 错误码）
 └── data/         # 20 条轨迹 / validation / mappings
+
+demo/             # 交互式演示（Streamlit 深定制：工坊/采集/评测/关于 + 讲稿 + 静态预览）
+ui/               # 薄壳（只调 bioaudit.api，轻量 API 演示；与 demo/ 并存，去留后续决策）
 ```
 
 ## 贡献

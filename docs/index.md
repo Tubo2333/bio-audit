@@ -6,8 +6,9 @@ Bio-Audit 文档站目录（站点规范见 [site-design](site-design.html)）�
 
 | 文档 | 说明 |
 |---|---|
-| [快速开始（中文）](quickstart.html) | 安装、CLI 审计、golden 回归、三闸/四闸/五闸、API/MCP 接入 |
+| [快速开始（中文）](quickstart.html) | 安装、CLI 审计、golden 回归、三闸/四闸/五闸、API/MCP 接入、演示启动 |
 | [Quick Start (English)](quickstart.en.html) | English version of the quick start |
+| [Demo 静态预览](demo-preview.html) | 新 demo 四屏关键界面静态预览（image-to-code 复刻，含真实数据；完整交互见运行应用，启动方式 `streamlit run demo/app.py`） |
 | [README](https://github.com/Tubo2333/bio-audit#readme) | 项目总览（GitHub 渲染；[英文版](https://github.com/Tubo2333/bio-audit/blob/main/README.en.md)） |
 | [规则贡献指南](https://github.com/Tubo2333/bio-audit/blob/main/CONTRIBUTING.md) | 规则/任务集变更流程（三闸/四闸）、代码规范 |
 

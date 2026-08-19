@@ -81,7 +81,18 @@ pip install -e ".[dev,ui]"          # Python >= 3.10
 bio-audit run src/bioaudit/data/trajectories/v2/deg_correct.json   # audit one trajectory
 bio-audit golden                    # golden regression (20 trajectories / 137 decisions, must be 0 diff)
 bio-audit ruleset-validate          # ruleset three gates (manifest / conflict / golden)
+
+# Interactive demo (dark audit console · 4 pages: workshop / capture / benchmark / about)
+pip install -e ".[demo]"            # demo extra: streamlit>=1.33,<2
+streamlit run demo/app.py           # cold start ≤10s to interactive (warm up once before presenting)
 ```
+
+Static interface preview (image-to-code replica of the four key screens, real data; full
+interactivity and the remaining tabs live in the running app):
+**[demo-preview.html](https://tubo2333.github.io/bio-audit/docs/demo-preview.html)**.
+`ui/` thin shell coexists with `demo/`: the shell is a lightweight API demo
+(`streamlit run ui/app.py`); `demo/` is the main presentation entry; keep/drop pending
+(window N documented).
 
 Full walkthrough (install / commands / API & MCP integration / regression):
 **[Quick Start](https://tubo2333.github.io/bio-audit/docs/quickstart.en.html)**
@@ -93,9 +104,11 @@ Full walkthrough (install / commands / API & MCP integration / regression):
 ontology + governed ruleset; real capture pipeline (M1/M3 cross-validation); 60-task benchmark;
 reward layer; real-agent evaluation pipeline live with first fix round (G-2); capture-integrity
 closed loop (window M: expected_types mandatory decision-point checks + missing-tier runtime
-enforcement + "unverified" state). Engineering:
-pytest 269/269 · CI dual matrix (Python 3.10/3.12) green · golden regression 0 diff · reports
-carry a snapshot triple (engine/ruleset/ontology versions) so any score is reproducible.
+enforcement + "unverified" state); interactive demo rebuilt (window N). Engineering:
+pytest 274/274 (incl. 5 demo smoke) · CI dual matrix (Python 3.10/3.12) green · golden
+regression 0 diff · reports carry a snapshot triple (engine/ruleset/ontology versions) so any
+score is reproducible. **Current snapshot triple: engine 0.3.0 · ruleset 1.7.0 · ontology 0.1.3**
+(matches the demo badges on every page).
 
 **Next**: L3/L4 conclusion- and consistency-level audits (general implementation), PRM
 (process reward model), task-set expansion (batch 3, cross-model annotation), more real-agent
@@ -113,12 +126,15 @@ evaluations (multiple datasets/agents).
 src/bioaudit/
 ├── engine/       # matching / scoring / aggregation (rule engine core)
 ├── ontology/     # 34 decision-type ontology + validator
-├── rules/        # 44 rule YAMLs (39 unique) + ruleset version snapshot
+├── rules/        # 45 rule YAMLs (40 unique) + ruleset version snapshot
 ├── capture/      # capture: M1 hook / M3 parsing / cross-validation / verdict
 ├── benchmark/    # tasks / difficulty / IRR / runner / contamination scan
 ├── reward/       # level→reward mapping / recipes / calibration
 ├── api/          # three-entry contract (pydantic + error codes)
 └── data/         # 20 trajectories / validation / mappings
+
+demo/             # interactive demo (deep-customized Streamlit: workshop/capture/benchmark/about + script + static preview)
+ui/               # thin shell (calls bioaudit.api only; coexists with demo/, keep/drop pending)
 ```
 
 ## Contributing

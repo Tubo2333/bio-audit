@@ -74,6 +74,7 @@
 | [N1b 审计工坊](N1b-workshop-report.html) | Cascader 三级联动 + 轨迹对比（≤3 并排、ontology 对齐、无此决策）+ Split Button + 结果页全元素（大卡/verdict 色点/快照徽章/维度条/五档徽章/证据卡 PMID/时间轴推导）+ expected_types 现象演示（63.7 实时重算与断言一致）+ 缓存与演示恢复 + 走查 🔴=0 |
 | [N1c 采集演示](N1c-capture-report.html) | 四类判定可视化（一致/虚报/漏报/未验证四色对齐表 + verdict 三态流转 11/13/1）+ expected_types 机制交互（勾选实时重算 → 补入 → 63.7 blocked；共享 capture_chain 单一事实源）+ declared 高级折叠区 + test_demo_smoke（AppTest 冒烟 + golden 守卫 + 63.7 断言）+ CI 加装 demo extra |
 | [N1d 评测与奖励 + 关于页](N1d-benchmark-about-report.html) | 评测页四 tab（benchmark 摘要 0.820/0.7455/0.7810/κ=0.8336/gap 0.046+0.0449 · 平台对照决策集差异 · reward 映射+spike-in · 真实评测档案 ¥2.55/¥0.43+R0）+ 关于页（一句话/三价值层/工程数字/路线图/MCP/takeaway/对照表）+ export 增补提炼（成本/reward/工程数字，verify 11 节全过）+ 走查 🔴=0 |
+| [N1e 打磨 + 发布](N1e-polish-release-report.html) | 全站最终走查（web-design-guidelines 🔴=0：四页 + 四 tab 明细 + 对比表结构缺陷修复闭环）+ design-taste 复查 + image-to-code 预览页（[demo-preview.html](../demo-preview.html)，自包含、与截图逐屏一致）+ 讲稿 [demo-script.md](../../demo/docs/demo-script.html) + README/文档站入口（ruleset 1.7.0 同步 + ui/ 薄壳留档）+ 冷启动实测 5.18s ≤10s + Docker 可选未做如实声明 |
 
 ---
 

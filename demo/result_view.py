@@ -167,8 +167,19 @@ def render_score_header(
     with c_dims:
         bars = []
         for dim in ("data_handling", "method_selection", "statistical_rigor"):
-            val = float(dims.get(dim, 0))
-            pct = val * 100
+            val = dims.get(dim)
+            if val is None:
+                # 该维度无决策（如 scRNA 轨迹无 statistical_rigor 类型决策）：
+                # 渲染中性「—」而非误导性的 0% 红条（Standards S1 闭环，N-e）
+                bars.append(
+                    '<div class="ba-dim-row">'
+                    f'<span class="ba-dim-label">{esc(DIM_LABELS.get(dim, dim))}</span>'
+                    '<span class="ba-dim-track"></span>'
+                    '<span class="ba-dim-val ba-dim-na">—</span>'
+                    "</div>"
+                )
+                continue
+            pct = float(val) * 100
             color = "#10b981" if pct >= 70 else ("#f59e0b" if pct >= 40 else "#ef4444")
             bars.append(
                 '<div class="ba-dim-row">'
@@ -426,7 +437,6 @@ def render_comparison(
         "决策行按本体阶段顺序对齐——缺失列显示「无此决策」：错位即信息"
         "（如 DEG 无 doublet_detection）。"
     )
-    st.markdown('<div class="ba-cmp-wrap"><table class="ba-cmp">', unsafe_allow_html=True)
     head = "<thead><tr><th>决策类型</th>" + "".join(
         f"<th>{esc(labels.get(r['trajectory_id'], r['trajectory_id']))}</th>"
         for r in results
@@ -455,8 +465,16 @@ def render_comparison(
                     f"{esc(choice)}</span></td>"
                 )
         body_rows.append("<tr>" + "".join(cells) + "</tr>")
+    # 单次 markdown 输出完整表格（N-e 走查发现：开/闭标签分两次 st.markdown
+    # 调用会被 Streamlit 拆进独立 DOM 容器 → 空 table + 孤儿 thead/tbody，
+    # 表格边框/表头样式/窄屏堆叠全部失效）
     st.markdown(
-        head + "<tbody>" + summary + "".join(body_rows) + "</tbody></table></div>",
+        '<div class="ba-cmp-wrap"><table class="ba-cmp">'
+        + head
+        + "<tbody>"
+        + summary
+        + "".join(body_rows)
+        + "</tbody></table></div>",
         unsafe_allow_html=True,
     )
 

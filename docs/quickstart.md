@@ -10,6 +10,8 @@
 git clone git@github.com:Tubo2333/bio-audit.git
 cd bio-audit
 pip install -e ".[dev,ui]"        # 核心 + 测试 + UI 薄壳
+# 演示（深色审计台四页）另装 demo extra：
+pip install -e ".[demo]"          # streamlit>=1.33,<2
 # 或按 lockfile 锁定依赖（B6 纪律）：
 pip install -r requirements.lock -r requirements-dev.lock && pip install -e .
 ```
@@ -50,7 +52,11 @@ bio-audit audit-decision decision.json --act scrna
   （pydantic 校验 + 错误码 + paradigm 必填），见 [API 契约](api-contract.html)；
 - **MCP**：stdio JSON-RPC，工具 = `audit_decision` / `audit_trajectory` / `report`，
   见 [MCP 契约](mcp-contract.html)；
-- **Streamlit 薄壳**：`streamlit run ui/app.py`（只调 bioaudit.api）。
+- **演示（推荐）**：`streamlit run demo/app.py`（深色审计台四页：审计工坊 / 采集演示 /
+  评测与奖励 / 关于；冷启动 ≤10s 到可交互，演示前先启动预热一次；界面静态预览见
+  [demo-preview.html](demo-preview.html)）；
+- **Streamlit 薄壳**：`streamlit run ui/app.py`（只调 bioaudit.api，轻量 API 演示；
+  与 `demo/` 并存，去留后续决策）。
 
 ## 5. 规则与任务集贡献
 
@@ -61,7 +67,7 @@ bio-audit audit-decision decision.json --act scrna
 ## 6. 测试与回归
 
 ```bash
-pytest                              # 234 项全量（本地/CI 双矩阵）
+pytest                              # 274 项全量（本地/CI 双矩阵；含 demo 冒烟 5 项）
 bio-audit golden --json             # 0 差异；diff≠0 即红=人工确认门槛
 python scripts/generate_scrna_r0.py --output /tmp/r0.json   # R0 确定性锚定（与包内逐字节一致）
 ```

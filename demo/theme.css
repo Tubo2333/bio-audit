@@ -6,7 +6,8 @@
    - verdict 绿 #10b981 / 黄 #f59e0b / 红 #ef4444
    - 等宽栈 "JetBrains Mono", Consolas, "Courier New", monospace（Windows 落 Consolas）
    - 8px 基准网格，卡片圆角 10px
-   版本锁定动机：data-testid 选择器在 1.x 稳定（pyproject streamlit>=1.31,<2）。
+   版本锁定动机：data-testid 选择器在 1.x 稳定（pyproject streamlit>=1.33,<2——
+   st.popover 首发 1.33.0，N-b 裁决升下限，见设计 §14）。
    ============================================================ */
 
 :root {
@@ -374,6 +375,8 @@ h1, h2, h3 {
   font-size: 0.78rem;
   font-variant-numeric: tabular-nums;
 }
+/* 维度无决策（缺失键）→ 中性「—」，不渲染误导性 0% 红条（N-e S1 闭环） */
+.ba-dim-na { color: var(--ba-text-faint); }
 
 /* ── level 五档徽章（L3 绿 / L2 青 / L1 黄 / L0 红 / L-1 灰） ── */
 .ba-level {
