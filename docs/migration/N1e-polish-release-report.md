@@ -235,10 +235,12 @@ N-c 转义补丁、N-d 徽章类名修复）；修复对象为走查/双轴审�
 
 ### 12.2 CI 云上结果
 
-- run `____`（push 后回填）**success**：双矩阵 `pytest+golden (Python 3.10)` +
-  `pytest+golden (Python 3.12)` 均绿（含 pytest 全套 274 passed + smoke 5 项真跑、
-  golden replay 137 决策 0 diff、本体/规则/采集/benchmark/reward/MCP 闸门、scrna_r0
-  数据管线锚定、ruff 含 demo/）；Pages build `____` success（docs 站重建含预览页）。
+- run `32277162897`（push 6fc91a1）**success**：双矩阵 `pytest+golden (Python 3.12, 4m31s)` +
+  `pytest+golden (Python 3.10, 4m44s)` 均绿——3.12 job 实测 **274 passed**（含
+  test_demo_smoke 5 项真跑，与本地同数）；golden replay 137 决策 0 diff；
+  本体/规则/采集/benchmark/reward/MCP 闸门 + scrna_r0 锚定不变；ruff 含 demo/（非门禁）；
+  Pages build `32277162047` success（37s；docs 站重建，含 demo-preview.html 与
+  demo/docs/demo-script.md 转 HTML）。
 
 ## 13. skill 四项矩阵收口核对
 
