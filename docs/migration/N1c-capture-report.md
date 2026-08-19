@@ -237,11 +237,13 @@ N-c 增量自查（对照 skill 的 AI 模板感特征清单）：
 
 ### 8.1 CI 云上结果
 
-- run `____`（push N-c commit）**success**：双矩阵 `pytest+golden (Python 3.10)` +
-  `pytest+golden (Python 3.12)` 均绿（含新增 test_demo_smoke 5 项——
-  demo extra 加装后 streamlit 云上可用）；golden replay 137 决策 0 diff；
-  本体/规则/benchmark/reward 闸门 + scrna_r0 锚定不变
-- Pages build `____` 随 push 触发 **success**（docs 站重建，index.md 登记 N1c）
+- run `32265897647`（push 361c262）**success**：双矩阵 `pytest+golden (Python 3.12,
+  4m8s)` + `pytest+golden (Python 3.10, 4m46s)` 均绿——含新增 test_demo_smoke
+  5 项（demo extra 加装后 streamlit 云上可用；3.12 job 实测 **274 passed**，
+  与本地同数 = smoke 真跑未 skip）；golden replay 137 决策 0 diff；
+  本体/规则/benchmark/reward 闸门 + scrna_r0 锚定不变；ruff 含 demo/（非门禁）
+- Pages build `32265895283` 随 push 触发 **success**（22s；docs 站重建，
+  index.md 登记 N1c）
 
 ### 8.2 push 前三查
 
