@@ -230,16 +230,21 @@
 - [x] **ruff**：demo/ 源码 0 错误（data/ 生成产物 exclude，N-a 既定）
 - [x] **实时出分与 golden 一致**：20/20 轨迹全量核对（分数 + verdict 双字段
       0 差异）；黄金 B 链路 63.7 与断言基准一致
-- [x] **推送纪律**：commit 仅 demo/ 工作文件（components.py / result_view.py /
-      01_workshop.py / theme.css）+ 本报告 + index.md 登记；push 前三查——
-      ① git status 无预期外文件 ② git log origin/main..HEAD 仅 1 commit
-      ③ git ls-files demo/ 无大文件
+- [x] **推送纪律**：commit `eafd05a`（仅 demo/ 4 文件 + pyproject.toml +
+      docs/migration/N1b-workshop-report.md + index.md 登记，共 7 文件）；
+      push 前三查——① git status 干净（无预期外文件）② git log origin/main..HEAD
+      仅 1 commit ③ git ls-files demo/ 无大文件（最大 38.8KB verdicts jsonl）；
+      `git push origin main` 成功（b08d0b1..eafd05a）
 - [x] **CI 云上绿**：见 §8.1
 - [x] **零改动**：src/、tests/、ui/、demo/data/ 未触碰（git diff 确认）
 
 ### 8.1 CI 云上结果
 
-（push 后填）
+- run `32259437950`（push eafd05a）**success**：双矩阵 `pytest+golden (Python 3.10)` +
+  `pytest+golden (Python 3.12)` 均绿（含 pytest 全套、golden replay 137 决策
+  0 diff、本体/规则/benchmark/reward 闸门、scrna_r0 数据管线锚定、漂移报告
+  artifact 无变化）；ruff 非门禁（`|| true`）
+- Pages build `32259438718` 随 push 触发 **success**（docs 站重建，index.md 登记 N1b）
 
 ## 9. 遗留与说明（给后续子窗口）
 
