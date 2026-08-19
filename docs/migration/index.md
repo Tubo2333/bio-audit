@@ -71,6 +71,7 @@
 | 报告 | 内容 |
 |---|---|
 | [N1a 骨架 + 数据层](N1a-skeleton-data-report.html) | demo/ 目录（侧边栏导航+条件渲染+深色主题+四空壳）+ export_demo_data.py 提炼（provenance 化 + 剥离绝对路径）+ 四页路由通 + 数字独立核对（80.0/69.0/66.7/63.7/30.0×2） |
+| [N1b 审计工坊](N1b-workshop-report.html) | Cascader 三级联动 + 轨迹对比（≤3 并排、ontology 对齐、无此决策）+ Split Button + 结果页全元素（大卡/verdict 色点/快照徽章/维度条/五档徽章/证据卡 PMID/时间轴推导）+ expected_types 现象演示（63.7 实时重算与断言一致）+ 缓存与演示恢复 + 走查 🔴=0 |
 
 ---
 
