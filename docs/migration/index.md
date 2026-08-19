@@ -66,6 +66,12 @@
 | [M1 采集完整性（expected_types + missing 三档强制 + override/词表）](M1-capture-integrity-report.html) | 10X-B 闭环（63.7 blocked 走采集链路，不再引擎级补验）+ 未验证状态（level=-2）+ override_n2 键映射修复 + PCA_arbitrary/no_trajectory 词表补齐（ruleset 1.7.0）+ C4 漂移记录 + benchmark/reward 连锁留档 |
 | [M 设计提案（确认记录）](M1-design-proposal.html) | expected_types 语义 / Option B 规则引用驱动 / B7 判定与词表评级——经项目负责人在线确认（2026-08-16） |
 
+## 新 Demo 重建（窗口 N）
+
+| 报告 | 内容 |
+|---|---|
+| [N1a 骨架 + 数据层](N1a-skeleton-data-report.html) | demo/ 目录（侧边栏导航+条件渲染+深色主题+四空壳）+ export_demo_data.py 提炼（provenance 化 + 剥离绝对路径）+ 四页路由通 + 数字独立核对（80.0/69.0/66.7/63.7/30.0×2） |
+
 ---
 
 报告中的验收清单依据执行方案冻结（`docs/specs/2026-08-13-execution-plan-v1.md`，仓库外）；分数口径纪律见 [site-design §6.2](../site-design.html#62-数字口径纪律教训-2-单一事实源)。

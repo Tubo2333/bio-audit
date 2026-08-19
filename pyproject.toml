@@ -28,7 +28,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-ui = ["streamlit>=1.31"]        # Streamlit 薄壳（ui/）
+# N-a（窗口 N，2026-08-16）：Streamlit 版本锁定 <2——防 2.x 改 data-testid
+# 使 demo theme.css 的 CSS 注入静默失效（demo-redesign-design §5；台账 §2.2）
+# 说明：demo/scripts 下 export/verify 脚本纯 stdlib，无需额外依赖；
+#       streamlit 仅 demo 运行时与 N-c 的 AppTest smoke 需要。
+ui = ["streamlit>=1.31,<2"]        # Streamlit 薄壳（ui/）
+demo = ["streamlit>=1.31,<2"]      # 新演示（demo/，窗口 N 重建）
 scripts = ["numpy>=1.24", "scipy>=1.10"]  # 验证数据重算脚本（B6 数据管线）
 dev = ["pytest>=7.0", "ruff>=0.4"]
 
@@ -51,6 +56,9 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+# demo/data 为 export 脚本生成的数据产物（executed.py 提炼副本保持源原样，
+# 供 M3 解析），不入 lint
+extend-exclude = ["demo/data"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W"]

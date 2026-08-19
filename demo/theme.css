@@ -1,0 +1,257 @@
+/* ============================================================
+   Bio-Audit 演示 · 深色审计台主题（窗口 N · N-a 骨架层）
+   设计 token：docs/specs/2026-08-16-demo-redesign-design.md §4
+   - 背景 #0f1115 / 面板 #1a1d24 / 边框 #2a2f3a
+   - 强调 琥珀 #f59e0b（主操作/焦点，面积 <10%）/ 辅助 青 #22d3ee（信息/链接）
+   - verdict 绿 #10b981 / 黄 #f59e0b / 红 #ef4444
+   - 等宽栈 "JetBrains Mono", Consolas, "Courier New", monospace（Windows 落 Consolas）
+   - 8px 基准网格，卡片圆角 10px
+   版本锁定动机：data-testid 选择器在 1.x 稳定（pyproject streamlit>=1.31,<2）。
+   ============================================================ */
+
+:root {
+  --ba-bg: #0f1115;
+  --ba-panel: #1a1d24;
+  --ba-panel-2: #232833;
+  --ba-border: #2a2f3a;
+  --ba-amber: #f59e0b;
+  --ba-cyan: #22d3ee;
+  --ba-green: #10b981;
+  --ba-red: #ef4444;
+  --ba-text: #e5e7eb;
+  --ba-text-dim: #9ca3af;
+  --ba-text-faint: #6b7280;
+  --ba-mono: "JetBrains Mono", Consolas, "Courier New", monospace;
+}
+
+/* ── 全局底与容器 ─────────────────────────────────────────── */
+[data-testid="stAppViewContainer"] {
+  background: var(--ba-bg);
+  color: var(--ba-text);
+}
+[data-testid="stApp"] { background: var(--ba-bg); }
+
+/* 1.31 与新版容器的宽度/padding 双兼容 */
+[data-testid="stAppViewContainer"] .block-container,
+[data-testid="stMainBlockContainer"] .block-container,
+[data-testid="stMain"] .block-container {
+  max-width: 1180px;
+  padding-top: 1.2rem;
+  padding-bottom: 4rem;
+}
+
+/* ── 侧边栏（面板） ───────────────────────────────────────── */
+[data-testid="stSidebar"] {
+  background: var(--ba-panel);
+  border-right: 1px solid var(--ba-border);
+}
+[data-testid="stSidebar"] * { color: var(--ba-text); }
+[data-testid="stSidebar"] .ba-sidebar-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ba-text);
+}
+[data-testid="stSidebar"] .ba-sidebar-sub {
+  font-size: 0.78rem;
+  color: var(--ba-text-faint);
+  margin-top: 2px;
+}
+.ba-nav-rule {
+  height: 1px;
+  background: var(--ba-border);
+  margin: 14px 0;
+}
+
+/* 页级导航：radio 定制为块级按钮组，选中态 = 琥珀左边条（无 AI 模板感的
+   克制选中态：不发光、不放大） */
+[data-testid="stSidebar"] div[data-testid="stRadio"] > div {
+  gap: 4px;
+}
+[data-testid="stSidebar"] div[data-testid="stRadio"] label {
+  display: flex;
+  align-items: center;
+  padding: 9px 12px 9px 14px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  border-left: 3px solid transparent;
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.6;
+  cursor: pointer;
+  transition: background 0.15s ease-out, border-color 0.15s ease-out;
+}
+[data-testid="stSidebar"] div[data-testid="stRadio"] label:hover {
+  background: var(--ba-panel-2);
+  border-color: var(--ba-border);
+}
+[data-testid="stSidebar"] div[data-testid="stRadio"] label:has(input:checked) {
+  background: rgba(245, 158, 11, 0.07);
+  border-color: var(--ba-border);
+  border-left-color: var(--ba-amber);
+  color: var(--ba-amber);
+  font-weight: 600;
+}
+/* 隐藏 radio 原生圆点（1.x 结构兼容：圆点位于 label 首个子元素） */
+[data-testid="stSidebar"] div[data-testid="stRadio"] label > div:first-child {
+  display: none;
+}
+
+/* 隐藏 Streamlit 自动 multipage 导航（条件渲染为本应用导航唯一来源） */
+[data-testid="stSidebarNav"] { display: none; }
+
+/* 隐藏默认 toolbar（Deploy 按钮/运行菜单）——演示界面不需要 */
+[data-testid="stToolbar"] { display: none; }
+[data-testid="stAppDeployButton"] { display: none; }
+
+/* ── 文本与排版（中文混排行高 ≥1.6） ─────────────────────── */
+p, li, label, .stMarkdown, [data-testid="stCaptionContainer"] p {
+  line-height: 1.6;
+  word-break: break-word;
+}
+h1, h2, h3 {
+  color: var(--ba-text);
+  letter-spacing: 0.01em;
+}
+[data-testid="stCaptionContainer"] p { color: var(--ba-text-faint); font-size: 0.82rem; }
+
+/* 页面标题（四页共用；等宽小号楷体式克制大标题，非模板居中） */
+.ba-page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--ba-text);
+  margin-bottom: 4px;
+}
+.ba-page-sub {
+  font-size: 0.92rem;
+  color: var(--ba-text-dim);
+  margin-bottom: 18px;
+  max-width: 720px;
+}
+
+/* ── 顶部横幅（品牌 + 版本徽章 + 当前页名） ───────────────── */
+.ba-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  background: var(--ba-panel);
+  border: 1px solid var(--ba-border);
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+.ba-brand {
+  font-family: var(--ba-mono);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--ba-text);
+}
+.ba-badge {
+  font-family: var(--ba-mono);
+  font-size: 0.72rem;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--ba-border);
+  color: var(--ba-cyan);
+  background: rgba(34, 211, 238, 0.06);
+}
+.ba-banner-page {
+  margin-left: auto;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ba-amber);
+}
+
+/* ── 卡片 / 数字 / 状态色点（N-b~N-d 共用基础） ───────────── */
+.ba-card {
+  background: var(--ba-panel);
+  border: 1px solid var(--ba-border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.ba-score {
+  font-family: var(--ba-mono);
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.ba-mono { font-family: var(--ba-mono); }
+.ba-verdict-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+.ba-verdict-pass { background: var(--ba-green); }
+.ba-verdict-needs_correction { background: var(--ba-amber); }
+.ba-verdict-blocked { background: var(--ba-red); }
+
+/* ── 控件深色化 ───────────────────────────────────────────── */
+[data-testid="stButton"] button {
+  background: var(--ba-panel);
+  border: 1px solid var(--ba-border);
+  color: var(--ba-text);
+  border-radius: 8px;
+  font-weight: 500;
+  transition: border-color 0.15s ease-out, background 0.15s ease-out;
+}
+[data-testid="stButton"] button:hover {
+  border-color: var(--ba-amber);
+  color: var(--ba-amber);
+}
+[data-testid="stButton"] button[kind="primary"],
+[data-testid="stButton"] button:active {
+  background: var(--ba-amber);
+  border-color: var(--ba-amber);
+  color: #14161b;
+  font-weight: 600;
+}
+[data-testid="stTextInput"] input,
+[data-testid="stTextArea"] textarea {
+  background: var(--ba-panel);
+  border: 1px solid var(--ba-border);
+  color: var(--ba-text);
+  border-radius: 8px;
+}
+[data-testid="stSelectbox"] [data-baseweb="select"],
+[data-testid="stMultiSelect"] [data-baseweb="select"],
+[data-testid="stDateInput"] [data-baseweb="select"] {
+  background: var(--ba-panel);
+  border: 1px solid var(--ba-border);
+  border-radius: 8px;
+  color: var(--ba-text);
+}
+[data-testid="stExpander"] {
+  border: 1px solid var(--ba-border);
+  border-radius: 10px;
+  background: var(--ba-panel);
+}
+[data-testid="stMetricValue"] {
+  font-family: var(--ba-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 占位区（四页空壳共用） ───────────────────────────────── */
+.ba-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+  background: var(--ba-panel);
+  border: 1px dashed var(--ba-border);
+  border-radius: 10px;
+  color: var(--ba-text-faint);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 24px;
+  line-height: 1.8;
+}
+
+/* ── 尊重减弱动效偏好 ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
