@@ -134,9 +134,19 @@ DOM 断言交叉验证。五维结果与问题闭环：
       ui/ 零改动（git diff 确认）；push 前三查
 - [x] **CI 云上绿**：见 §7.1
 
-### 7.1 CI 云上结果
+### 7.1 推送与 CI 云上结果
 
-（push 后填写）
+- **commit** `3a4738d`（2026-08-19）：19 文件（demo/ 16 + pyproject.toml + docs 2 报告 + index.md 登记）；
+  push 前四查——git status 无预期外文件、diff 边界干净（src/tests/ui 零改动）、
+  `git ls-files demo/` 无大文件、commit 边界单 commit；
+- **push 插曲（如实）**：本机代理（127.0.0.1:7892，SSH over HTTPS proxy 配置）不在线
+  → 首推失败（errno=10061）；实测直连 GitHub SSH 认证成功 → 一次性
+  `-c core.sshCommand="ssh -o ProxyCommand=none"` 推送成功（不改配置文件）；
+- **CI 云上绿**：run `32270653462`（push 3a4738d）**success**——双矩阵
+  `pytest+golden (Python 3.10)` 与 `pytest+golden (Python 3.12)` 均绿（含 pytest
+  全套 274 passed + smoke 5 项真跑、golden replay 137 决策 0 diff、本体/规则/采集/
+  benchmark/reward/MCP 闸门、数据管线锚定、ruff 含 demo/）；Pages build
+  `32270649324` success（docs 站重建，登记 N1d）。
 
 ## 8. 双轴代码审查闭环记录
 
