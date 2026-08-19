@@ -23,16 +23,13 @@ import json
 import re
 from datetime import datetime, timezone
 
+import capture_chain  # demo/ 同目录模块；N-c 起共享 63.7 链路（现象/机制单一事实源）
 import components
 import data_index
 import result_view
 import streamlit as st
 
 from bioaudit.api.audit import match_details, run_audit
-from bioaudit.capture.cross_validator import CrossValidator
-from bioaudit.capture.expected_types import expected_types_for
-from bioaudit.capture.m3_parser import M3Parser
-from bioaudit.capture.models import PROVENANCE_SOURCE_M1
 from bioaudit.ontology.loader import get_ontology
 from bioaudit.report import current_snapshot
 
@@ -125,87 +122,12 @@ def _golden_b_chain() -> dict:
     声明轨迹（M1，含 skip_doublet）→ M3 解析 executed.py → expected_types
     11 决策清单 → 交叉验证（补入 doublet_detection=expected）→ run_audit
     → 63.7 · blocked。断言基准 = demo/data/windowL_10X_B_expected.json。
+
+    N-c 起：链路本体收敛到 ``capture_chain.run_chain``（采集页机制层共用
+    单一事实源——两处数字必须一致）；本函数保留为现象层的缓存包装。
     """
     _warm_registry("scrna")
-
-    # ① M1 声明重建（provenance_source == PROVENANCE_SOURCE_M1，
-    # 按 verdict_id 去重取末条）
-    records: dict[str, dict] = {}
-    for line in data_index.verdicts_10X_B_path().read_text(encoding="utf-8").splitlines():
-        if not line.strip():
-            continue
-        rec = json.loads(line)
-        if rec.get("provenance_source") != PROVENANCE_SOURCE_M1:
-            continue
-        snap = rec.get("score_snapshot") or {}
-        records[rec["verdict_id"]] = {
-            "step_id": rec.get("step_id"),
-            "decision_type": rec.get("decision_type"),
-            "choice": rec.get("choice"),
-            "rationale": snap.get("agent_rationale", ""),
-            "context": snap.get("context", {}),
-            "verdict_id": rec.get("verdict_id"),
-        }
-    m1 = list(records.values())
-
-    # ② M3 解析（executed.py 提炼副本，M3 输入专用不执行）
-    declared = {"sequencing": "10X_scRNA_seq"}
-    parser = M3Parser(act="scrna", metadata=None, declared=declared)
-    m3 = parser.parse_code(
-        data_index.executed_10X_B_path().read_text(encoding="utf-8"),
-        source="golden_agent_10X_B_executed.py",
-    )
-
-    # ③ 预期决策点清单（10X 标准管线 11 决策）
-    expected = expected_types_for("scrna", {"sequencing": "10X_scRNA_seq"})
-
-    # ④ 交叉验证：补入 expected + 虚报撤销
-    result = CrossValidator(act="scrna").validate(
-        m1, m3,
-        session_id="demo_workshop_goldenB_63_7",
-        expected_types=expected,
-        expected_context=declared,
-    )
-
-    # ⑤ final 轨迹（一致声明 + 补入决策）→ run_audit
-    consistent_keys = {
-        (a.m1["step_id"], a.m1["decision_type"])
-        for a in result.alignments if a.status == "consistent" and a.m1
-    }
-    final_decisions = [
-        {k: d[k] for k in ("step_id", "decision_type", "choice", "rationale", "context")}
-        for d in m1 if (d["step_id"], d["decision_type"]) in consistent_keys
-    ]
-    final_decisions += [
-        {k: d[k] for k in ("step_id", "decision_type", "choice", "rationale", "context")}
-        for d in result.added_decisions
-    ]
-    state = run_audit(final_decisions, act="scrna")
-    chain_had_error = bool(state.get("error"))
-    if chain_had_error:
-        _fill_error_state(state)
-
-    # ⑥ 断言基准核对（demo/data 提炼副本）
-    bench = json.loads(
-        data_index.windowL_10X_B_expected_path().read_text(encoding="utf-8")
-    )
-    return {
-        "n_m1": len(m1),
-        "m3_n_candidates": len(m3.candidates),
-        "stats": dict(result.stats),
-        "added": [
-            {"decision_type": d["decision_type"], "choice": d["choice"]}
-            for d in result.added_decisions
-        ],
-        "final_n": len(final_decisions),
-        "state": state,
-        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "benchmark": {
-            "trajectory_score": bench["audit"]["trajectory_score"],
-            "eval_verdict": bench["audit"]["eval_verdict"],
-            "n_decisions": bench["final_trajectory"]["n_decisions"],
-        },
-    }
+    return capture_chain.run_chain()
 
 
 # ── 案例清单构建（Cascader resolver；数据全部来自 demo/data）──

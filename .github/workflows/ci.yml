@@ -37,7 +37,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.lock -r requirements-dev.lock
-          pip install -e .
+          # N-c（2026-08-19，台账 §2.2 收口）：test_demo_smoke.py（AppTest）
+          # 上 CI 需要 streamlit——demo extra 加装（范围 >=1.33,<2 由 pyproject
+          # 锁定）；streamlit 依赖树较大不并入 requirements 锁
+          # （requirements-dev.lock 注释同款理由），以 extra 加装（未精确
+          # 锁版本，上限 <2 防 2.x 破坏 data-testid CSS 注入）
+          pip install -e ".[demo]"
 
       - name: 本体校验器（P1 三职责：覆盖/语义边界/冲突）
         run: bio-audit validate-ontology --json
@@ -87,6 +92,6 @@ jobs:
           print('OK: scrna_r0.json 锚定一致')
           EOF
 
-      - name: ruff lint（H13）
+      - name: ruff lint（H13；N-c 起含 demo/——pyproject extend-exclude 仅排除 demo/data）
         run: |
-          ruff check src tests scripts || true
+          ruff check src tests scripts demo || true

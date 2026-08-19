@@ -594,6 +594,214 @@ h1, h2, h3 {
 .ba-callout-ok { border-left: 3px solid var(--ba-green); color: var(--ba-text); }
 .ba-callout-err { border-left: 3px solid var(--ba-red); color: var(--ba-red); }
 
+/* ══════════════════════════════════════════════════════════
+   N-c 采集演示（demo-redesign-design §3.3 机制层）
+   ══════════════════════════════════════════════════════════ */
+
+/* ── 统计 chips 行（四类判定计数 / verdict 三态计数） ── */
+.ba-stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 4px;
+}
+.ba-stat-chip {
+  font-family: var(--ba-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid var(--ba-border);
+  border-radius: 999px;
+  padding: 3px 12px;
+  background: var(--ba-panel);
+  white-space: nowrap;
+}
+.ba-stat-chip-exp {
+  color: var(--ba-cyan);
+  border-color: rgba(34, 211, 238, 0.4);
+  background: rgba(34, 211, 238, 0.07);
+}
+
+/* ── 四类判定对齐表（四色语义严格绑定判定类别） ── */
+.ba-align-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 0.74rem;
+  color: var(--ba-text-dim);
+  margin: 6px 0 10px;
+}
+.ba-align-legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.ba-align-legend-item i {
+  width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+}
+.ba-align {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.78rem;
+  min-width: 780px;
+}
+.ba-align th, .ba-align td {
+  border: 1px solid var(--ba-border);
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.6;
+  word-break: break-word;
+}
+.ba-align thead th {
+  background: var(--ba-panel-2);
+  font-weight: 600;
+  color: var(--ba-text);
+  white-space: nowrap;
+}
+.ba-align-type { font-size: 0.84rem; font-weight: 600; color: var(--ba-text); }
+.ba-align-tid { font-size: 0.68rem; color: var(--ba-text-faint); }
+.ba-align-badge {
+  display: inline-block;
+  font-family: var(--ba-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  border: 1px solid var(--ba-border);
+  border-radius: 6px;
+  padding: 1px 8px;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+.ba-align-badge-exp {
+  color: var(--ba-cyan) !important;
+  border-color: rgba(34, 211, 238, 0.45) !important;
+  background: rgba(34, 211, 238, 0.08) !important;
+  cursor: help;
+}
+.ba-align-none { color: var(--ba-text-faint); font-style: italic; }
+.ba-align-detail {
+  font-size: 0.74rem;
+  color: var(--ba-text-dim);
+  cursor: help;
+  max-width: 380px;
+}
+/* 虚报行：红调底 + 左边条（唯一红色行，一眼定位问题决策） */
+.ba-align-row-fp td { background: rgba(239, 68, 68, 0.05); }
+.ba-align-row-fp td:first-child { border-left: 3px solid var(--ba-red); }
+.ba-inst { font-size: 0.68rem; color: var(--ba-text-faint); margin-left: 6px; }
+
+/* ── verdict 状态位流转 ── */
+.ba-flow-stat {
+  font-family: var(--ba-mono);
+  font-size: 0.86rem;
+  color: var(--ba-text-dim);
+  border: 1px solid var(--ba-border);
+  background: var(--ba-panel);
+  border-radius: 8px;
+  padding: 5px 14px;
+}
+.ba-flow-stat b { font-size: 1rem; color: var(--ba-text); }
+.ba-flow-stat.ba-flow-final { border-color: rgba(16, 185, 129, 0.4); }
+.ba-flow-stat.ba-flow-final b { color: var(--ba-green); }
+.ba-flow-stat.ba-flow-revoked { border-color: rgba(239, 68, 68, 0.4); }
+.ba-flow-stat.ba-flow-revoked b { color: var(--ba-red); }
+.ba-flow-arrow { color: var(--ba-text-faint); font-size: 0.8rem; }
+.ba-flow-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: var(--ba-text-faint);
+  margin: 4px 0 12px;
+}
+.ba-flow-chip {
+  font-family: var(--ba-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 1px 8px;
+  white-space: nowrap;
+}
+.ba-flow-chip-prov { color: var(--ba-text-dim); background: rgba(107, 114, 128, 0.15); }
+.ba-flow-chip-final { color: var(--ba-green); background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.4); }
+.ba-flow-chip-revoked { color: var(--ba-red); background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.4); }
+.ba-flow-chip-exp { color: var(--ba-cyan); background: rgba(34, 211, 238, 0.08); border: 1px solid rgba(34, 211, 238, 0.4); }
+.ba-flow { padding: 10px 16px; }
+.ba-flow-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.1fr) auto minmax(200px, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--ba-border);
+}
+.ba-flow-row:last-child { border-bottom: none; }
+.ba-flow-row-revoked { background: rgba(239, 68, 68, 0.05); border-left: 3px solid var(--ba-red); }
+.ba-flow-row-exp { background: rgba(34, 211, 238, 0.04); border-left: 3px solid var(--ba-cyan); }
+.ba-flow-dec { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
+.ba-flow-cn { font-size: 0.84rem; font-weight: 600; }
+.ba-flow-tid { font-size: 0.66rem; color: var(--ba-text-faint); }
+.ba-flow-choice {
+  font-size: 0.72rem;
+  color: var(--ba-text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
+}
+.ba-flow-chips { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.ba-flow-reason {
+  font-size: 0.72rem;
+  color: var(--ba-text-faint);
+  cursor: help;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── 补入决策卡（中间产物） ── */
+.ba-added-card { border-left: 3px solid var(--ba-cyan); margin: 10px 0; }
+.ba-added-title {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ba-cyan);
+  margin-bottom: 8px;
+}
+.ba-added-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.ba-added-type {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ba-text);
+  border: 1px solid var(--ba-border);
+  border-radius: 6px;
+  padding: 2px 10px;
+}
+.ba-added-ctx { display: flex; flex-wrap: wrap; gap: 6px; }
+.ba-ctx-chip {
+  font-size: 0.68rem;
+  color: var(--ba-cyan);
+  background: rgba(34, 211, 238, 0.06);
+  border: 1px solid rgba(34, 211, 238, 0.3);
+  border-radius: 999px;
+  padding: 1px 9px;
+  white-space: nowrap;
+}
+
+/* ── declared 折叠区列表 ── */
+.ba-decl-list { margin: 6px 0 0 4px; padding-left: 18px; }
+.ba-decl-list li { font-size: 0.82rem; color: var(--ba-text-dim); margin-bottom: 6px; }
+.ba-decl-list b { color: var(--ba-text); }
+
+/* ── 窄屏（<1100px）：采集页对齐表纵向堆叠，不横向溢出页面 ── */
+@media (max-width: 1100px) {
+  .ba-align { min-width: 0; }
+  .ba-align thead { display: none; }
+  .ba-align tr { display: block; margin-bottom: 12px; border: 1px solid var(--ba-border); border-radius: 10px; }
+  .ba-align td { display: block; border: none; border-bottom: 1px solid var(--ba-border); }
+  .ba-align td:last-child { border-bottom: none; }
+  .ba-flow-row { grid-template-columns: 1fr; gap: 6px; }
+  .ba-flow-chips { white-space: normal; flex-wrap: wrap; }
+}
+
 /* ── 窄屏（<1100px）：对比表纵向堆叠，不横向溢出页面 ── */
 @media (max-width: 1100px) {
   .ba-cmp { min-width: 0; }
