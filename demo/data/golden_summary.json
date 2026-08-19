@@ -18,7 +18,7 @@
         "source": "windowI_A.json",
         "source_sha256": "31bd2bfeb4710e4d5848a38d74b76d23fed5e2096bfd73f751f16e95fe470bf9",
         "generated_at": "2026-08-16T01:00:47",
-        "exported_at": "2026-08-19T12:32:38+00:00"
+        "exported_at": "2026-08-19T15:28:26+00:00"
       },
       "note": "黄金对照 A（Smart-seq2，I 窗口）· 10 决策"
     },
@@ -42,7 +42,7 @@
         "source": "windowI_B.json",
         "source_sha256": "817df161c001047438c43658252af30cf8337d24f363ec864bcef3b100ab88db",
         "generated_at": "2026-08-16T01:02:54",
-        "exported_at": "2026-08-19T12:32:38+00:00",
+        "exported_at": "2026-08-19T15:28:26+00:00",
         "note": "原始 63.0·blocked 实测于 windowI_B.json（I1 报告 §5.3）；69.0·needs_correction 为 J 窗口重评（J1-rule-quality-report.md，K1 复核不变）"
       },
       "score_original": 63.0,
@@ -69,7 +69,7 @@
         "source": "windowI_C.json",
         "source_sha256": "6b1fa1d3a7c658af1b185be6967b047d033a9659b04b391fa601938a6f1ac24b",
         "generated_at": "2026-08-16T01:05:01",
-        "exported_at": "2026-08-19T12:32:38+00:00"
+        "exported_at": "2026-08-19T15:28:26+00:00"
       },
       "note": "黄金对照 C（Smart-seq2，I 窗口）· 66.7 仅限 Smart-seq2-C 口径（QC 硬阈值），禁止与 63.7 混写"
     },
@@ -91,7 +91,7 @@
         "source": "windowL_10X_A.json",
         "source_sha256": "a4a94637ae050aed83991e463da4a5fcca20755cb60de470b4e9eaf79b6b5cc4",
         "generated_at": "2026-08-16T20:43:31",
-        "exported_at": "2026-08-19T12:32:38+00:00"
+        "exported_at": "2026-08-19T15:28:26+00:00"
       },
       "note": "黄金对照 A（10X，L 窗口）· 11 决策含双联体检测"
     },
@@ -115,7 +115,7 @@
         "source": "windowL_10X_B_expected.json",
         "source_sha256": "87b3f0ca65f0b8c14117aa84609ee21b677ed768139b85d6398cf7eec69f8dba",
         "generated_at": "2026-08-16T23:05:11",
-        "exported_at": "2026-08-19T12:32:38+00:00"
+        "exported_at": "2026-08-19T15:28:26+00:00"
       },
       "note": "黄金对照 B（10X，expected_types 后，L/M 窗口）· 63.7 仅限 10X-B expected 口径（静默跳过双联体被补入），禁止与 66.7 混写",
       "expected_types_n_added": 1
@@ -125,7 +125,7 @@
     "source": "windowI_A/B/C + windowL_10X_A/B_expected.json",
     "source_sha256": "31bd2bfeb4710e4d5848a38d74b76d23fed5e2096bfd73f751f16e95fe470bf9",
     "generated_at": "",
-    "exported_at": "2026-08-19T12:32:38+00:00",
+    "exported_at": "2026-08-19T15:28:26+00:00",
     "note": "五份黄金对照报告提炼；口径分列见各条目 note；source_sha256 为聚合块引用值，各条目含独立指纹"
   }
 }

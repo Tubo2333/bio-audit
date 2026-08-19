@@ -21,6 +21,8 @@
     eval_summary.json               真实评测 ×2（30.0×2，G/L-b）
     benchmark_summary.json          benchmark 摘要（recall/precision/F1/gap/IRR）
     r0_summary.json                 R0 锚定（ρ=0.9747）
+    reward_summary.json             reward 校准摘要（映射 + mask + spike-in；N-d 增补）
+    engineering_summary.json        工程数字摘要（测试数/CI/golden 口径；N-d 增补）
     trajectories_index.json         20 条轨迹索引（含 golden 基线分数）
     verdicts_10X_B.jsonl            M1 声明重建输入（N-c）
     golden_agent_10X_B_executed.py  M3 解析输入（N-c）
@@ -215,6 +217,28 @@ def extract_eval(src: Path) -> dict:
     lb_levels = {str(k): v for k, v in sorted(
         Counter(d.get("level") for d in lbr["audit"]["per_decision"]).items())}
 
+    # ── 成本（N-d 增补；出处 = 窗口报告权威口径，与导出数据同源链）────
+    # G：agent-eval-report.md §2（总花费 ¥2.55，平台余额 39.53 → 36.98 权威口径）+
+    #     agent-eval-report-g2.md §1（成本 ¥2.55）；L-b：L1 报告 §7.2
+    #     （平台余额差权威口径 ¥0.43，22.53 → 22.10；usage 换算口径 ¥0.90 留档）
+    g_report = REPO_ROOT / "docs" / "migration" / "agent-eval-report.md"
+    g2_report = REPO_ROOT / "docs" / "migration" / "agent-eval-report-g2.md"
+    l1_report = REPO_ROOT / "docs" / "migration" / "L1-broader-eval-report.md"
+    g_text = g_report.read_text(encoding="utf-8")
+    g2_text = g2_report.read_text(encoding="utf-8")
+    l1_text = l1_report.read_text(encoding="utf-8")
+    m_cost_g = re.search(r"总花费（窗口 G）.*?¥([\d.]+)", g_text)
+    if not m_cost_g:
+        raise AssertionError("agent-eval-report.md 未找到总花费 ¥2.55 锚点")
+    cost_g = float(m_cost_g.group(1))
+    assert abs(cost_g - 2.55) < 1e-9, f"G 窗口成本锚点漂移: {cost_g}"
+    assert "成本 ¥2.55" in g2_text, "G-2 报告未找到成本 ¥2.55 锚点"
+    m_cost_lb = re.search(r"成本（平台余额差，权威口径）.*?¥([\d.]+)", l1_text)
+    if not m_cost_lb:
+        raise AssertionError("L1 报告未找到成本 ¥0.43 锚点")
+    cost_lb = float(m_cost_lb.group(1))
+    assert abs(cost_lb - 0.43) < 1e-9, f"L-b 成本锚点漂移: {cost_lb}"
+
     return {
         "runs": [
             {
@@ -228,6 +252,13 @@ def extract_eval(src: Path) -> dict:
                          "（agent-eval-report-g2 §8 / windowK1_reeval.json，ruleset "
                          "1.5.0）；G-2 重评版本同分 30.0 但 L1×7/L3×1/L-1×12"
                          "（windowG_reeval.json，ruleset 1.2.0）"),
+                "cost": {
+                    "amount": cost_g,
+                    "currency": "CNY",
+                    "caliber": "平台余额差（权威口径），预算 ¥5 内未超支",
+                    "source": ("agent-eval-report.md §2（余额 39.53 → 36.98）+ "
+                               "agent-eval-report-g2.md §1"),
+                },
                 "provenance": provenance(
                     "windowG_reeval.json + windowK1_reeval.json",
                     _sha256_file(k1_reeval),
@@ -243,6 +274,13 @@ def extract_eval(src: Path) -> dict:
                 "n_decisions": len(lbr["audit"]["per_decision"]),
                 "level_counts": lb_levels,
                 "note": "30.0 · needs_correction（L1×4/L2×1，5 决策）",
+                "cost": {
+                    "amount": cost_lb,
+                    "currency": "CNY",
+                    "caliber": "平台余额差（权威口径），预算 ¥5 内未超支",
+                    "source": ("L1-broader-eval-report.md §7.2（余额 22.53 → 22.10；"
+                               "usage 换算口径 ¥0.90 留档）"),
+                },
                 "provenance": provenance("windowLb_analysis.json",
                                          _sha256_file(lb),
                                          lbr.get("generated_at")),
@@ -353,6 +391,141 @@ def extract_r0() -> dict:
                                  _sha256_file(r0_path),
                                  None,
                                  "K/M 后版本（台账 §2.1）"),
+    }
+
+
+# ═══════════════════════════════════════════════════════════════
+# reward 校准摘要（N-d 增补：映射 + mask 语义 + spike-in 掉分）
+# 出处 = reward-mapping.md（宪法）+ E4 报告 §三.9 + reward-protocol §七.2
+# ═══════════════════════════════════════════════════════════════
+def extract_reward() -> dict:
+    """reward 校准摘要：level→reward 映射（-1 mask）+ spike-in 三范式掉分。
+
+    数字锚点全部从宪法/报告解析断言（防漂移护栏，与 IRR/gap 同款链路）：
+    - 映射表锚点：reward-mapping.md §2 表格逐行正则（{4:1.00, 3:0.85, 2:0.60,
+      1:0.30, 0:0.00}）；mask 语义锚点 = "不参与分子也不参与分母"（§3）；
+    - 聚合锚点：mean（§5）+ 硬惩罚 ×0.30（§6）；
+    - spike-in 实测锚点：E4 报告 §三.9 三范式行（0.85 → 0.2354/0.2125/0.2400，
+      drop 0.6146/0.6375/0.6100）+ reward-protocol §七.2 交叉锚点；
+    - 状态锚点：experimental_uncalibrated（E4 报告 §六）。
+    """
+    e4 = REPO_ROOT / "docs" / "migration" / "E4-phase4-reward-report.md"
+    mapping_doc = REPO_ROOT / "docs" / "reward-mapping.md"
+    protocol = REPO_ROOT / "docs" / "reward-protocol.md"
+    e4_text = e4.read_text(encoding="utf-8")
+    map_text = mapping_doc.read_text(encoding="utf-8")
+    proto_text = protocol.read_text(encoding="utf-8")
+
+    # 映射表（宪法 §2 冻结值；逐行锚点断言）
+    mapping = {4: 1.0, 3: 0.85, 2: 0.6, 1: 0.3, 0: 0.0}
+    for level, value in mapping.items():
+        pat = rf"\| {level} \|[^|]*\| {value:.2f} \|"
+        if not re.search(pat, map_text):
+            raise AssertionError(f"reward-mapping.md 未找到 L{level} → {value:.2f} 锚点")
+    # mask 语义（§3）与聚合（§5 mean / §6 γ=0.30）
+    if "不参与分子也不参与分母" not in map_text:
+        raise AssertionError("reward-mapping.md 未找到 -1 mask 语义锚点")
+    if "聚合语义 | **mean**" not in map_text or "× **0.30**" not in map_text:
+        raise AssertionError("reward-mapping.md 未找到 mean / γ=0.30 锚点")
+    if "experimental_uncalibrated" not in e4_text:
+        raise AssertionError("E4 报告未找到 experimental_uncalibrated 锚点")
+
+    # spike-in 三范式（E4 报告 §三.9 实测行解析）
+    spike_in = []
+    for paradigm in ("scrna", "deg", "pan"):
+        m = re.search(
+            rf"{paradigm}_correct \+ `([a-z_0-9]+)`[^\n]*?→ \*\*0\.85 → "
+            r"([\d.]+)，drop = ([\d.]+)\*\*",
+            e4_text)
+        if not m:
+            raise AssertionError(f"E4 报告未找到 {paradigm} spike-in 锚点")
+        injection, after, drop = m.group(1), float(m.group(2)), float(m.group(3))
+        assert abs(drop - (0.85 - after)) < 1e-9, f"{paradigm} spike-in drop 不自洽"
+        spike_in.append({
+            "paradigm": paradigm,
+            "trajectory": f"{paradigm}_correct",
+            "injection": injection,
+            "before": 0.85,
+            "after": after,
+            "drop": drop,
+            "threshold": 0.30,
+        })
+    if not re.search(r"drop = 0\.6146", proto_text):
+        raise AssertionError("reward-protocol §七.2 未找到 spike-in 锚点")
+
+    return {
+        "mapping": {str(k): v for k, v in mapping.items()},
+        "mask": {
+            "level": -1,
+            "semantic": ("mask（None）——不参与分子也不参与分母；全 mask → "
+                         "trajectory_reward=None（不给 0 虚假信号）"),
+        },
+        "aggregation": ("mean（未 mask 步骤均值）+ 配方 B 硬惩罚 γ=0.30"
+                        "（任一未 mask L0，二元不复利）"),
+        "spike_in": spike_in,
+        "spike_threshold": 0.30,
+        "status": "experimental_uncalibrated",
+        "status_note": ("reward 是训练信号候选，未经过 RLHF 校准；任何消费方不得把 "
+                        "reward 当校准信号用于生产决策（E4 报告 §六 / C3 语义）"),
+        "provenance": provenance(
+            "E4-phase4-reward-report.md §三.9 + reward-protocol.md §七.2 + "
+            "reward-mapping.md §2",
+            _sha256_file(e4), None,
+            "mapping/mask/γ 锚点 = reward-mapping.md（宪法）；spike-in 实测 = E4 报告"
+            "+ reward-protocol（N-d 增补）"),
+    }
+
+
+# ═══════════════════════════════════════════════════════════════
+# 工程数字摘要（N-d 增补：测试数 / CI 矩阵 / golden 守卫口径）
+# ═══════════════════════════════════════════════════════════════
+def extract_engineering() -> dict:
+    """工程数字摘要：n_tests = pytest --collect-only -q 实测（与 pytest 实跑同源）。
+
+    ci_matrix_versions 从 .github/workflows/ci.yml 双矩阵声明解析（锚点断言）；
+    golden_diff 为提交级守卫口径（golden 0 差异硬验收，防漂移护栏 = 测试本身）。
+    零硬编码：测试数随仓库实际收集数变化，防漂移。
+    """
+    import subprocess
+
+    proc = subprocess.run(
+        [sys.executable, "-m", "pytest", "--collect-only", "-q"],
+        cwd=REPO_ROOT, capture_output=True, text=True, timeout=300,
+    )
+    if proc.returncode != 0:
+        raise AssertionError(
+            f"pytest --collect-only 失败（exit {proc.returncode}）："
+            f"{proc.stderr[-300:] or proc.stdout[-300:]}")
+    m = re.search(r"(\d+) tests? collected", proc.stdout + proc.stderr)
+    if not m:
+        raise AssertionError(
+            f"pytest --collect-only 未能解析收集数: {proc.stdout[-300:]}")
+    n_tests = int(m.group(1))
+
+    # CI 双矩阵版本（ci.yml 锚点解析）
+    ci_yml = REPO_ROOT / ".github" / "workflows" / "ci.yml"
+    ci_text = ci_yml.read_text(encoding="utf-8")
+    m = re.search(r'python-version:\s*\["([\d.]+)",\s*"([\d.]+)"\]', ci_text)
+    if not m:
+        raise AssertionError("ci.yml 未找到 python-version 双矩阵锚点")
+    ci_matrix_versions = [m.group(1), m.group(2)]
+
+    golden = REPO_ROOT / "tests" / "golden" / "golden_expected_output_after.json"
+    return {
+        "n_tests": n_tests,
+        "note": "pytest --collect-only -q 实测（N-d 增补；N-c 验收 pytest 274 passed "
+                "一致，台账 §11）",
+        "ci_matrix": ("Python 3.10 / 3.12 双矩阵（pytest 全量 + golden 重放 + "
+                      "三/四/五闸 + reward-validate；.github/workflows/ci.yml）"),
+        "ci_matrix_versions": ci_matrix_versions,
+        "golden": ("20 轨迹 137 决策重放 0 差异（tests/golden/"
+                   "golden_expected_output_after.json 冻结基线；提交级守卫）"),
+        "golden_diff": 0,
+        "provenance": provenance(
+            "pytest --collect-only -q + ci.yml + golden 基线",
+            _sha256_file(golden), None,
+            "工程数字提炼（N-d 增补）；n_tests 与 pytest 实跑同源；"
+            "ci_matrix_versions 读 ci.yml 锚点"),
     }
 
 
@@ -512,6 +685,11 @@ def _final_scan() -> None:
 
 
 def main() -> int:
+    # 中文 Windows 控制台（GBK）下 ¥ 等字符会抛 UnicodeEncodeError——统一 UTF-8
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, OSError):
+        pass
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sources", type=Path, default=DEFAULT_SOURCES,
                         help="cellvoyager-outputs 根目录（默认本机路径）")
@@ -527,6 +705,8 @@ def main() -> int:
     eval_ = extract_eval(src)
     benchmark = extract_benchmark(src)
     r0 = extract_r0()
+    reward = extract_reward()
+    engineering = extract_engineering()
     traj = extract_trajectories()
     capture = extract_capture_inputs(src)
 
@@ -534,6 +714,8 @@ def main() -> int:
     _write_json("eval_summary.json", eval_)
     _write_json("benchmark_summary.json", benchmark)
     _write_json("r0_summary.json", r0)
+    _write_json("reward_summary.json", reward)
+    _write_json("engineering_summary.json", engineering)
     _write_json("trajectories_index.json", traj)
 
     manifest = {
@@ -566,6 +748,10 @@ def main() -> int:
           f"F1 {benchmark['detection']['f1']:.4f} / "
           f"gap {benchmark['gap']['delta']} / κ={benchmark['irr']['kappa']}")
     print(f"  R0: {r0['key_metric']}")
+    print(f"  reward: 映射 {len(reward['mapping'])} 档 + spike-in "
+          + " / ".join(f"{s['paradigm']} {s['before']}→{s['after']}"
+                       for s in reward["spike_in"]))
+    print(f"  工程数字: pytest 收集 {engineering['n_tests']} 测试")
     print(f"  轨迹索引: {traj['n_trajectories']} 条 / "
           f"verdicts {capture['verdicts_10X_B.jsonl']['n_verdicts']} 行")
     return 0

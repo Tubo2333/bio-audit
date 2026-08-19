@@ -1,0 +1,18 @@
+{
+  "n_tests": 274,
+  "note": "pytest --collect-only -q 实测（N-d 增补；N-c 验收 pytest 274 passed 一致，台账 §11）",
+  "ci_matrix": "Python 3.10 / 3.12 双矩阵（pytest 全量 + golden 重放 + 三/四/五闸 + reward-validate；.github/workflows/ci.yml）",
+  "ci_matrix_versions": [
+    "3.10",
+    "3.12"
+  ],
+  "golden": "20 轨迹 137 决策重放 0 差异（tests/golden/golden_expected_output_after.json 冻结基线；提交级守卫）",
+  "golden_diff": 0,
+  "provenance": {
+    "source": "pytest --collect-only -q + ci.yml + golden 基线",
+    "source_sha256": "12331cc4bbc335f7bb5068de7e3d9fefebc72bebbd06d2d9e944148bbfc21ccf",
+    "generated_at": "",
+    "exported_at": "2026-08-19T15:28:29+00:00",
+    "note": "工程数字提炼（N-d 增补）；n_tests 与 pytest 实跑同源；ci_matrix_versions 读 ci.yml 锚点"
+  }
+}

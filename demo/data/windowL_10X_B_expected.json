@@ -177,7 +177,7 @@
     "source": "windowL_10X_B_expected.json",
     "source_sha256": "87b3f0ca65f0b8c14117aa84609ee21b677ed768139b85d6398cf7eec69f8dba",
     "generated_at": "2026-08-16T23:05:11",
-    "exported_at": "2026-08-19T12:32:38+00:00",
+    "exported_at": "2026-08-19T15:28:29+00:00",
     "note": "63.7 断言基准提炼副本（demo-redesign-design §6；N-c 断言读本副本）"
   }
 }

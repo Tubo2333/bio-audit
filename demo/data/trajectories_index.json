@@ -166,7 +166,7 @@
     "source": "golden_expected_output_after.json + trajectories/v2",
     "source_sha256": "12331cc4bbc335f7bb5068de7e3d9fefebc72bebbd06d2d9e944148bbfc21ccf",
     "generated_at": "",
-    "exported_at": "2026-08-19T12:32:38+00:00",
+    "exported_at": "2026-08-19T15:28:29+00:00",
     "note": "分数/verdict 来自 golden 基线（当前引擎实测，golden 0 差异）；轨迹本体运行时读 bioaudit 包内 v2 目录"
   }
 }

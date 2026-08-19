@@ -90,6 +90,21 @@ demo/
 标注"仅限 Smart-seq2-C 口径（QC 硬阈值），禁止与 63.7 混写"；eval_summary 标注
 "29/30 双口径页内注释见 N-b（demo-redesign-design §3.2）"。
 
+### 5.1 N-d 增补（2026-08-19 · demo/data 增补提炼，台账 §12.1 精神）
+
+窗口 N-d 经 export 脚本**重提炼增补**（未手改数据文件；重跑后 exported_at 更新、
+其余数值零变化，verify 11 节全 [OK]）：
+
+| 增补项 | 内容 | 出处（提炼锚点） | 一致 |
+|---|---|---|---|
+| eval_summary 成本 | cellvoyager_g ¥2.55（平台余额差权威口径）/ cellvoyager_lb ¥0.43（同上） | agent-eval-report.md §2（总花费 ¥2.55）+ L1 报告 §7.2（余额差 ¥0.43） | ✅ |
+| reward_summary.json（新文件） | 映射 {4:1.00,3:0.85,2:0.60,1:0.30,0:0.00} + L-1 mask 语义 + 聚合 mean/γ=0.30 + spike-in 三范式（scrna 0.85→0.2354 drop 0.6146 / deg 0.85→0.2125 drop 0.6375 / pan 0.85→0.2400 drop 0.6100）+ status experimental_uncalibrated | reward-mapping.md §2/§3/§5/§6 逐行锚点 + E4 报告 §三.9 + reward-protocol §七.2 | ✅ |
+| engineering_summary.json（新文件） | n_tests=274（pytest --collect-only -q 实测）+ CI 双矩阵 + golden 0 差异口径 | pytest 实收集（与 N-c 验收 274 passed 一致）+ ci.yml + golden 基线 | ✅ |
+| data_index.REQUIRED_FILES | +2 文件（reward/engineering） | manifest 指纹自检通过 | ✅ |
+
+demo/data 由 9 → 11 个摘要/副本文件（含新增 2 个）；N-d 页面全部数字读
+demo/data 提炼摘要，页面零硬编码（数字核对表见 N1d 报告 §数字核对表）。
+
 ## 6. 关键实现说明
 
 ### 6.1 设计语言（design-taste-frontend 执行记录）

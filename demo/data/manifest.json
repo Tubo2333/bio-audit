@@ -1,22 +1,28 @@
 {
-  "generated_at": "2026-08-19T12:32:38+00:00",
+  "generated_at": "2026-08-19T15:28:29+00:00",
   "exported_by": "demo/scripts/export_demo_data.py",
   "sources_note": "源为 cellvoyager-outputs（仓库外，--sources 传入；文件指纹登记于各条目 source_sha256）",
   "files": {
     "golden_summary.json": {
-      "sha256": "02bbd14122b335e0d306a40ccc9147df4dd391eb98eae7b8283f612875e572e7"
+      "sha256": "c5be1d900181014b538d2b1d40368172274ee3224617a188ed67c1f2455132b9"
     },
     "eval_summary.json": {
-      "sha256": "d92ff23c1330af20399619ecc5c047edf5ad8505251d646504eea015c1f5b832"
+      "sha256": "b7afaeacda96133b4298e08af5c9e074b25aed0f97d7df9c60ca3a924a4d1476"
     },
     "benchmark_summary.json": {
-      "sha256": "7417fe642daa0e5c09f02410d41519da3c7036c9bd93335e09c745ee938adadb"
+      "sha256": "9e85481fbd6f0b2b6b53dd9058377ac2ae2b8ce7552ae3e8448951e704fdfeeb"
     },
     "r0_summary.json": {
-      "sha256": "cd9ddc8487e2096363d66436893a88286dfe087e418a2b1fa1642f425950f5f9"
+      "sha256": "bf0592222afc0fa86691b1005bc91d2b802a83604682df86600c28b7c24643f3"
+    },
+    "reward_summary.json": {
+      "sha256": "ec293369f3b7a09d55cf76af763af2534bfa21527350c52e3f8e30785b607208"
+    },
+    "engineering_summary.json": {
+      "sha256": "10272186e2b8bbfe656009cceaf5e05f5708de5221abbcc5262168ae8188828f"
     },
     "trajectories_index.json": {
-      "sha256": "d5089eccef65921be5a0361d49b08959282f0e0faa8004601e4ecede66b9158a"
+      "sha256": "77175e29edc7bf9916700714d96a4af7e9a739be30a0663737ed59078563f29d"
     },
     "verdicts_10X_B.jsonl": {
       "sha256": "a7f050254057911313337a81ed82249e898bc0c19f2b19969b290dde821f29c1",
@@ -31,7 +37,7 @@
       "note": "解析专用副本（M3Parser 输入，不执行）；Windows 路径以占位符剥离"
     },
     "windowL_10X_B_expected.json": {
-      "sha256": "56a14b71f6b1801aca17f77a6d2b6fd6c862e3a587c0e04e0905e28525c27779",
+      "sha256": "15dfd153eb2ed6b049e092c714b965cd88745197334350409e913bd82ac24229",
       "source": "windowL_10X_B_expected.json",
       "source_sha256": "87b3f0ca65f0b8c14117aa84609ee21b677ed768139b85d6398cf7eec69f8dba"
     }

@@ -136,7 +136,7 @@
     "source": "benchmark_run_baseline.json",
     "source_sha256": "f527601282fbfd9c718379fd04addccf29d6ec794d8a8a1e4def536204c5225e",
     "generated_at": "2026-08-15",
-    "exported_at": "2026-08-19T12:32:38+00:00",
+    "exported_at": "2026-08-19T15:28:26+00:00",
     "note": "IRR κ 出处 F1 报告（基准产物无此字段，从报告提炼）"
   }
 }

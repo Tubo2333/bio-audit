@@ -21,6 +21,8 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
+import sys
 from collections import Counter
 from pathlib import Path
 
@@ -51,6 +53,12 @@ def _sha256(path: Path) -> str:
 
 
 def main() -> int:
+    # 中文 Windows 控制台（GBK）下 ¥ 等字符会抛 UnicodeEncodeError（N-d 新增
+    # 成本核对消息含 ¥）——统一 UTF-8，保证默认调用可复现
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, OSError):
+        pass
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sources", type=Path, default=DEFAULT_SOURCES)
     args = parser.parse_args()
@@ -200,6 +208,56 @@ def main() -> int:
             for mm in _WIN_PATH.finditer(f.read_text(encoding="utf-8", errors="replace")):
                 hits.append(f"{f.name}: {mm.group(0)[:50]}")
     check(not hits, "无 Windows 绝对路径" if not hits else f"命中 {hits}")
+
+    print("== 9. 真实评测成本（N-d 增补；窗口报告锚点重读）==")
+    g_report = (REPO_ROOT / "docs" / "migration" / "agent-eval-report.md"
+                ).read_text(encoding="utf-8")
+    m = re.search(r"总花费（窗口 G）.*?¥([\d.]+)", g_report)
+    check(m is not None
+          and abs(run_g["cost"]["amount"] - float(m.group(1))) < 1e-9,
+          f"cellvoyager_g 成本 ¥{run_g['cost']['amount']}（agent-eval-report.md §2 "
+          "锚点：总花费 ¥2.55 权威口径）")
+    l1_text = (REPO_ROOT / "docs" / "migration" / "L1-broader-eval-report.md"
+               ).read_text(encoding="utf-8")
+    m = re.search(r"成本（平台余额差，权威口径）.*?¥([\d.]+)", l1_text)
+    check(m is not None
+          and abs(run_lb["cost"]["amount"] - float(m.group(1))) < 1e-9,
+          f"cellvoyager_lb 成本 ¥{run_lb['cost']['amount']}（L1 §7.2 锚点："
+          "余额差权威口径）")
+
+    print("== 10. reward 校准摘要（N-d 增补；宪法/报告锚点重读）==")
+    rw = json.loads((DATA_DIR / "reward_summary.json").read_text(encoding="utf-8"))
+    map_text = (REPO_ROOT / "docs" / "reward-mapping.md").read_text(encoding="utf-8")
+    for level, value in rw["mapping"].items():
+        pat = rf"\| {level} \|[^|]*\| {value:.2f} \|"
+        check(re.search(pat, map_text) is not None,
+              f"映射 L{level} → {value:.2f} 与宪法 §2 一致")
+    check("不参与分子也不参与分母" in map_text, "-1 mask 语义锚点存在")
+    e4 = (REPO_ROOT / "docs" / "migration" / "E4-phase4-reward-report.md"
+          ).read_text(encoding="utf-8")
+    for row in rw["spike_in"]:
+        m = re.search(
+            rf"{row['paradigm']}_correct \+ `{row['injection']}`[^\n]*?→ "
+            rf"\*\*0\.85 → {row['after']:.4f}，drop = {row['drop']:.4f}\*\*",
+            e4)
+        check(m is not None,
+              f"{row['paradigm']} spike-in {row['after']:.4f} / drop "
+              f"{row['drop']:.4f} 与 E4 §三.9 一致")
+        check(abs(row["drop"] - (0.85 - row["after"])) < 1e-9,
+              f"{row['paradigm']} spike-in drop 数值自洽")
+
+    print("== 11. 工程数字（N-d 增补；pytest 实收集重放）==")
+    eng = json.loads((DATA_DIR / "engineering_summary.json").read_text(encoding="utf-8"))
+    proc = subprocess.run(
+        [sys.executable, "-m", "pytest", "--collect-only", "-q"],
+        cwd=REPO_ROOT, capture_output=True, text=True, timeout=300,
+    )
+    if proc.returncode != 0:
+        check(False, f"pytest --collect-only 失败（exit {proc.returncode}）")
+    m = re.search(r"(\d+) tests? collected", proc.stdout + proc.stderr)
+    check(m is not None and eng["n_tests"] == int(m.group(1)),
+          f"n_tests {eng['n_tests']} == pytest --collect-only 实测 "
+          f"{m.group(1) if m else '?'}")
 
     if FAILURES:
         print(f"\n核对失败 {len(FAILURES)} 项")

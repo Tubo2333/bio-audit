@@ -105,6 +105,20 @@
 [data-testid="stAppDeployButton"] { display: none; }
 
 /* ── 文本与排版（中文混排行高 ≥1.6） ─────────────────────── */
+/* 链接：特定性压过 Streamlit 默认（.stMarkdown a → rgb(0,84,163) 深蓝） */
+[data-testid="stMarkdownContainer"] a,
+.stMarkdown a,
+.stApp a {
+  color: var(--ba-cyan);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(34, 211, 238, 0.35);
+  transition: color 0.15s ease-out, border-color 0.15s ease-out;
+}
+[data-testid="stMarkdownContainer"] a:hover,
+.stMarkdown a:hover {
+  color: var(--ba-text);
+  border-bottom-color: var(--ba-cyan);
+}
 p, li, label, .stMarkdown, [data-testid="stCaptionContainer"] p {
   line-height: 1.6;
   word-break: break-word;
@@ -791,6 +805,223 @@ h1, h2, h3 {
 .ba-decl-list li { font-size: 0.82rem; color: var(--ba-text-dim); margin-bottom: 6px; }
 .ba-decl-list b { color: var(--ba-text); }
 
+/* ══════════════════════════════════════════════════════════
+   N-d 评测与奖励 + 关于（demo-redesign-design §3.4/§3.5）
+   ══════════════════════════════════════════════════════════ */
+
+/* ── st.tabs 深色化（评测页四 tab；整页导航仍为侧边栏条件渲染） ── */
+[data-testid="stTabs"] [data-baseweb="tab-list"] {
+  gap: 4px;
+  border-bottom: 1px solid var(--ba-border);
+  margin-bottom: 14px;
+}
+[data-testid="stTabs"] button[role="tab"] {
+  background: transparent;
+  color: var(--ba-text-dim);
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 8px 14px;
+  transition: color 0.15s ease-out, border-color 0.15s ease-out;
+}
+[data-testid="stTabs"] button[role="tab"]:hover { color: var(--ba-text); }
+[data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
+  color: var(--ba-amber);
+  border-bottom-color: var(--ba-amber);
+  font-weight: 600;
+}
+
+/* ── 统计大卡（benchmark 摘要 / 关于页工程数字） ── */
+.ba-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+  margin: 6px 0 14px;
+}
+.ba-stat-card {
+  background: var(--ba-panel);
+  border: 1px solid var(--ba-border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.ba-stat-value {
+  font-family: var(--ba-mono);
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--ba-text);
+  font-variant-numeric: tabular-nums;
+  word-break: break-all;
+}
+.ba-stat-label {
+  font-size: 0.78rem;
+  color: var(--ba-amber);
+  font-weight: 600;
+  margin-top: 6px;
+}
+/* 长值卡（如三元组版本串）用小一号等宽，避免大字号折行破坏节奏 */
+.ba-stat-value-sm {
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: normal;
+  word-break: break-word;
+}
+.ba-stat-sub {
+  font-size: 0.7rem;
+  color: var(--ba-text-faint);
+  margin-top: 2px;
+  line-height: 1.5;
+}
+
+/* ── 决策构成堆叠条（correct / edge / error） ── */
+.ba-stack {
+  display: flex;
+  height: 14px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--ba-panel-2);
+  margin: 10px 0 10px;
+}
+.ba-stack-seg { height: 100%; }
+.ba-stack-legend { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ── strata CI 注（右列小字） ── */
+.ba-dim-ci {
+  flex: 0 0 auto;
+  font-size: 0.7rem;
+  color: var(--ba-text-faint);
+  font-family: var(--ba-mono);
+  white-space: nowrap;
+}
+.ba-card-tight { padding: 14px 18px 8px; }
+
+/* ── 窄表（reward 映射 / 层间比较 / 对照表） ── */
+.ba-cmp-narrow { min-width: 0; }
+.ba-cmp-highlight td { background: rgba(34, 211, 238, 0.06); }
+.ba-cmp-highlight td:first-child { border-left: 3px solid var(--ba-cyan); }
+
+/* ── spike-in 掉分行 ── */
+.ba-spike-row { margin-bottom: 14px; }
+.ba-spike-row:last-child { margin-bottom: 0; }
+.ba-spike-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.ba-spike-trail { font-size: 0.8rem; color: var(--ba-text-dim); }
+.ba-spike-val { font-size: 0.9rem; font-weight: 600; margin-left: auto; }
+.ba-spike-bar { display: flex; align-items: center; gap: 10px; }
+.ba-spike-track {
+  flex: 1;
+  height: 8px;
+  background: var(--ba-panel-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.ba-spike-fill {
+  display: block;
+  height: 100%;
+  background: var(--ba-red);
+  border-radius: 999px;
+}
+.ba-spike-drop { font-size: 0.72rem; color: var(--ba-red); white-space: nowrap; }
+
+/* ── 真实评测运行卡 / R0 卡 ── */
+.ba-run-card { margin-bottom: 12px; }
+.ba-run-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.ba-run-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--ba-text-dim);
+}
+.ba-run-cost { font-size: 0.8rem; color: var(--ba-text-dim); }
+.ba-cost-chip {
+  color: var(--ba-amber);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.07);
+  border-radius: 6px;
+  padding: 1px 8px;
+  font-weight: 600;
+}
+.ba-score-sm {
+  font-family: var(--ba-mono);
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 关于页 ── */
+.ba-lead {
+  font-size: 1.12rem;
+  color: var(--ba-text);
+  line-height: 1.8;
+  max-width: 860px;
+  margin: 4px 0 18px;
+}
+.ba-layer-row {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--ba-border);
+  border-radius: 10px;
+  background: var(--ba-panel);
+  margin-bottom: 10px;
+}
+.ba-layer-num {
+  font-family: var(--ba-mono);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--ba-amber);
+  padding-top: 2px;
+}
+.ba-layer-title { font-size: 0.95rem; font-weight: 700; color: var(--ba-text); }
+.ba-layer-desc {
+  font-size: 0.84rem;
+  color: var(--ba-text-dim);
+  line-height: 1.7;
+  margin-top: 4px;
+}
+.ba-road-list { margin: 8px 0 0; padding-left: 18px; }
+.ba-road-list li {
+  font-size: 0.82rem;
+  color: var(--ba-text-dim);
+  margin-bottom: 7px;
+  line-height: 1.6;
+}
+.ba-road-list b { color: var(--ba-text); }
+.ba-takeaway { margin: 8px 0; }
+.ba-takeaway-line {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 0.9rem;
+  color: var(--ba-text);
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+.ba-takeaway-line:last-child { margin-bottom: 0; }
+.ba-takeaway-num {
+  font-family: var(--ba-mono);
+  color: var(--ba-amber);
+  font-weight: 700;
+  flex: none;
+}
+
 /* ── 窄屏（<1100px）：采集页对齐表纵向堆叠，不横向溢出页面 ── */
 @media (max-width: 1100px) {
   .ba-align { min-width: 0; }
@@ -811,6 +1042,12 @@ h1, h2, h3 {
   .ba-cmp td:last-child { border-bottom: none; }
   .ba-cmp .ba-cmp-summary td { border-bottom: 1px solid var(--ba-border); }
   .ba-dec-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+}
+
+/* ── 窄屏（<1100px）：关于页价值层行收窄 ── */
+@media (max-width: 1100px) {
+  .ba-layer-row { grid-template-columns: 44px 1fr; }
+  .ba-stat-value { font-size: 1.5rem; }
 }
 
 /* ── 尊重减弱动效偏好 ─────────────────────────────────────── */

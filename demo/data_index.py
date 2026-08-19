@@ -25,6 +25,8 @@ REQUIRED_FILES: tuple[str, ...] = (
     "eval_summary.json",
     "benchmark_summary.json",
     "r0_summary.json",
+    "reward_summary.json",
+    "engineering_summary.json",
     "trajectories_index.json",
     "verdicts_10X_B.jsonl",
     "golden_agent_10X_B_executed.py",
@@ -94,6 +96,16 @@ def benchmark_summary() -> dict:
 def r0_summary() -> dict:
     """R0 锚定摘要（scrna_r0.json 提炼）。"""
     return _load("r0_summary.json")
+
+
+def reward_summary() -> dict:
+    """reward 校准摘要（映射 + mask + spike-in 掉分，N-d 增补）。"""
+    return _load("reward_summary.json")
+
+
+def engineering_summary() -> dict:
+    """工程数字摘要（测试数/CI/golden 口径，N-d 增补）。"""
+    return _load("engineering_summary.json")
 
 
 def trajectories_index() -> list[dict]:
